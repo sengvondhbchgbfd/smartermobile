@@ -1,0 +1,69 @@
+Ref
+WidgetRef
+AutoDisposeRef
+
+/////////////////////////
+1️⃣ Ref → used INSIDE providers |=>
+
+final dioClientProvider = Provider<DioClient>((ref) {
+  final storage = ref.read(secureStorageProvider);
+  return DioClient(storage);
+});
+
+
++ Here the ref type is: Ref ref
+    What Ref can do
+    -----------------
+    Inside providers you can:
+    read other providers
+    listen to providers
+    refresh providers
+    dispose resources
+    So inside providers → use Ref
+
+2️⃣ WidgetRef → used INSIDE widgets |=>
+   When you use Riverpod in UI, the ref type changes.
+   class HomePage extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dio = ref.watch(dioClientProvider);
+    return Text("Hello");
+  }
+}
+
++ Here ref type is: WidgetRef ref
+    Why different type?
+    Because widgets have UI lifecycle:
+    rebuild
+    mount
+    dispose
+    Riverpod gives widgets a special ref that knows about UI.
+    What WidgetRef is for
+    Inside widgets you use ref to:
+    watch state
+    trigger actions
+    call providers from UI
+    So inside widgets → use WidgetRef
+
+3️⃣ AutoDisposeRef → for temporary providers
+    Sometimes providers should disappear when not used.
+    Example:
+    API request screen
+    Search screen
+    Detail page
+    Temporary state
+
+    You don’t want memory leak.
+
+
+   ---------------------
+    final userProvider = FutureProvider.autoDispose((ref) async {
+    return fetchUser();
+    });
+  + This ref type becomes: 
+    - AutoDisposeRef ref
+    --------------------
+    
+    Meaning:
+👉 “Destroy this provider when no one is using it.”
+    This saves memory and cancels API calls automatically 🔥

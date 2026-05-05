@@ -1,11 +1,11 @@
-import 'package:frontendmobile/features/auth/domain/entities/user.dart';
+import 'package:frontendmobile/features/auth/data/models/user_model.dart';
 import 'package:frontendmobile/features/auth/domain/repositories/auth_repository.dart';
 
 class LoginUseCase {
-  final AuthRepository repository;
-  LoginUseCase(this.repository);
+  final AuthRepository _repository;
+  LoginUseCase(this._repository);
 
-  Future<User> call(String email, String password) {
-    return repository.login(email, password) as Future<User>;
+  Future<UserModel> call(String username, String password) {
+    return _repository.login(username, password);
   }
 }

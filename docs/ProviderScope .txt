@@ -1,0 +1,12 @@
+
+void main() {
+  runApp(
+    ProviderScope(        
+      child: MyApp(),
+    ),
+  );
+}
+
+///////////////
+
+Without ProviderScope → every ref.watch() and ref.read() will crash because there's no container to read from.
