@@ -5,10 +5,7 @@ class OnboardingBottomBar extends StatelessWidget {
   final int totalPages;
   final VoidCallback onNext;
   final VoidCallback onSkip;
-
-  ////////////////////////////////////////
-  //
-  ///////////////////////////////////////
+  final VoidCallback onLogin; // ✅ ADD
 
   const OnboardingBottomBar({
     super.key,
@@ -16,17 +13,10 @@ class OnboardingBottomBar extends StatelessWidget {
     required this.totalPages,
     required this.onNext,
     required this.onSkip,
+    required this.onLogin, // ✅ ADD
   });
 
-  ///////////////////////////////////////////////////////////////////
-  //
-  //////////////////////////////////////////////////////////////////
-
   bool get _isLast => currentPage == totalPages - 1;
-
-  ///////////////////////////////////////////////////////////////////
-  //
-  //////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +25,6 @@ class OnboardingBottomBar extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ////////////////////////////////////////////////////////////
-          // ── Primary button ───────────────────────────────────────
-          /////////////////////////////////////////////////////////////
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             width: double.infinity,
@@ -78,15 +65,13 @@ class OnboardingBottomBar extends StatelessWidget {
           ),
 
           const SizedBox(height: 4),
-          //////////////////////////////////////////////////////////////
-          // ── Skip / already have account ──────────────────────────
-          ////////////////////////////////////////////////////////////
+
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
             child: _isLast
                 ? TextButton(
                     key: const ValueKey('login'),
-                    onPressed: onSkip,
+                    onPressed: onLogin, // ✅ FIX: was onSkip
                     child: RichText(
                       text: const TextSpan(
                         text: 'Already have an account? ',

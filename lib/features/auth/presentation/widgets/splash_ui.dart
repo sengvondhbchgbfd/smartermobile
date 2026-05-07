@@ -7,7 +7,9 @@ class SplashUi extends StatefulWidget {
   State<SplashUi> createState() => _SplashUiState();
 }
 
+//////////////////////////////////////////////////////////////////////////
 // ✅ Changed: SingleTickerProviderStateMixin → TickerProviderStateMixin
+//////////////////////////////////////////////////////////////////////////
 class _SplashUiState extends State<SplashUi> with TickerProviderStateMixin {
   late final AnimationController _pulseCtrl;
   late final AnimationController
@@ -20,7 +22,11 @@ class _SplashUiState extends State<SplashUi> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
+    //////////////////////////////////////////////////////////////////////////
+
     // Pulse controller — repeating
+    //////////////////////////////////////////////////////////////////////////
+
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
@@ -51,9 +57,13 @@ class _SplashUiState extends State<SplashUi> with TickerProviderStateMixin {
   @override
   void dispose() {
     _pulseCtrl.dispose();
-    _scaleCtrl.dispose(); // ✅ dispose both
+    _scaleCtrl.dispose();
     super.dispose();
   }
+
+  //////////////////////////////////////////////////////////////////////////
+  //
+  //////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +82,9 @@ class _SplashUiState extends State<SplashUi> with TickerProviderStateMixin {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
+                  ///////////////////////////////////////////////////////////
                   // Outer pulse ring
+                  ///////////////////////////////////////////////////////////
                   AnimatedBuilder(
                     animation: _pulseCtrl,
                     builder: (_, __) => Transform.scale(
@@ -114,7 +126,10 @@ class _SplashUiState extends State<SplashUi> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+
+                  ////////////////////////////////////////////////////////////
                   // Logo circle
+                  ///////////////////////////////////////////////////////////
                   ScaleTransition(
                     scale: _scale,
                     child: Container(
@@ -141,9 +156,9 @@ class _SplashUiState extends State<SplashUi> with TickerProviderStateMixin {
                 ],
               ),
             ),
-
+            ////////////////////////////////////////////////////////////////
             const SizedBox(height: 32),
-
+            ///////////////////////////////////////////////////////////////
             const Text(
               'Gym Management',
               style: TextStyle(
@@ -188,6 +203,10 @@ class _BouncingDotsState extends State<_BouncingDots>
   final List<AnimationController> _ctrls = [];
   final List<Animation<double>> _anims = [];
 
+  ////////////////////////////////////////////////////////
+  ///
+  ///////////////////////////////////////////////////////
+
   @override
   void initState() {
     super.initState();
@@ -206,6 +225,10 @@ class _BouncingDotsState extends State<_BouncingDots>
     _startSequence();
   }
 
+  ////////////////////////////////////////////////////////////
+  ///
+  ///////////////////////////////////////////////////////////
+
   Future<void> _startSequence() async {
     while (mounted) {
       for (int i = 0; i < _ctrls.length; i++) {
@@ -217,11 +240,19 @@ class _BouncingDotsState extends State<_BouncingDots>
     }
   }
 
+  ////////////////////////////////////////////////////////////
+  ///
+  ///////////////////////////////////////////////////////////
+
   @override
   void dispose() {
     for (final c in _ctrls) c.dispose();
     super.dispose();
   }
+
+  ////////////////////////////////////////////////////////
+  ///
+  ////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {

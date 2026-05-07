@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -8,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final bool obscureText;
   final String? Function(String?)? validator;
+  final TextInputType? keyboardType;
 
   const CustomTextField({
     super.key,
@@ -18,6 +20,7 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
     this.obscureText = false,
     this.validator,
+    this.keyboardType,
   });
 
   InputDecoration _decoration(BuildContext context) {
@@ -27,30 +30,28 @@ class CustomTextField extends StatelessWidget {
     return InputDecoration(
       labelText: label,
       hintText: hint,
+
       prefixIcon: prefixIcon != null
           ? Icon(
               prefixIcon,
-              color: isDark ? Colors.grey[400] : Colors.grey[700],
+              size: 20,
+              color: isDark
+                  ? Pallets.textSecondaryDark
+                  : Pallets.textSecondaryLight,
             )
           : null,
+
       suffixIcon: suffixIcon,
 
       filled: true,
-      fillColor: isDark ? Colors.grey[900] : Colors.grey[100],
+      fillColor: isDark ? Pallets.surfaceDark : Pallets.surfaceLight,
 
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
-
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
 
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(
-          color: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+          color: isDark ? Pallets.borderDark : Pallets.borderLight,
         ),
       ),
 
@@ -61,12 +62,12 @@ class CustomTextField extends StatelessWidget {
 
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red),
+        borderSide: const BorderSide(color: Pallets.error),
       ),
 
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        borderSide: const BorderSide(color: Pallets.error, width: 1.5),
       ),
     );
   }
@@ -77,6 +78,7 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       obscureText: obscureText,
       validator: validator,
+      keyboardType: keyboardType,
       decoration: _decoration(context),
     );
   }

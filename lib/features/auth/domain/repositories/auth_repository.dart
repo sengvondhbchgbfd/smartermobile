@@ -16,4 +16,29 @@ abstract class AuthRepository {
     required String timezone,
     required String currency,
   });
+
+
+
+
+
+
+
+  Future<void> registerUser({
+    required String username,
+    required String password,
+    required String fullName,
+    required int roleId,
+    required int departmentId,
+  });
+
+
+
+
+
+
+
+
+
+
+  
 }

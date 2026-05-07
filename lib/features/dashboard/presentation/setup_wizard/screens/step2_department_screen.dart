@@ -27,6 +27,10 @@ class _Step2DeptState extends ConsumerState<Step2DepartmentScreen> {
     );
   }
 
+
+
+
+
   @override
   Widget build(BuildContext context) {
     final state     = ref.watch(wizardProvider);
@@ -55,7 +59,7 @@ class _Step2DeptState extends ConsumerState<Step2DepartmentScreen> {
             const SizedBox(height: 24),
             WizardButtons(
               isLoading: isLoading,
-              onSkip:    () => ref.read(wizardProvider.notifier).skipStep(),
+              onSkip:    () => ref.read(wizardProvider.notifier).nextStep(),
               onSubmit:  _submit,
             ),
           ],

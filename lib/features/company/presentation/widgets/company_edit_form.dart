@@ -27,6 +27,7 @@ class _CompanyEditFormState extends ConsumerState<CompanyEditForm> {
   late final TextEditingController _nameCtrl;
   late final TextEditingController _emailCtrl;
   late final TextEditingController _phoneCtrl;
+  late final TextEditingController _addressCtrl;
   late final TextEditingController _timezoneCtrl;
   late final TextEditingController _currencyCtrl;
 
@@ -36,6 +37,7 @@ class _CompanyEditFormState extends ConsumerState<CompanyEditForm> {
     _nameCtrl = TextEditingController(text: widget.company.companyName);
     _emailCtrl = TextEditingController(text: widget.company.email ?? '');
     _phoneCtrl = TextEditingController(text: widget.company.phone ?? '');
+    _addressCtrl = TextEditingController(text: widget.company.address ?? '');
     _timezoneCtrl = TextEditingController(text: widget.company.timezone ?? '');
     _currencyCtrl = TextEditingController(text: widget.company.currency ?? '');
   }
@@ -45,6 +47,7 @@ class _CompanyEditFormState extends ConsumerState<CompanyEditForm> {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
+    _addressCtrl.dispose();
     _timezoneCtrl.dispose();
     _currencyCtrl.dispose();
     super.dispose();
@@ -65,6 +68,7 @@ class _CompanyEditFormState extends ConsumerState<CompanyEditForm> {
             companyName: _nameCtrl.text.trim(),
             email: _emailCtrl.text.trim(),
             phone: _phoneCtrl.text.trim(),
+            address: _addressCtrl.text.trim(), // ✅ fix 3
             timezone: _timezoneCtrl.text.trim(),
             currency: _currencyCtrl.text.trim(),
           ),
@@ -95,7 +99,6 @@ class _CompanyEditFormState extends ConsumerState<CompanyEditForm> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Fixed: read isUpdating from AsyncData value, not isLoading on AsyncValue
     final companyState = ref.watch(companyProvider);
     final isUpdating = companyState.valueOrNull?.isUpdating ?? false;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -147,6 +150,12 @@ class _CompanyEditFormState extends ConsumerState<CompanyEditForm> {
                 label: 'Phone',
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
+              ),
+              _AppField(
+                // ✅ fix 4
+                controller: _addressCtrl,
+                label: 'Address',
+                icon: Icons.location_on_outlined,
               ),
               _AppField(
                 controller: _timezoneCtrl,

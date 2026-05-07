@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
-class CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
+class CustomDropdown<T> extends StatelessWidget {
   final String label;
-  final String? hint;
   final IconData? prefixIcon;
-  final Widget? suffixIcon;
-  final bool obscureText;
-  final String? Function(String?)? validator;
+  final T? value;
+  final List<DropdownMenuItem<T>> items;
+  final Function(T?) onChanged;
+  final String? Function(T?)? validator;
 
-  const CustomTextField({
+  const CustomDropdown({
     super.key,
-    required this.controller,
     required this.label,
-    this.hint,
     this.prefixIcon,
-    this.suffixIcon,
-    this.obscureText = false,
+    required this.value,
+    required this.items,
+    required this.onChanged,
     this.validator,
   });
 
@@ -26,31 +25,29 @@ class CustomTextField extends StatelessWidget {
 
     return InputDecoration(
       labelText: label,
-      hintText: hint,
+
       prefixIcon: prefixIcon != null
           ? Icon(
               prefixIcon,
-              color: isDark ? Colors.grey[400] : Colors.grey[700],
+              size: 20,
+              color: isDark
+                  ? Pallets.textSecondaryDark
+                  : Pallets.textSecondaryLight,
             )
           : null,
-      suffixIcon: suffixIcon,
 
       filled: true,
-      fillColor: isDark ? Colors.grey[900] : Colors.grey[100],
+      fillColor: isDark ? Pallets.surfaceDark : Pallets.surfaceLight,
 
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,
       ),
 
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
-
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(
-          color: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+          color: isDark ? Pallets.borderDark : Pallets.borderLight,
         ),
       ),
 
@@ -61,23 +58,35 @@ class CustomTextField extends StatelessWidget {
 
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red),
+        borderSide: const BorderSide(color: Pallets.error),
       ),
 
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        borderSide: const BorderSide(color: Pallets.error, width: 1.5),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return DropdownButtonFormField<T>(
+      value: value,
+      items: items,
+      onChanged: onChanged,
       validator: validator,
+      dropdownColor: isDark
+          ? Pallets.surfaceDark
+          : Pallets.surfaceLight,
       decoration: _decoration(context),
+      style: TextStyle(
+        color: isDark
+            ? Pallets.textPrimaryDark
+            : Pallets.textPrimaryLight,
+        fontSize: 14,
+      ),
     );
   }
 }

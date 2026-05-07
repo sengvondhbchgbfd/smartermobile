@@ -158,53 +158,50 @@ class _CompanyScreenState extends ConsumerState<CompanyScreen> {
   // ================= REGISTER COMPANY =================
   ///////////////////////////////////////////////////////////////////////
 
-  void _showRegisterSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF1E293B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
-            top: 20,
-          ),
-          child: CompanyRegisterForm(
-            onSubmit:
-                ({
-                  required String companyName,
-                  required String companyCode,
-                  String? email,
-                  String? phone,
-                  int? maxUsers,
-                  String? timezone,
-                  String? currency,
-                }) async {
-                  Navigator.pop(context);
+void _showRegisterSheet() {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF1E293B),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 20,
+        ),
+        child: CompanyRegisterForm(
+          onSubmit: ({
+            required String companyCode,
+            required String companyName,
+            required String currency,
+            required String email,
+            required int maxUsers,
+            required String timezone,
+            String planType = 'free',
+          }) async {
+            Navigator.pop(context);
 
-                  await ref
-                      .read(companyProvider.notifier)
-                      .registerCompany(
-                        companyName: companyName,
-                        companyCode: companyCode,
-                        email: email,
-                        phone: phone,
-                        maxUsers: maxUsers,
-                        timezone: timezone,
-                        currency: currency,
-                        username: '',
-                        password: '',
-                        fullName: '',
-                      );
-                },
-          ),
-        );
-      },
-    );
-  }
+            await ref
+                .read(companyProvider.notifier)
+                .registerCompany(
+                  companyCode: companyCode,
+                  companyName: companyName,
+                  currency: currency,
+                  email: email,
+                  maxUsers: maxUsers,
+                  timezone: timezone,
+                  planType: planType,
+                );
+          },
+        ),
+      );
+    },
+  );
+}
+
 }

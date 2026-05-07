@@ -11,11 +11,11 @@ class RegisterResponseModel extends RegisterResponseEntity {
 
   factory RegisterResponseModel.fromJson(Map<String, dynamic> json) {
     return RegisterResponseModel(
-      companyId:   json['company_id']   as int,
-      companyName: json['company_name'] as String,
-      username:    json['username']     as String,
-      role:        json['role']         as String,
-      message:     json['message']      as String,
+      companyId: json['company_id'] as int? ?? 0,
+      companyName: json['company_name']?.toString() ?? '',
+      username: json['username']?.toString() ?? '',
+      role: json['role']?.toString() ?? '',
+      message: json['message']?.toString() ?? '',
     );
   }
 }

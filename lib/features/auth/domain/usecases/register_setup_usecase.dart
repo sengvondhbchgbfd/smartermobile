@@ -16,11 +16,11 @@ class RegisterUseCase {
     await _repository.register(
       companyName: companyName,
       companyCode: companyCode,
-      username:    username,
-      password:    password,
-      fullName:    fullName,
-      timezone:    timezone,
-      currency:    currency,
+      username: username,
+      password: password,
+      fullName: fullName,
+      timezone: timezone,
+      currency: currency,
     );
   }
 }

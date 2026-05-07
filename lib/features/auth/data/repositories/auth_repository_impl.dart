@@ -66,6 +66,31 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /////////////////////////////////////////////////////////////////////////
+  ///
+  ////////////////////////////////////////////////////////////////////////
+  @override
+  Future<void> registerUser({
+    required String username,
+    required String password,
+    required String fullName,
+    required int roleId,
+    required int departmentId,
+  }) async {
+    try {
+      final model = RegisterUserRequestModel(
+        username: username,
+        password: password,
+        fullName: fullName,
+        roleId: roleId,
+        departmentId: departmentId,
+      );
+      await _datasource.registerUser(model);
+    } on DioException catch (e) {
+      throw ApiErrorHandler.getMessage(e);
+    }
+  }
+
   ////////////////////////////////////////////////////////////////////////
   //
   ///////////////////////////////////////////////////////////////////////

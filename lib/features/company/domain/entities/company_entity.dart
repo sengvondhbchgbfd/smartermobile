@@ -4,6 +4,7 @@ class CompanyEntity {
   final String? companyCode;
   final String? email;
   final String? phone;
+  final String? address;       // ✅ add this
   final String planType;
   final String status;
   final String? timezone;
@@ -22,6 +23,7 @@ class CompanyEntity {
     this.companyCode,
     this.email,
     this.phone,
+    this.address,              // ✅ add this
     required this.planType,
     required this.status,
     this.timezone,

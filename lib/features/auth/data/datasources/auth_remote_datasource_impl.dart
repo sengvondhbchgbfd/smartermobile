@@ -7,6 +7,12 @@ import 'package:frontendmobile/features/auth/data/models/user_model.dart';
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   final Dio _dio;
   AuthRemoteDatasourceImpl(this._dio);
+
+  @override
+  Future<void> registerUser(RegisterUserRequestModel model) async {
+    await _dio.post('/auth/register', data: model.toJson());
+  }
+
   ////////////////////////////////////////////////////////////////////////
   //
   ///////////////////////////////////////////////////////////////////////

@@ -19,9 +19,14 @@ abstract class CompanyRepository {
     String? companyName,
     String? email,
     String? phone,
+    String? address,
+    int? max_users,
     String? timezone,
     String? currency,
   });
+
+
+
 
   // ── Upload Logo ───────────────────────────────────────────────────────
   Future<Either<Failure, String>> uploadLogo({

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/shared/widgets/custom_button.dart';
 import 'package:frontendmobile/shared/widgets/custom_textfield.dart';
-
 const _timezones = ['Asia/Phnom_Penh', 'Asia/Bangkok', 'Asia/Singapore', 'UTC'];
 const _currencies = ['USD', 'KHR', 'THB', 'SGD'];
 
@@ -17,7 +16,8 @@ class RegisterForm extends ConsumerStatefulWidget {
 
 class _RegisterFormState extends ConsumerState<RegisterForm> {
   // ====================================================|
-
+  // main data set
+  //=====================================================|
   final _formKey = GlobalKey<FormState>();
   final _companyName = TextEditingController();
   final _companyCode = TextEditingController();
@@ -39,10 +39,12 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
   }
 
   //==========================================================
-  //
+  //  event
   //==========================================================
 
   Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
     if (!_formKey.currentState!.validate()) return;
 
     await ref
@@ -58,7 +60,6 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
         );
 
     if (!mounted) return;
-
     ref
         .read(registerProvider)
         .whenOrNull(
@@ -110,8 +111,10 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                     color: Colors.grey,
                   ),
                 ),
+                ////////////////////////////////////////////////////////////
                 const SizedBox(height: 32),
 
+                ////////////////////////////////////////////////////////////
                 _SectionLabel('Company information'),
                 const SizedBox(height: 12),
                 CustomTextField(
@@ -122,7 +125,11 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                   validator: (v) =>
                       v!.isEmpty ? 'Company name is required' : null,
                 ),
+
+                ////////////////////////////////////////////////////////////
                 const SizedBox(height: 12),
+
+                ////////////////////////////////////////////////////////////
                 CustomTextField(
                   controller: _companyCode,
                   label: 'Company code',
@@ -131,8 +138,11 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                   validator: (v) =>
                       v!.isEmpty ? 'Company code is required' : null,
                 ),
+
+                ////////////////////////////////////////////////////////////
                 const SizedBox(height: 24),
 
+                ////////////////////////////////////////////////////////////
                 _SectionLabel('Admin account'),
                 const SizedBox(height: 12),
                 CustomTextField(
@@ -142,7 +152,11 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                   prefixIcon: Icons.person_outlined,
                   validator: (v) => v!.isEmpty ? 'Full name is required' : null,
                 ),
+
+                ////////////////////////////////////////////////////////////
                 const SizedBox(height: 12),
+
+                ////////////////////////////////////////////////////////////
                 CustomTextField(
                   controller: _username,
                   label: 'Username',
@@ -150,7 +164,10 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                   prefixIcon: Icons.alternate_email_outlined,
                   validator: (v) => v!.isEmpty ? 'Username is required' : null,
                 ),
+
+                ////////////////////////////////////////////////////////////
                 const SizedBox(height: 12),
+                ////////////////////////////////////////////////////////////
                 CustomTextField(
                   controller: _password,
                   label: 'Password',
@@ -172,7 +189,10 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                   },
                 ),
 
+                ////////////////////////////////////////////////////////////
                 const SizedBox(height: 24),
+
+                ////////////////////////////////////////////////////////////
                 _SectionLabel('Settings'),
                 const SizedBox(height: 12),
                 _DropdownField(
@@ -190,15 +210,20 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                   icon: Icons.attach_money_outlined,
                   onChanged: (v) => setState(() => _currency = v!),
                 ),
+
+                ////////////////////////////////////////////////////////////
                 const SizedBox(height: 32),
 
+                ////////////////////////////////////////////////////////////
                 CustomButton(
                   label: 'Create account',
                   isLoading: isLoading,
                   onPressed: isLoading ? null : _submit,
                 ),
-
+                ////////////////////////////////////////////////////////////
                 const SizedBox(height: 16),
+
+                ////////////////////////////////////////////////////////////
                 Center(
                   child: TextButton(
                     onPressed: () => context.go('/login'),

@@ -43,7 +43,9 @@ class CompanyInfoCard extends ConsumerWidget {
       ),
       child: Column(
         children: [
+          ///////////////////////////////////////////////////////////////////
           /// ───────── Banner + Logo ─────────
+          /// ///////////////////////////////////////////////////////////////
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -133,8 +135,9 @@ class CompanyInfoCard extends ConsumerWidget {
           ),
 
           const SizedBox(height: 44),
-
+          //////////////////////////////////////////////////////////////////
           /// ───────── Details ─────────
+          /// ///////////////////////////////////////////////////////////////
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -174,6 +177,7 @@ class CompanyInfoCard extends ConsumerWidget {
 
                 _InfoRow(Icons.email, 'Email', company.email),
                 _InfoRow(Icons.phone, 'Phone', company.phone),
+                _InfoRow(Icons.location_city, 'Address', company.address),
                 _InfoRow(Icons.public, 'Timezone', company.timezone),
                 _InfoRow(Icons.attach_money, 'Currency', company.currency),
                 _InfoRow(
@@ -190,7 +194,7 @@ class CompanyInfoCard extends ConsumerWidget {
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  //
+  //  show dialog
   //////////////////////////////////////////////////////////////////////////////
 
   void _showEditDialog(
@@ -201,6 +205,7 @@ class CompanyInfoCard extends ConsumerWidget {
     final name = TextEditingController(text: company.companyName);
     final email = TextEditingController(text: company.email);
     final phone = TextEditingController(text: company.phone);
+    final address = TextEditingController(text: company.address);
     final timezone = TextEditingController(text: company.timezone);
     final currency = TextEditingController(text: company.currency);
 
@@ -219,6 +224,7 @@ class CompanyInfoCard extends ConsumerWidget {
                 _input(name, 'Company Name'),
                 _input(email, 'Email'),
                 _input(phone, 'Phone'),
+                _input(address, 'Address'),
                 _input(timezone, 'Timezone'),
                 _input(currency, 'Currency'),
               ],
@@ -239,6 +245,7 @@ class CompanyInfoCard extends ConsumerWidget {
                         companyName: name.text,
                         email: email.text,
                         phone: phone.text,
+                        address: address.text,
                         timezone: timezone.text,
                         currency: currency.text,
                       ),

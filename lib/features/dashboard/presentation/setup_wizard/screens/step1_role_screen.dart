@@ -32,6 +32,9 @@ class _Step1RoleState extends ConsumerState<Step1RoleScreen> {
     );
   }
 
+
+  
+
   @override
   Widget build(BuildContext context) {
     final state     = ref.watch(wizardProvider);
@@ -92,7 +95,7 @@ class _Step1RoleState extends ConsumerState<Step1RoleScreen> {
             const SizedBox(height: 24),
             WizardButtons(
               isLoading: isLoading,
-              onSkip:    () => ref.read(wizardProvider.notifier).skipStep(),
+              onSkip:    () => ref.read(wizardProvider.notifier).nextStep(),
               onSubmit:  _submit,
             ),
           ],

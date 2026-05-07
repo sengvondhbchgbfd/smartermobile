@@ -7,6 +7,7 @@ class CompanyModel extends CompanyEntity {
     super.companyCode,
     super.email,
     super.phone,
+    super.address,        // ✅ add
     required super.planType,
     required super.status,
     super.timezone,
@@ -27,6 +28,7 @@ class CompanyModel extends CompanyEntity {
       companyCode: json['company_code'],
       email: json['email'],
       phone: json['phone'],
+      address: json['address'],       // ✅ add
       planType: json['plan_type'] ?? 'free',
       status: json['status'] ?? 'active',
       timezone: json['timezone'],
@@ -52,6 +54,7 @@ class CompanyModel extends CompanyEntity {
       'company_code': companyCode,
       'email': email,
       'phone': phone,
+      'address': address,             // ✅ add
       'plan_type': planType,
       'status': status,
       'timezone': timezone,

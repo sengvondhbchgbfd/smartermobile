@@ -18,6 +18,10 @@ final companyIdProvider = FutureProvider.autoDispose<String?>((ref) async {
   return id;
 });
 
+////////////////////////////////////////////////////////////////////
+///
+///////////////////////////////////////////////////////////////////
+
 final connectivityProvider = Provider<Connectivity>((ref) {
   return Connectivity();
 });
@@ -30,7 +34,6 @@ final cacheServiceProvider = FutureProvider<CacheService>((ref) async {
   final prefs = await ref.watch(sharedPreferencesProvider.future);
   return CacheService(prefs);
 });
-
 
 final dioClientProvider = FutureProvider<DioClient>((ref) async {
   final storage = ref.read(secureStorageProvider);

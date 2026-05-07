@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+
 class CompanyRegisterForm extends StatefulWidget {
   final Function({
-    required String companyName,
     required String companyCode,
-    String? email,
-    String? phone,
-    int? maxUsers,
-    String? timezone,
-    String? currency,
+    required String companyName,
+    required String currency,
+    required String email,
+    required int maxUsers,
+    required String timezone,
+    String planType,
   })
   onSubmit;
 
@@ -23,7 +24,6 @@ class _CompanyRegisterFormState extends State<CompanyRegisterForm> {
   final _nameCtrl = TextEditingController();
   final _codeCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
   final _maxCtrl = TextEditingController();
   final _timezoneCtrl = TextEditingController();
   final _currencyCtrl = TextEditingController();
@@ -31,13 +31,12 @@ class _CompanyRegisterFormState extends State<CompanyRegisterForm> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       widget.onSubmit(
-        companyName: _nameCtrl.text,
-        companyCode: _codeCtrl.text,
-        email: _emailCtrl.text,
-        phone: _phoneCtrl.text,
-        maxUsers: int.tryParse(_maxCtrl.text.trim()),
-        timezone: _timezoneCtrl.text,
-        currency: _currencyCtrl.text,
+        companyCode: _codeCtrl.text.trim(),
+        companyName: _nameCtrl.text.trim(),
+        currency: _currencyCtrl.text.trim(),
+        email: _emailCtrl.text.trim(),
+        maxUsers: int.parse(_maxCtrl.text.trim()),
+        timezone: _timezoneCtrl.text.trim(),
       );
     }
   }
@@ -47,7 +46,6 @@ class _CompanyRegisterFormState extends State<CompanyRegisterForm> {
     _nameCtrl.dispose();
     _codeCtrl.dispose();
     _emailCtrl.dispose();
-    _phoneCtrl.dispose();
     _maxCtrl.dispose();
     _timezoneCtrl.dispose();
     _currencyCtrl.dispose();
@@ -59,48 +57,55 @@ class _CompanyRegisterFormState extends State<CompanyRegisterForm> {
     return Form(
       key: _formKey,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextFormField(
             controller: _nameCtrl,
-            decoration: const InputDecoration(labelText: "Company Name"),
-            validator: (value) => value!.isEmpty ? "Enter company name" : null,
+            decoration: const InputDecoration(labelText: 'Company Name'),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Enter company name' : null,
           ),
-
           TextFormField(
             controller: _codeCtrl,
-            decoration: const InputDecoration(labelText: "Company Code"),
-            validator: (value) => value!.isEmpty ? "Enter company code" : null,
+            decoration: const InputDecoration(labelText: 'Company Code'),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Enter company code' : null,
           ),
-
           TextFormField(
             controller: _emailCtrl,
-            decoration: const InputDecoration(labelText: "Email"),
-          ),
-
-          TextFormField(
-            controller: _phoneCtrl,
-            decoration: const InputDecoration(labelText: "Phone"),
+            decoration: const InputDecoration(labelText: 'Email'),
+            keyboardType: TextInputType.emailAddress,
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Enter email' : null,
           ),
           TextFormField(
             controller: _maxCtrl,
-            decoration: const InputDecoration(labelText: "MaxUsers"),
+            decoration: const InputDecoration(labelText: 'Max Users'),
+            keyboardType: TextInputType.number,
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return 'Enter max users';
+              if (int.tryParse(v.trim()) == null) return 'Must be a number';
+              return null;
+            },
           ),
-
           TextFormField(
             controller: _timezoneCtrl,
-            decoration: const InputDecoration(labelText: "Timezone"),
+            decoration: const InputDecoration(labelText: 'Timezone'),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Enter timezone' : null,
           ),
           TextFormField(
             controller: _currencyCtrl,
-            decoration: const InputDecoration(labelText: "Currency"),
+            decoration: const InputDecoration(labelText: 'Currency'),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Enter currency' : null,
           ),
-
           const SizedBox(height: 20),
-
           ElevatedButton(
             onPressed: _submit,
-            child: const Text("Create Company"),
+            child: const Text('Create Company'),
           ),
+          const SizedBox(height: 12),
         ],
       ),
     );

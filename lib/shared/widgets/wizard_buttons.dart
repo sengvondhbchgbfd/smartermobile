@@ -12,16 +12,21 @@ class WizardButtons extends StatelessWidget {
     required this.onSubmit,
   });
 
+
+
+
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
+        ///////////////////////////////////////////////////////////
         /// Skip button
+        /// ////////////////////////////////////////////////////////
         Expanded(
           child: OutlinedButton(
             onPressed: isLoading ? null : onSkip,
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.white24),
+              side: const BorderSide(color: Color.fromRGBO(11, 3, 255, 0.239)),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -29,14 +34,16 @@ class WizardButtons extends StatelessWidget {
             ),
             child: const Text(
               'Skip',
-              style: TextStyle(color: Colors.white54),
+              style: TextStyle(color: Color.fromARGB(137, 237, 225, 4)),
             ),
           ),
         ),
 
         const SizedBox(width: 12),
 
+        ///////////////////////////////////////////////////////////
         /// Continue button
+        /// ///////////////////////////////////////////////////////
         Expanded(
           flex: 2,
           child: ElevatedButton(

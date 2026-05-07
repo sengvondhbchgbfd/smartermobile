@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/company/domain/usecases/register_company_usecase.dart';
 import 'package:frontendmobile/features/company/presentation/providers/company_provider.dart';
 import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/providers/wizard_state.dart';
+import 'package:frontendmobile/features/dashboard/presentation/utils/wizard_steps.dart';
 import 'package:frontendmobile/shared/providers/core_providers.dart';
 
 class WizardNotifier extends StateNotifier<WizardState> {
@@ -12,14 +13,14 @@ class WizardNotifier extends StateNotifier<WizardState> {
   //
   //////////////////////////////////////////////////////////////
 
-  Future<bool> registerCompanyAndAdmin({
-    required String companyName,
+  Future<bool> registerCompany({
     required String companyCode,
-    required String username,
-    required String password,
-    required String fullName,
-    required String timezone,
+    required String companyName,
     required String currency,
+    required String email,
+    required int maxUsers,
+    required String timezone,
+    String planType = 'free',
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -28,16 +29,15 @@ class WizardNotifier extends StateNotifier<WizardState> {
 
       final result = await useCase(
         RegisterCompanyParams(
-          companyName: companyName,
           companyCode: companyCode,
-          username: username,
-          password: password,
-          fullName: fullName,
-          timezone: timezone,
+          companyName: companyName,
           currency: currency,
+          email: email,
+          maxUsers: maxUsers,
+          timezone: timezone,
+          planType: planType,
         ),
       );
-
       return result.fold(
         (failure) {
           state = state.copyWith(isLoading: false, error: failure.message);
@@ -46,12 +46,14 @@ class WizardNotifier extends StateNotifier<WizardState> {
         (response) {
           state = state.copyWith(
             isLoading: false,
-            currentStep: 1,
+            companyId: response.companyId,
             companyName: companyName,
             companyCode: companyCode,
-            timezone: timezone,
             currency: currency,
-            companyId: response.companyId,
+            email: email,
+            maxUsers: maxUsers,
+            timezone: timezone,
+            currentStep: 1,
           );
           return true;
         },
@@ -98,7 +100,7 @@ class WizardNotifier extends StateNotifier<WizardState> {
         },
       );
       final roleId = response.data?['role_id'] as int?;
-      state = state.copyWith(isLoading: false, currentStep: 1, roleId: roleId);
+      state = state.copyWith(isLoading: false, currentStep: 2, roleId: roleId);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -121,7 +123,7 @@ class WizardNotifier extends StateNotifier<WizardState> {
       final departmentId = response.data?['department_id'] as int?;
       state = state.copyWith(
         isLoading: false,
-        currentStep: 2,
+        currentStep: 3,
         departmentId: departmentId,
       );
       return true;
@@ -135,7 +137,7 @@ class WizardNotifier extends StateNotifier<WizardState> {
   ///////////////////////////////////////////////////////////////
 
   void selectUserType(String type) {
-    state = state.copyWith(userType: type, currentStep: 3);
+    state = state.copyWith(userType: type, currentStep: 4);
   }
   ///////////////////////////////////////////////////////////////
   // ── Step 4 — Upload Avatar ─────────────────────────────────
@@ -156,7 +158,7 @@ class WizardNotifier extends StateNotifier<WizardState> {
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
-      state = state.copyWith(isLoading: false, currentStep: 4);
+      state = state.copyWith(isLoading: false, currentStep: 5);
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -168,8 +170,23 @@ class WizardNotifier extends StateNotifier<WizardState> {
   //
   ///////////////////////////////////////////////////////////////
 
-  void skipStep() => state = state.copyWith(currentStep: state.currentStep + 1);
+  void previousStep() {
+    if (state.isBusy) return;
+
+    if (state.currentStep > 0) {
+      state = state.copyWith(currentStep: state.currentStep - 1);
+    }
+  }
+
+  void nextStep() {
+    if (state.currentStep < WizardSteps.steps.length - 1) {
+      state = state.copyWith(currentStep: state.currentStep + 1);
+    }
+  }
+
   void clearError() => state = state.copyWith(clearError: true);
+
+  void markComplete() => state = state.copyWith(isCompleted: true);
 }
 
 final wizardProvider = StateNotifierProvider<WizardNotifier, WizardState>(

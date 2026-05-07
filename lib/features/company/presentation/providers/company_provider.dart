@@ -27,7 +27,6 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
     _createCompany = RegisterCompanyUseCase(repo);
     return const CompanyState();
   }
-
   /////////////////////////////////////////////////////////////////////////////
   //
   ////////////////////////////////////////////////////////////////////////////
@@ -35,18 +34,13 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
   ////////////////////////////////////////////////////////////////////////////
   // CreateCompany
   ////////////////////////////////////////////////////////////////////////////
-
   Future<bool> registerCompany({
-    required String companyName,
     required String companyCode,
-    required String username, // ← add
-    required String password, // ← add
-    required String fullName, // ← add
-    String? email,
-    String? phone,
-    int? maxUsers,
-    String? timezone,
-    String? currency,
+    required String companyName,
+    required String currency,
+    required String email,
+    required int maxUsers,
+    required String timezone,
     String planType = 'free',
   }) async {
     final current = state.valueOrNull ?? const CompanyState();
@@ -54,16 +48,12 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
 
     final result = await _createCompany(
       RegisterCompanyParams(
-        companyName: companyName,
         companyCode: companyCode,
-        username: username, // ← add
-        password: password, // ← add
-        fullName: fullName, // ← add
+        companyName: companyName,
+        currency: currency,
         email: email,
-        phone: phone,
         maxUsers: maxUsers,
         timezone: timezone,
-        currency: currency,
         planType: planType,
       ),
     );
@@ -76,10 +66,8 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
         return false;
       },
       (response) {
-        // RegisterResponseEntity only has companyId/staffId/userId
-        // fetch full company details after registration
         state = AsyncData(current.copyWith(isUpdating: false, error: null));
-        fetchCompany(response.companyId); // ← load full company into state
+        fetchCompany(response.companyId);
         return true;
       },
     );

@@ -12,33 +12,35 @@ class CompanyRemoteDataSourceImpl extends BaseRemoteDatasource
   CompanyRemoteDataSourceImpl(this.dio);
 
   // ── Register Company + Admin ──────────────────────────────────────────
-  @override
-  Future<RegisterResponseModel> registerCompany(
-    RegisterCompanyParams params, // ← changed
-  ) {
-    return safeRequest(
-      request: () => dio.post(
-        '/setup/register',
-        data: {
-          'company_name': params.companyName,
-          'company_code': params.companyCode,
-          'username': params.username,
-          'password': params.password,
-          'full_name': params.fullName,
-          if (params.email != null) 'email': params.email,
-          if (params.phone != null) 'phone': params.phone,
-          if (params.maxUsers != null) 'max_users': params.maxUsers,
-          if (params.timezone != null) 'timezone': params.timezone,
-          if (params.currency != null) 'currency': params.currency,
-          'plan_type': params.planType,
-        },
-      ),
-      parser: (data) {
-        print('DEBUG RESPONSE: $data'); 
-        return RegisterResponseModel.fromJson(data);
+ @override
+Future<RegisterResponseModel> registerCompany(
+  RegisterCompanyParams params,
+) {
+  return safeRequest(
+    request: () => dio.post(
+      '/companies/',
+      data: {
+        'company_code': params.companyCode,
+        'company_name': params.companyName,
+        'currency': params.currency,
+        'email': params.email,
+        'max_users': params.maxUsers,
+        'plan_type': params.planType,
+        'timezone': params.timezone,
       },
-    );
-  }
+    ),
+    parser: (data) {
+      print('DEBUG RESPONSE: $data');
+      return RegisterResponseModel.fromJson(data);
+    },
+  );
+}
+
+
+
+
+
+
 
   // ── Get Company ───────────────────────────────────────────────────────
   @override

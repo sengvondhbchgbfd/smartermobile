@@ -7,7 +7,8 @@ import 'package:frontendmobile/features/auth/data/repositories/auth_repository_i
 import 'package:frontendmobile/features/auth/domain/repositories/auth_repository.dart';
 import 'package:frontendmobile/features/auth/domain/usecases/login_usecase.dart';
 import 'package:frontendmobile/features/auth/domain/usecases/logout_usecase.dart';
-import 'package:frontendmobile/features/auth/domain/usecases/register_usecase.dart';
+import 'package:frontendmobile/features/auth/domain/usecases/register_setup_usecase.dart';
+import 'package:frontendmobile/features/auth/domain/usecases/register_user_usecase.dart';
 import 'package:frontendmobile/shared/providers/core_providers.dart'; // ← import core
 
 // ── Auth providers ───────────────────────────────────────────
@@ -41,6 +42,49 @@ final logoutUseCaseProvider = FutureProvider<LogoutUseCase>((ref) async {
 final registerUseCaseProvider = FutureProvider<RegisterUseCase>((ref) async {
   return RegisterUseCase(await ref.watch(authRepositoryProvider.future));
 });
+
+// ── RegisterUser UseCase provider ────────────────────────────
+final registerUserUseCaseProvider = FutureProvider<RegisterUserUsecase>((
+  ref,
+) async {
+  return RegisterUserUsecase(await ref.watch(authRepositoryProvider.future));
+});
+
+// ── RegisterUser notifier ─────────────────────────────────────
+
+class RegisterUserNotifier extends StateNotifier<AsyncValue<void>> {
+  final Ref _ref;
+  RegisterUserNotifier(this._ref) : super(const AsyncData(null));
+  Future<void> registerUser({
+    required String username,
+    required String password,
+    required String fullName,
+    required int roleId,
+    required int departmentId,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final useCase = await _ref.read(registerUserUseCaseProvider.future);
+      await useCase(
+        username: username,
+        password: password,
+        fullName: fullName,
+        roleId: roleId,
+        departmentId: departmentId,
+      );
+      state = const AsyncData(null);
+    } on DioException catch (e) {
+      state = AsyncError(ApiErrorHandler.getMessage(e), StackTrace.current);
+    } catch (e) {
+      state = AsyncError(e.toString(), StackTrace.current);
+    }
+  }
+}
+
+final registerUserProvider =
+    StateNotifierProvider<RegisterUserNotifier, AsyncValue<void>>(
+      (ref) => RegisterUserNotifier(ref),
+    );
 
 /////////////////////////////////////////////////////////////////////////
 // ── Register notifier ────────────────────────────────────────

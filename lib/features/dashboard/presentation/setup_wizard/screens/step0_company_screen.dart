@@ -1,209 +1,208 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontendmobile/features/onboarding/presentation/providers/onboarding_provider.dart';
-import 'package:frontendmobile/features/onboarding/presentation/widgets/onboarding_field.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
+import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/providers/wizard_provider.dart';
+import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/widgets/custom_dropdown.dart';
+import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/widgets/custom_text_field.dart';
+import 'package:frontendmobile/shared/widgets/wizard_buttons.dart';
 
 class Step0CompanyScreen extends ConsumerStatefulWidget {
   const Step0CompanyScreen({super.key});
+
   @override
-  ConsumerState<Step0CompanyScreen> createState() => _Step1Sate();
+  ConsumerState<Step0CompanyScreen> createState() => _Step0CompanyScreenState();
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-//////////////////////////////////////////////////////////////////////
-class _Step1Sate extends ConsumerState<Step0CompanyScreen> {
+class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
+  /////////////////////////////////////////////////////////////////////
+  ///
+  /////////////////////////////////////////////////////////////////////
+
   final _formKey = GlobalKey<FormState>();
-  final _companyName = TextEditingController();
-  final _companyCode = TextEditingController();
-  final _username = TextEditingController();
-  final _password = TextEditingController();
-  final _fullName = TextEditingController();
-  final _timezone = TextEditingController(text: 'Asia/Phnom_Penh');
-  final _currency = TextEditingController(text: 'USD');
+  final _companyNameCtrl = TextEditingController();
+  final _companyCodeCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _maxUsersCtrl = TextEditingController();
+
+  String _planType = 'free';
+  String? _selectedCurrency;
+  String? _selectedTimezone;
+
+  static const List<String> _currencies = ['USD', 'KHR', 'THB', 'VND', 'SGD'];
+  static const List<String> _timezones = [
+    'Asia/Phnom_Penh',
+    'Asia/Bangkok',
+    'Asia/Ho_Chi_Minh',
+    'Asia/Singapore',
+  ];
+  /////////////////////////////////////////////////////////////////////
+  ///
+  /////////////////////////////////////////////////////////////////////
 
   @override
   void dispose() {
-    _companyName.dispose();
-    _companyCode.dispose();
-    _username.dispose();
-    _password.dispose();
-    _fullName.dispose();
-    _timezone.dispose();
-    _currency.dispose();
+    _companyNameCtrl.dispose();
+    _companyCodeCtrl.dispose();
+    _emailCtrl.dispose();
+    _maxUsersCtrl.dispose();
     super.dispose();
   }
 
+  /////////////////////////////////////////////////////////////////////
+  ///
+  /////////////////////////////////////////////////////////////////////
+
   Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
-    await ref
-        .read(onboardingProvider.notifier)
-        .registerCompanyAndAdmin(
-          companyName: _companyName.text.trim(),
-          companyCode: _companyCode.text.trim().toUpperCase(),
-          username: _username.text.trim(),
-          password: _password.text.trim(),
-          fullName: _fullName.text.trim(),
-          timezone: _timezone.text.trim(),
-          currency: _currency.text.trim(),
+
+    final success = await ref
+        .read(wizardProvider.notifier)
+        .registerCompany(
+          companyCode: _companyCodeCtrl.text.trim(),
+          companyName: _companyNameCtrl.text.trim(),
+          currency: _selectedCurrency!,
+          email: _emailCtrl.text.trim(),
+          maxUsers: int.parse(_maxUsersCtrl.text.trim()),
+          timezone: _selectedTimezone!,
+          planType: _planType,
         );
+    if (!mounted) return;
+    if (success) {}
   }
+
+  /////////////////////////////////////////////////////////////////////
+  ///
+  /////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(onboardingProvider);
-    final isLoading = state.isLoading;
+    final wizardState = ref.watch(wizardProvider);
+    final isLoading = wizardState.isLoading;
+    final error = wizardState.error;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    //////////////////////////////////////////////////////
-    //
-    //////////////////////////////////////////////////////
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '🏢 Company Info',
-              style: TextStyle(
-                color: Colors.white54,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-
-            /////////////////////////////////////////
-            const SizedBox(height: 12),
-
-            ////////////////////////////////////////
-            OnboardingField(
-              controller: _companyName,
-              label: 'Company Name',
-              icon: Icons.business_outlined,
-              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-            ),
-
-            OnboardingField(
-              controller: _companyCode,
-              label: 'Company Code',
-              icon: Icons.qr_code_outlined,
-              hint: 'e.g. MYCO',
-              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-            ),
-            OnboardingField(
-              controller: _timezone,
-              label: 'Timezone',
-              icon: Icons.public_outlined,
-              hint: 'e.g. Asia/Phnom_Penh',
-              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-            ),
-            OnboardingField(
-              controller: _currency,
-              label: 'Currency',
-              icon: Icons.attach_money,
-              hint: 'e.g. USD, KHR',
-              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '👤 Admin Account',
-              style: TextStyle(
-                color: Colors.white54,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            //////////////////////////////////////////////////////
-            const SizedBox(height: 12),
-            //////////////////////////////////////////////////////
-            OnboardingField(
-              controller: _fullName,
-              label: 'Full Name',
-              icon: Icons.person_outlined,
-              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-            ),
-            OnboardingField(
-              controller: _username,
-              label: 'Username',
-              icon: Icons.alternate_email,
-              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-            ),
-            OnboardingField(
-              controller: _password,
-              label: 'Password',
-              icon: Icons.lock_outline,
-              obscure: true,
-              validator: (v) =>
-                  v == null || v.length < 6 ? 'Min 6 characters' : null,
-            ),
-
-            if (state.error != null) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.redAccent.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
-                ),
-                child: Row(
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.redAccent,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        state.error!,
-                        style: const TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 13,
+                    if (error != null) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Pallets.error.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Pallets.error.withOpacity(0.4),
+                          ),
+                        ),
+                        child: Text(
+                          error,
+                          style: const TextStyle(
+                            color: Pallets.error,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
+                      const SizedBox(height: 12),
+                    ],
+
+                    ///////////////////////////////////////////////////////////
+                    ///
+                    ///////////////////////////////////////////////////////////
+                    CustomTextField(
+                      controller: _companyNameCtrl,
+                      label: 'Company Name',
+                      prefixIcon: Icons.apartment,
+                    ),
+                    const SizedBox(height: 12),
+
+                    ///////////////////////////////////////////////////////////
+                    ///
+                    ///////////////////////////////////////////////////////////
+                    CustomTextField(
+                      controller: _companyCodeCtrl,
+                      label: 'Company code',
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 12),
+
+                    ///////////////////////////////////////////////////////////
+                    ///
+                    ///////////////////////////////////////////////////////////
+                    CustomTextField(
+                      controller: _emailCtrl,
+                      label: 'Email',
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 12),
+
+                    ///////////////////////////////////////////////////////////
+                    ///
+                    ///////////////////////////////////////////////////////////
+                    CustomTextField(
+                      controller: _maxUsersCtrl,
+                      label: "maxUsers",
+                      keyboardType: TextInputType.number,
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 12),
+
+                    ///////////////////////////////////////////////////////////
+                    ///
+                    ///////////////////////////////////////////////////////////
+                    CustomDropdown<String>(
+                      label: 'Currency',
+                      prefixIcon: Icons.attach_money,
+                      value: _selectedCurrency,
+                      items: _currencies
+                          .map(
+                            (c) => DropdownMenuItem(value: c, child: Text(c)),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => _selectedCurrency = v),
+                      validator: (v) => v == null ? 'Select currency' : null,
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    ///////////////////////////////////////////////////////////
+                    ///
+                    ///////////////////////////////////////////////////////////
+                    CustomDropdown<String>(
+                      label: 'Timezone',
+                      prefixIcon: Icons.schedule_outlined,
+                      value: _selectedTimezone,
+                      items: _timezones
+                          .map(
+                            (t) => DropdownMenuItem(value: t, child: Text(t)),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => _selectedTimezone = v),
+                      validator: (v) => v == null ? 'Select timezone' : null,
                     ),
                   ],
                 ),
               ),
-            ],
-
-            //////////////////////////////////////////////////////
-            const SizedBox(height: 24),
-            //////////////////////////////////////////////////////
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Text(
-                        'Continue',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              ),
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: WizardButtons(
+              isLoading: isLoading,
+              onSkip: () => ref.read(wizardProvider.notifier).nextStep(),
+              onSubmit: _submit,
+            ),
+          ),
+        ],
       ),
     );
   }

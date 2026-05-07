@@ -3,8 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/shared/providers/core_providers.dart';
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
+  //////////////////////////////////////////////////////////
+  ///
+  ////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(authProvider, (previous, next) {
@@ -17,9 +22,16 @@ class HomeScreen extends ConsumerWidget {
       }
     });
 
+    ///////////////////////////////////////////////////////////////
+    ///
+    //////////////////////////////////////////////////////////////
+
     final authState = ref.watch(authProvider);
     final isLoading = authState is AsyncLoading;
     final companyIdAsync = ref.watch(companyIdProvider);
+    ////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////
 
     return Scaffold(
       appBar: AppBar(
@@ -46,7 +58,9 @@ class HomeScreen extends ConsumerWidget {
             const Text('Welcome!', style: TextStyle(fontSize: 18)),
             const SizedBox(height: 20),
 
+            ////////////////////////////////////////////////////////////
             /// ✅ Correct Riverpod way (NO FutureBuilder)
+            /// ///////////////////////////////////////////////////////
             companyIdAsync.when(
               loading: () => const CircularProgressIndicator(),
               error: (error, _) => Text('Error: $error'),
@@ -59,7 +73,7 @@ class HomeScreen extends ConsumerWidget {
                   icon: const Icon(Icons.business),
                   label: const Text('Go to Company'),
                   onPressed: () {
-                    context.push('/company/$companyId');
+                    context.push('/companies/$companyId');
                   },
                 );
               },

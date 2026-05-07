@@ -11,6 +11,9 @@ class SplashScreen extends ConsumerStatefulWidget {
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
+////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////
 class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
@@ -19,22 +22,27 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _checkAuth() async {
-    await Future.delayed(const Duration(seconds: 2));
-
+    ///////////////////////////////////////////
+    ///
+    ///////////////////////////////////////////
+    await Future.delayed(const Duration(seconds: 1));
+    //////////////////////////////////////////
+    ///
+    //////////////////////////////////////////
     try {
       final dio = await ref.read(dioProvider.future);
       final response = await dio.get('/setup/status');
       final isInitialized = response.data?['initialized'] ?? false;
-
       if (!mounted) return;
-
       ///////////////////////////////////////////////////////////
       // ✅ Step 2 — not initialized → go to onboarding
       ///////////////////////////////////////////////////////////
+
       if (!isInitialized) {
         context.go(RouteNames.onboarding);
         return;
       }
+
       /////////////////////////////////////////////////////////
       // ✅ Step 3 — initialized → check token
       //////////////////////////////////////////////////////////
@@ -42,7 +50,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       final token = await storage.getAccessToken();
       if (!mounted) return;
       if (token == null) {
-        context.go(RouteNames.onboarding);
+        context.go(RouteNames.login);
         return;
       }
 
@@ -65,7 +73,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     } catch (e) {
       // ✅ If API fails → fallback to login
       if (!mounted) return;
-      context.go(RouteNames.onboarding);
+      context.go(RouteNames.login);
     }
   }
 

@@ -5,5 +5,6 @@ abstract class AuthRemoteDatasource {
   // Future<bool> validateToken(String token);
   Future<UserModel> login(String username, String password);
   Future<void> register(RegisterRequestModel model);
+  Future<void> registerUser(RegisterUserRequestModel model);
   Future<void> logout();
 }

@@ -40,7 +40,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   /////////////////////////////////////////////////////////
   //
   /////////////////////////////////////////////////////////
+
   void _onSkip() => context.go('/setup-wizard');
+  void _onLogin() => context.go('/login');
+
   ////////////////////////////////////////////////////////
   ///
   ////////////////////////////////////////////////////////
@@ -134,6 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               totalPages: kOnboardingPages.length,
               onNext: _onNext,
               onSkip: _onSkip,
+              onLogin: _onLogin,
             ),
 
             ////////////////////////////////////////////////////////

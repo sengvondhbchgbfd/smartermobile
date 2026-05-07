@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/providers/wizard_provider.dart';
+import 'package:frontendmobile/shared/widgets/wizard_buttons.dart';
 
 class Step3UserTypeScreen extends ConsumerStatefulWidget {
   const Step3UserTypeScreen({super.key});
@@ -13,33 +14,41 @@ class _Step3UserTypeState extends ConsumerState<Step3UserTypeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    /////////////////////////////////////////////
+    ///
+    /////////////////////////////////////////////
+
+    ///////////////////////////////////////////////
+    ///
+    ///////////////////////////////////////////////
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           _TypeCard(
-            icon:     Icons.people_outlined,
-            title:    'Staff',
+            icon: Icons.people_outlined,
+            title: 'Staff',
             subtitle: 'Employees, managers, and team members',
             selected: _selected == 'staff',
-            onTap:    () => setState(() => _selected = 'staff'),
+            onTap: () => setState(() => _selected = 'staff'),
           ),
           const SizedBox(height: 16),
           _TypeCard(
-            icon:     Icons.person_outlined,
-            title:    'Customer',
+            icon: Icons.person_outlined,
+            title: 'Customer',
             subtitle: 'Clients and customers of the company',
             selected: _selected == 'customer',
-            onTap:    () => setState(() => _selected = 'customer'),
+            onTap: () => setState(() => _selected = 'customer'),
           ),
           const Spacer(),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => ref.read(wizardProvider.notifier).skipStep(),
+                  onPressed: () => ref.read(wizardProvider.notifier).nextStep(),
                   style: OutlinedButton.styleFrom(
-                    side:  const BorderSide(color: Colors.white24),
+                    side: const BorderSide(color: Colors.white24),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -51,6 +60,7 @@ class _Step3UserTypeState extends ConsumerState<Step3UserTypeScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(width: 12),
               Expanded(
                 flex: 2,
@@ -61,7 +71,7 @@ class _Step3UserTypeState extends ConsumerState<Step3UserTypeScreen> {
                             .read(wizardProvider.notifier)
                             .selectUserType(_selected!),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:         const Color(0xFF6366F1),
+                    backgroundColor: const Color(0xFF6366F1),
                     disabledBackgroundColor: Colors.white12,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -71,8 +81,8 @@ class _Step3UserTypeState extends ConsumerState<Step3UserTypeScreen> {
                   child: const Text(
                     'Continue',
                     style: TextStyle(
-                      color:      Colors.white,
-                      fontSize:   15,
+                      color: Colors.white,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -142,18 +152,15 @@ class _TypeCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      color:      selected ? Colors.white : Colors.white70,
-                      fontSize:   16,
+                      color: selected ? Colors.white : Colors.white70,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color:    Colors.white38,
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: Colors.white38, fontSize: 13),
                   ),
                 ],
               ),
