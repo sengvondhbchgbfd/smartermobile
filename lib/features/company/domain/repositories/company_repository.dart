@@ -11,6 +11,7 @@ abstract class CompanyRepository {
   );
 
   // ── Get Company ───────────────────────────────────────────────────────
+
   Future<Either<Failure, CompanyEntity>> getCompany(int companyId);
 
   // ── Update Company ────────────────────────────────────────────────────
@@ -24,9 +25,6 @@ abstract class CompanyRepository {
     String? timezone,
     String? currency,
   });
-
-
-
 
   // ── Upload Logo ───────────────────────────────────────────────────────
   Future<Either<Failure, String>> uploadLogo({

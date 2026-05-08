@@ -5,35 +5,20 @@ import 'package:flutter/material.dart';
 // ─────────────────────────────────────────────
 
 class Pallets {
-  // Brand Gradient
   static const Color gradient1 = Color.fromRGBO(187, 63, 221, 1);
   static const Color gradient2 = Color.fromRGBO(251, 109, 169, 1);
   static const Color gradient3 = Color.fromRGBO(255, 159, 124, 1);
 
-  // Backgrounds
-  static const Color backgroundDark = Color.fromRGBO(18, 18, 18, 1);
-  static const Color backgroundLight = Color(0xFFF5F5F5);
-
+  static const Color backgroundDark = Color(0xFF121212);
   static const Color surfaceDark = Color(0xFF1E1E2E);
-  static const Color surfaceLight = Color(0xFFFFFFFF);
 
-  // Border
   static const Color borderDark = Color.fromRGBO(52, 51, 67, 1);
-  static const Color borderLight = Color(0xFFE0E0E0);
 
-  // Text
   static const Color textPrimaryDark = Colors.white;
-  static const Color textPrimaryLight = Color(0xFF121212);
-
   static const Color textSecondaryDark = Color(0xFFA7A7A7);
-  static const Color textSecondaryLight = Color(0xFF6B6B6B);
 
-  // Semantic
-  static const Color error = Colors.redAccent;
   static const Color success = Colors.green;
-  static const Color inactive = Color(0xFFABABAB);
-  static const Color transparent = Colors.transparent;
-  static const Color inactiveSeek = Colors.white38;
+  static const Color error = Colors.redAccent;
 }
 
 // ─────────────────────────────────────────────
@@ -68,8 +53,22 @@ class DashboardStat {
   });
 }
 
+class UserController {
+  final String name;
+  final String role;
+  final String branch;
+  final String avatar;
+
+  const UserController({
+    required this.name,
+    required this.role,
+    required this.branch,
+    required this.avatar,
+  });
+}
+
 // ─────────────────────────────────────────────
-// SCREEN
+// DASHBOARD
 // ─────────────────────────────────────────────
 
 class DashboardScreen extends StatefulWidget {
@@ -83,24 +82,90 @@ class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
 
+  int selectedBottomIndex = 0;
+
+  // ─────────────────────────────────────────────
+  // USER
+  // ─────────────────────────────────────────────
+
+  final UserController currentUser = const UserController(
+    name: 'John Doe',
+    role: 'Administrator',
+    branch: 'Main Branch',
+    avatar: 'JD',
+  );
+
+  // ─────────────────────────────────────────────
+  // STATS
+  // ─────────────────────────────────────────────
+
+  final List<DashboardStat> stats = const [
+    DashboardStat(
+      title: 'Employees',
+      value: '48',
+      icon: Icons.people_alt_rounded,
+      color: Colors.blue,
+    ),
+    DashboardStat(
+      title: 'Attendance',
+      value: '92%',
+      icon: Icons.qr_code_scanner_rounded,
+      color: Colors.green,
+    ),
+    DashboardStat(
+      title: 'Messages',
+      value: '16',
+      icon: Icons.chat_bubble_rounded,
+      color: Colors.purple,
+    ),
+    DashboardStat(
+      title: 'Invoices',
+      value: '1,284',
+      icon: Icons.receipt_long_rounded,
+      color: Colors.orange,
+    ),
+  ];
+
+  // ─────────────────────────────────────────────
+  // MODULES
+  // ─────────────────────────────────────────────
+
   final List<DashboardModule> modules = const [
     DashboardModule(
+      title: 'User Control',
+      subtitle: 'Roles & Permissions',
+      icon: Icons.admin_panel_settings_rounded,
+      color: Colors.indigo,
+    ),
+    DashboardModule(
+      title: 'Attendance Scan',
+      subtitle: 'QR & Face Scan',
+      icon: Icons.qr_code_scanner_rounded,
+      color: Colors.green,
+    ),
+    DashboardModule(
+      title: 'Chat System',
+      subtitle: 'DM & Groups',
+      icon: Icons.chat_rounded,
+      color: Colors.purple,
+    ),
+    DashboardModule(
       title: 'HR / Staff',
-      subtitle: 'Employees & Roles',
+      subtitle: 'Employees',
       icon: Icons.people_alt_rounded,
       color: Colors.blue,
     ),
     DashboardModule(
-      title: 'Invoices',
-      subtitle: 'Billing & Payments',
-      icon: Icons.receipt_long_rounded,
-      color: Colors.orange,
+      title: 'Inventory',
+      subtitle: 'Products & Stock',
+      icon: Icons.inventory_2_rounded,
+      color: Colors.teal,
     ),
     DashboardModule(
-      title: 'Inventory',
-      subtitle: 'Stock & Products',
-      icon: Icons.inventory_2_rounded,
-      color: Colors.green,
+      title: 'Invoices',
+      subtitle: 'Billing System',
+      icon: Icons.receipt_long_rounded,
+      color: Colors.orange,
     ),
     DashboardModule(
       title: 'CRM',
@@ -109,45 +174,14 @@ class _DashboardScreenState extends State<DashboardScreen>
       color: Colors.red,
     ),
     DashboardModule(
-      title: 'Chat',
-      subtitle: 'Messages',
-      icon: Icons.chat_bubble_rounded,
-      color: Colors.purple,
-    ),
-    DashboardModule(
-      title: 'Settings',
-      subtitle: 'System Config',
-      icon: Icons.settings_rounded,
-      color: Colors.grey,
+      title: 'Payroll',
+      subtitle: 'Salary & Bonus',
+      icon: Icons.payments_rounded,
+      color: Colors.amber,
     ),
   ];
 
-  final List<DashboardStat> stats = const [
-    DashboardStat(
-      title: 'Invoices',
-      value: '1,284',
-      icon: Icons.receipt_rounded,
-      color: Colors.orange,
-    ),
-    DashboardStat(
-      title: 'Employees',
-      value: '48',
-      icon: Icons.people_alt_rounded,
-      color: Colors.blue,
-    ),
-    DashboardStat(
-      title: 'Products',
-      value: '932',
-      icon: Icons.inventory_2_rounded,
-      color: Colors.green,
-    ),
-    DashboardStat(
-      title: 'Customers',
-      value: '392',
-      icon: Icons.groups_rounded,
-      color: Colors.red,
-    ),
-  ];
+  // ─────────────────────────────────────────────
 
   @override
   void initState() {
@@ -167,64 +201,58 @@ class _DashboardScreenState extends State<DashboardScreen>
     super.dispose();
   }
 
-  bool isDark(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark;
-  }
-
-  Color bgColor(BuildContext context) {
-    return isDark(context) ? Pallets.backgroundDark : Pallets.backgroundLight;
-  }
-
-  Color surfaceColor(BuildContext context) {
-    return isDark(context) ? Pallets.surfaceDark : Pallets.surfaceLight;
-  }
-
-  Color borderColor(BuildContext context) {
-    return isDark(context) ? Pallets.borderDark : Pallets.borderLight;
-  }
-
-  Color textPrimary(BuildContext context) {
-    return isDark(context) ? Pallets.textPrimaryDark : Pallets.textPrimaryLight;
-  }
-
-  Color textSecondary(BuildContext context) {
-    return isDark(context)
-        ? Pallets.textSecondaryDark
-        : Pallets.textSecondaryLight;
-  }
+  // ─────────────────────────────────────────────
+  // BUILD
+  // ─────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      backgroundColor: bgColor(context),
+      backgroundColor: Pallets.backgroundDark,
+
+      bottomNavigationBar: _buildBottomNavigation(),
+
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Pallets.gradient2,
+        onPressed: () {},
+        child: const Icon(Icons.add),
+      ),
+
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.04,
-            vertical: 20,
-          ),
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(context),
+              _buildHeader(),
 
               const SizedBox(height: 24),
 
-              _buildHeader(context),
+              _buildSearchBar(),
 
               const SizedBox(height: 24),
 
-              _buildStatsGrid(context),
+              _buildUserControllerCard(),
+
+              const SizedBox(height: 24),
+
+              _buildStatsGrid(),
 
               const SizedBox(height: 28),
 
-              _buildModules(context),
+              _buildModules(),
 
               const SizedBox(height: 28),
 
-              _buildRecentActivity(context),
+              _buildAttendanceCard(),
+
+              const SizedBox(height: 24),
+
+              _buildChatPreview(),
+
+              const SizedBox(height: 24),
+
+              _buildRecentActivity(),
             ],
           ),
         ),
@@ -233,20 +261,20 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   // ─────────────────────────────────────────────
-  // TOP BAR
+  // HEADER
   // ─────────────────────────────────────────────
 
-  Widget _buildTopBar(BuildContext context) {
+  Widget _buildHeader() {
     return Row(
       children: [
         Container(
-          width: 46,
-          height: 46,
+          width: 52,
+          height: 52,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Pallets.gradient1, Pallets.gradient2, Pallets.gradient3],
             ),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: const Icon(Icons.dashboard_rounded, color: Colors.white),
         ),
@@ -256,68 +284,149 @@ class _DashboardScreenState extends State<DashboardScreen>
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: const [
               Text(
-                'BizCore',
+                'BizCore ERP',
                 style: TextStyle(
-                  color: textPrimary(context),
-                  fontSize: 18,
+                  color: Pallets.textPrimaryDark,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              SizedBox(height: 4),
               Text(
-                'Business Dashboard',
-                style: TextStyle(color: textSecondary(context), fontSize: 12),
+                'Business Management System',
+                style: TextStyle(
+                  color: Pallets.textSecondaryDark,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
         ),
 
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: surfaceColor(context),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: borderColor(context)),
-          ),
-          child: Icon(
-            Icons.notifications_rounded,
-            color: textPrimary(context),
-            size: 20,
-          ),
+        Stack(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: Pallets.surfaceDark,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Pallets.borderDark),
+              ),
+              child: const Icon(
+                Icons.notifications_rounded,
+                color: Colors.white,
+              ),
+            ),
+            Positioned(
+              right: 10,
+              top: 10,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
   // ─────────────────────────────────────────────
-  // HEADER
+  // SEARCH
   // ─────────────────────────────────────────────
 
-  Widget _buildHeader(BuildContext context) {
-    return FadeTransition(
-      opacity: CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
+  Widget _buildSearchBar() {
+    return Container(
+      height: 54,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Pallets.surfaceDark,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Pallets.borderDark),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Row(
+        children: const [
+          Icon(Icons.search_rounded, color: Pallets.textSecondaryDark),
+          SizedBox(width: 10),
           Text(
-            'Good Morning 👋',
-            style: TextStyle(color: textSecondary(context), fontSize: 14),
+            'Search modules...',
+            style: TextStyle(color: Pallets.textSecondaryDark),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // USER CONTROLLER
+  // ─────────────────────────────────────────────
+
+  Widget _buildUserControllerCard() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Pallets.gradient1, Pallets.gradient2],
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: Colors.white.withOpacity(0.2),
+            child: Text(
+              currentUser.avatar,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(width: 16),
 
-          Text(
-            'Main Dashboard',
-            style: TextStyle(
-              color: textPrimary(context),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  currentUser.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  currentUser.role,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  currentUser.branch,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ],
             ),
+          ),
+
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.settings_rounded, color: Colors.white),
           ),
         ],
       ),
@@ -328,36 +437,33 @@ class _DashboardScreenState extends State<DashboardScreen>
   // STATS
   // ─────────────────────────────────────────────
 
-  Widget _buildStatsGrid(BuildContext context) {
+  Widget _buildStatsGrid() {
     return GridView.builder(
       shrinkWrap: true,
       itemCount: stats.length,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: MediaQuery.of(context).size.width > 700 ? 4 : 2,
-        mainAxisSpacing: 14,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
         crossAxisSpacing: 14,
-        childAspectRatio: 1.4,
+        mainAxisSpacing: 14,
+        childAspectRatio: 1.3,
       ),
       itemBuilder: (context, index) {
         final stat = stats[index];
 
         return TweenAnimationBuilder(
           tween: Tween<double>(begin: 0, end: 1),
-          duration: Duration(milliseconds: 400 + (index * 100)),
-          curve: Curves.easeOut,
+          duration: Duration(milliseconds: 400 + (index * 120)),
+          curve: Curves.easeOutBack,
           builder: (context, value, child) {
-            return Transform.translate(
-              offset: Offset(0, 30 * (1 - value)),
-              child: Opacity(opacity: value, child: child),
-            );
+            return Transform.scale(scale: value, child: child);
           },
           child: Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: surfaceColor(context),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: borderColor(context)),
+              color: Pallets.surfaceDark,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: Pallets.borderDark),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,7 +472,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: stat.color.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(stat.icon, color: stat.color),
                 ),
@@ -375,8 +481,8 @@ class _DashboardScreenState extends State<DashboardScreen>
 
                 Text(
                   stat.value,
-                  style: TextStyle(
-                    color: textPrimary(context),
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -386,7 +492,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
                 Text(
                   stat.title,
-                  style: TextStyle(color: textSecondary(context), fontSize: 13),
+                  style: const TextStyle(color: Pallets.textSecondaryDark),
                 ),
               ],
             ),
@@ -400,14 +506,14 @@ class _DashboardScreenState extends State<DashboardScreen>
   // MODULES
   // ─────────────────────────────────────────────
 
-  Widget _buildModules(BuildContext context) {
+  Widget _buildModules() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Modules',
+        const Text(
+          'System Modules',
           style: TextStyle(
-            color: textPrimary(context),
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -419,66 +525,57 @@ class _DashboardScreenState extends State<DashboardScreen>
           shrinkWrap: true,
           itemCount: modules.length,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: MediaQuery.of(context).size.width > 700 ? 3 : 2,
-            mainAxisSpacing: 14,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
             crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
             childAspectRatio: 1.1,
           ),
           itemBuilder: (context, index) {
             final module = modules[index];
 
-            return TweenAnimationBuilder(
-              tween: Tween<double>(begin: 0, end: 1),
-              duration: Duration(milliseconds: 500 + (index * 120)),
-              curve: Curves.easeOutBack,
-              builder: (context, value, child) {
-                return Transform.scale(scale: value, child: child);
-              },
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () {},
-                child: Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: surfaceColor(context),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: borderColor(context)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: module.color.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(module.icon, color: module.color),
+            return InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Pallets.surfaceDark,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: Pallets.borderDark),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: module.color.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(14),
                       ),
+                      child: Icon(module.icon, color: module.color),
+                    ),
 
-                      const Spacer(),
+                    const Spacer(),
 
-                      Text(
-                        module.title,
-                        style: TextStyle(
-                          color: textPrimary(context),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
+                    Text(
+                      module.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
+                    ),
 
-                      const SizedBox(height: 4),
+                    const SizedBox(height: 4),
 
-                      Text(
-                        module.subtitle,
-                        style: TextStyle(
-                          color: textSecondary(context),
-                          fontSize: 12,
-                        ),
+                    Text(
+                      module.subtitle,
+                      style: const TextStyle(
+                        color: Pallets.textSecondaryDark,
+                        fontSize: 12,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -489,32 +586,92 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   // ─────────────────────────────────────────────
-  // RECENT ACTIVITY
+  // ATTENDANCE
   // ─────────────────────────────────────────────
 
-  Widget _buildRecentActivity(BuildContext context) {
-    final activities = [
-      'Invoice #1002 created',
-      'New employee added',
-      'Stock updated',
-      'Customer payment received',
-      'Payroll completed',
-    ];
-
+  Widget _buildAttendanceCard() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: surfaceColor(context),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor(context)),
+        color: Pallets.surfaceDark,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Pallets.borderDark),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: const Icon(
+              Icons.qr_code_scanner_rounded,
+              color: Colors.green,
+              size: 30,
+            ),
+          ),
+
+          const SizedBox(width: 18),
+
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Attendance Scanner',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+
+                SizedBox(height: 6),
+
+                Text(
+                  'QR Scan & Face Recognition',
+                  style: TextStyle(color: Pallets.textSecondaryDark),
+                ),
+              ],
+            ),
+          ),
+
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            onPressed: () {},
+            child: const Text('Scan'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // CHAT
+  // ─────────────────────────────────────────────
+
+  Widget _buildChatPreview() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Pallets.surfaceDark,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Pallets.borderDark),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Recent Activity',
+          const Text(
+            'Team Chat',
             style: TextStyle(
-              color: textPrimary(context),
+              color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
@@ -522,18 +679,98 @@ class _DashboardScreenState extends State<DashboardScreen>
 
           const SizedBox(height: 18),
 
-          ...activities.map(
+          _chatTile('Sarah', 'Please approve invoice #102', '2m'),
+
+          _chatTile('Tom', 'Meeting at 3PM', '10m'),
+
+          _chatTile('Maria', 'Payroll completed', '1h'),
+        ],
+      ),
+    );
+  }
+
+  Widget _chatTile(String name, String message, String time) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: Pallets.gradient2,
+            child: Text(name[0], style: const TextStyle(color: Colors.white)),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                Text(
+                  message,
+                  style: const TextStyle(color: Pallets.textSecondaryDark),
+                ),
+              ],
+            ),
+          ),
+
+          Text(time, style: const TextStyle(color: Pallets.textSecondaryDark)),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // RECENT ACTIVITY
+  // ─────────────────────────────────────────────
+
+  Widget _buildRecentActivity() {
+    final items = [
+      'Invoice created',
+      'Attendance scanned',
+      'User added',
+      'Stock updated',
+      'Payroll approved',
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Pallets.surfaceDark,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Pallets.borderDark),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Recent Activity',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          ...items.map(
             (e) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.only(bottom: 14),
               child: Row(
                 children: [
                   Container(
                     width: 10,
                     height: 10,
                     decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Pallets.gradient1, Pallets.gradient2],
-                      ),
+                      color: Colors.green,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -541,21 +778,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                   const SizedBox(width: 12),
 
                   Expanded(
-                    child: Text(
-                      e,
-                      style: TextStyle(
-                        color: textPrimary(context),
-                        fontSize: 14,
-                      ),
-                    ),
+                    child: Text(e, style: const TextStyle(color: Colors.white)),
                   ),
 
-                  Text(
-                    '2m ago',
-                    style: TextStyle(
-                      color: textSecondary(context),
-                      fontSize: 12,
-                    ),
+                  const Text(
+                    'Now',
+                    style: TextStyle(color: Pallets.textSecondaryDark),
                   ),
                 ],
               ),
@@ -563,6 +791,44 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
         ],
       ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // BOTTOM NAVIGATION
+  // ─────────────────────────────────────────────
+
+  Widget _buildBottomNavigation() {
+    return BottomNavigationBar(
+      currentIndex: selectedBottomIndex,
+      backgroundColor: Pallets.surfaceDark,
+      selectedItemColor: Pallets.gradient2,
+      unselectedItemColor: Pallets.textSecondaryDark,
+      type: BottomNavigationBarType.fixed,
+      onTap: (index) {
+        setState(() {
+          selectedBottomIndex = index;
+        });
+      },
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.dashboard_rounded),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.qr_code_scanner_rounded),
+          label: 'Scan',
+        ),
+        BottomNavigationBarItem(icon: Icon(Icons.chat_rounded), label: 'Chat'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.people_alt_rounded),
+          label: 'Users',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings_rounded),
+          label: 'Settings',
+        ),
+      ],
     );
   }
 }

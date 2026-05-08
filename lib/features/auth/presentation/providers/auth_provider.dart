@@ -5,10 +5,10 @@ import 'package:frontendmobile/core/storage/secure_storage_service.dart';
 import 'package:frontendmobile/features/auth/data/datasources/auth_remote_datasource_impl.dart';
 import 'package:frontendmobile/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:frontendmobile/features/auth/domain/repositories/auth_repository.dart';
-import 'package:frontendmobile/features/auth/domain/usecases/login_usecase.dart';
-import 'package:frontendmobile/features/auth/domain/usecases/logout_usecase.dart';
-import 'package:frontendmobile/features/auth/domain/usecases/register_setup_usecase.dart';
-import 'package:frontendmobile/features/auth/domain/usecases/register_user_usecase.dart';
+import 'package:frontendmobile/features/auth/domain/usecases/auth/login_usecase.dart';
+import 'package:frontendmobile/features/auth/domain/usecases/auth/logout_usecase.dart';
+import 'package:frontendmobile/features/auth/domain/usecases/setup/register_setup_usecase.dart';
+import 'package:frontendmobile/features/auth/domain/usecases/user/register_user_usecase.dart';
 import 'package:frontendmobile/shared/providers/core_providers.dart'; // ← import core
 
 // ── Auth providers ───────────────────────────────────────────
