@@ -4,7 +4,7 @@ class CompanyEntity {
   final String? companyCode;
   final String? email;
   final String? phone;
-  final String? address;       // ✅ add this
+  final String? address;       
   final String planType;
   final String status;
   final String? timezone;

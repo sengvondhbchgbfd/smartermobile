@@ -11,6 +11,8 @@ class CompanyRepositoryImpl implements CompanyRepository {
   final CompanyRemoteDatasource remoteDatasource;
   CompanyRepositoryImpl(this.remoteDatasource);
 
+
+  
   // ── Register Company ──────────────────────────────────────────────────
   @override
   Future<Either<Failure, RegisterResponseEntity>> registerCompany(
@@ -26,6 +28,9 @@ class CompanyRepositoryImpl implements CompanyRepository {
     }
   }
 
+
+  
+
   // ── Get Company ───────────────────────────────────────────────────────
   @override
   Future<Either<Failure, CompanyEntity>> getCompany(int companyId) async {
@@ -39,6 +44,8 @@ class CompanyRepositoryImpl implements CompanyRepository {
     }
   }
 
+
+
   // ── Update Company ────────────────────────────────────────────────────
   @override
   Future<Either<Failure, CompanyEntity>> updateCompany({
@@ -46,8 +53,8 @@ class CompanyRepositoryImpl implements CompanyRepository {
     String? companyName,
     String? email,
     String? phone,
-    String? address, // ← add
-    int? max_users, // ← add
+    String? address, 
+    int? max_users, 
     String? timezone,
     String? currency,
   }) async {
@@ -56,8 +63,8 @@ class CompanyRepositoryImpl implements CompanyRepository {
       if (companyName != null) data['company_name'] = companyName;
       if (email != null) data['email'] = email;
       if (phone != null) data['phone'] = phone;
-      if (address != null) data['address'] = address; // ← add
-      if (max_users != null) data['max_users'] = max_users; // ← add
+      if (address != null) data['address'] = address;
+      if (max_users != null) data['max_users'] = max_users; 
       if (timezone != null) data['timezone'] = timezone;
       if (currency != null) data['currency'] = currency;
 

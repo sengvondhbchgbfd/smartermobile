@@ -48,11 +48,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     final isLoading = ref.watch(authProvider) is AsyncLoading;
 
     /////////////////////////////////////////////////////////
-    ///
+    /// USERS
     //////////////////////////////////////////////////////////
     ref.listen<AsyncValue>(authProvider, (prev, next) {
       next.whenOrNull(
-        data: (_) => context.go('/dashboard'),
+        data: (_) => context.go('/salaries'),
         error: (e, _) => ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         ),

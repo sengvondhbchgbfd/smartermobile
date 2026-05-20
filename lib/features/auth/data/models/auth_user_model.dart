@@ -22,13 +22,19 @@ class UserModel {
   );
 }
 
+
+
 class UserInfo {
   final int userId;
+
+
   final int companyId;
   final String username;
   final String fullName;
   final String role;
   final int? departmentId;
+
+
   final List<String> permissions;
   final int staffId;
   final String status;
@@ -60,4 +66,6 @@ class UserInfo {
     status: json['status'] ?? '',
     isManager: json['is_manager'] ?? false,
   );
+
+   operator [](String other) {}
 }

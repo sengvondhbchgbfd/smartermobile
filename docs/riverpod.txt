@@ -4,7 +4,6 @@ It helps you manage state safely, cleanly, and efficiently.
 
 Why use Riverpod? |=> 
 Compared to basic setState():
-
 ❌ setState() → messy in large apps
 ❌ hard to manage data flow
 ❌ causes unnecessary rebuilds
@@ -26,3 +25,18 @@ Authentication
 API data
 Dashboard state
 Real-time updates
+
+//////////////////////////////////////////////////////////////
+
+
+flutter packages upgrade  |=> Upgrade packages
+dart run build_runner clean |=>  Clean old files
+flutter pub get |=> Get packages
+dart run build_runner build --delete-conflicting-outputs  |=> Generate
+dart run build_runner build --delete-conflicting-outputs |=> Every time you change a provider file, just run
+dart run build_runner watch --delete-conflicting-outputs |=>  Or auto watch mode (run once, auto generates on save)
+
+
+////////////////////////////////////////////////////////////////
+
+

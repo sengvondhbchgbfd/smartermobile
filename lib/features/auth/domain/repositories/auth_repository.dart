@@ -1,4 +1,4 @@
-import 'package:frontendmobile/features/auth/data/models/user_model.dart';
+import 'package:frontendmobile/features/auth/data/models/auth_user_model.dart';
 
 abstract class AuthRepository {
   /////////////////////////////////////////////////
@@ -57,8 +57,23 @@ abstract class AuthRepository {
     String? status,
   });
 
+  //////////////////////////////////////////////////
+  ///
+  /////////////////////////////////////////////////
 
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  });
 
+  Future<void> resetPassword({
+    required int userId,
+    required String newPassword,
+  });
 
-  
+  Future<UserModel> refreshToken(String refreshToken);
+
+  Future<void> activateUser(int userId);
+
+  Future<void> deactivateUser(int userId);
 }

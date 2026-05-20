@@ -34,7 +34,7 @@ class _Step4AvatarState extends ConsumerState<Step4AvatarScreen> {
     /////////////////////
     final storage = ref.read(secureStorageProvider);
     final staffIdStr = await storage.getUserInfo().then(
-      (info) => info?['staff_id'],
+      (info) => info?["staff_id"],
     );
     /////////////////////
     //

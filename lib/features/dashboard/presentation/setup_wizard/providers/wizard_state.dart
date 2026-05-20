@@ -2,9 +2,7 @@ class WizardState {
   final int currentStep;
   final bool isLoading;
   final bool isBusy;
-
   final bool isCompleted;
-
   final String? error;
 
 

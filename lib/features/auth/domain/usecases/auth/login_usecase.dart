@@ -1,4 +1,4 @@
-import 'package:frontendmobile/features/auth/data/models/user_model.dart';
+import 'package:frontendmobile/features/auth/data/models/auth_user_model.dart';
 import 'package:frontendmobile/features/auth/domain/repositories/auth_repository.dart';
 
 class LoginUseCase {

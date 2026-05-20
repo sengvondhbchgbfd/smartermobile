@@ -5,7 +5,13 @@ import 'package:frontendmobile/features/company/domain/usecases/register_company
 abstract class CompanyRemoteDatasource {
   
   // ← changed: takes params object, returns RegisterResponseModel
+
+
+  
   Future<RegisterResponseModel> registerCompany(RegisterCompanyParams params);
+
+
+
 
   Future<CompanyModel> getCompany(int companyId);
 

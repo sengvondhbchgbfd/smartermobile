@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:frontendmobile/core/errors/api_error_handler.dart';
 import 'package:frontendmobile/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:frontendmobile/features/auth/data/models/change_password_model.dart';
 import 'package:frontendmobile/features/auth/data/models/register_model.dart';
-import 'package:frontendmobile/features/auth/data/models/user_model.dart';
+import 'package:frontendmobile/features/auth/data/models/reset_password_model.dart';
+import 'package:frontendmobile/features/auth/data/models/auth_user_model.dart';
 import 'package:frontendmobile/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -99,6 +101,133 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> logout() async {
     try {
       await _datasource.logout();
+    } on DioException catch (e) {
+      throw ApiErrorHandler.getMessage(e);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // GET USERS
+  //////////////////////////////////////////////////////////////////////
+  @override
+  Future<List<UserInfo>> getUsers() async {
+    try {
+      return await _datasource.getUsers();
+    } on DioException catch (e) {
+      throw ApiErrorHandler.getMessage(e);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // GET USER BY ID
+
+  //////////////////////////////////////////////////////////////////////
+  @override
+  Future<UserInfo> getUserById(int userId) async {
+    try {
+      return await _datasource.getUserById(userId);
+    } on DioException catch (e) {
+      throw ApiErrorHandler.getMessage(e);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // UPDATE USER
+  //////////////////////////////////////////////////////////////////////
+
+  @override
+  Future<void> updateUser({
+    required int userId,
+    String? fullName,
+    int? roleId,
+    int? departmentId,
+    String? status,
+  }) async {
+    try {
+      final data = <String, dynamic>{
+        if (fullName != null) 'full_name': fullName,
+        if (roleId != null) 'role_id': roleId,
+        if (departmentId != null)
+          if (status != null) 'status': status,
+      };
+      await _datasource.updateUser(userId, data);
+    } on DioException catch (e) {
+      throw ApiErrorHandler.getMessage(e);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // CHANGE PASSWORD
+  //////////////////////////////////////////////////////////////////////
+
+  @override
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final model = ChangePasswordRequestModel(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+
+      await _datasource.changePassword(model);
+    } on DioException catch (e) {
+      throw ApiErrorHandler.getMessage(e);
+    }
+  }
+  //////////////////////////////////////////////////////////////////////
+  // RESET PASSWORD
+  //////////////////////////////////////////////////////////////////////
+
+  @override
+  Future<void> resetPassword({
+    required int userId,
+    required String newPassword,
+  }) async {
+    try {
+      final model = ResetPasswordRequestModel(newPassword: newPassword);
+
+      await _datasource.resetPassword(userId, model);
+    } on DioException catch (e) {
+      throw ApiErrorHandler.getMessage(e);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // REFRESH TOKEN
+  //////////////////////////////////////////////////////////////////////
+
+  @override
+  Future<UserModel> refreshToken(String refreshToken) async {
+    try {
+      return await _datasource.refreshToken(refreshToken);
+    } on DioException catch (e) {
+      throw ApiErrorHandler.getMessage(e);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // ACTIVATE USER
+  //////////////////////////////////////////////////////////////////////
+
+  @override
+  Future<void> activateUser(int userId) async {
+    try {
+      await _datasource.activateUser(userId);
+    } on DioException catch (e) {
+      throw ApiErrorHandler.getMessage(e);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // DEACTIVATE USER
+  //////////////////////////////////////////////////////////////////////
+
+  @override
+  Future<void> deactivateUser(int userId) async {
+    try {
+      await _datasource.deactivateUser(userId);
     } on DioException catch (e) {
       throw ApiErrorHandler.getMessage(e);
     }

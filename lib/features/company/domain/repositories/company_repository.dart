@@ -10,6 +10,8 @@ abstract class CompanyRepository {
     RegisterCompanyParams params,
   );
 
+
+
   // ── Get Company ───────────────────────────────────────────────────────
 
   Future<Either<Failure, CompanyEntity>> getCompany(int companyId);

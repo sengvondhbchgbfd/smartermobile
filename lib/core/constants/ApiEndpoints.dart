@@ -21,15 +21,18 @@ class ApiEndpoints {
   static const String usersV1 = '/users';
 
   // ── Staff Roles ─────────────────────────
-  static const String staffRoles = '/staff-roles';
+  static const String staffRoles = '/staff-roles/';
 
   // ── Staff ───────────────────────────────
-  static const String staff = '/staff';
+
+  static const String staff = '/staff/';
+
   static const String staffMy = '/staff/my';
   static const String staffManagers = '/staff/managers';
 
   // ── Salaries ────────────────────────────
-  static const String salaries = '/salaries';
+  static const String salaries = '/salaries/';
+
   static const String salariesMy = '/salaries/my';
   static const String salariesSummary = '/salaries/summary';
   static const String salariesAdjustments = '/salaries/adjustments';
@@ -78,6 +81,7 @@ class ApiEndpoints {
   static const String systemSettings = '/system-settings';
 
   // ── Helper: build dynamic paths ─────────
+
   static String userById(int id) => '/auth/users/$id';
   static String userByUsername(String u) => '/auth/users/username/$u';
   static String deactivateUser(int id) => '/auth/users/$id/deactivate';
@@ -96,6 +100,7 @@ class ApiEndpoints {
   static String staffRoleById(int id) => '/staff-roles/$id';
 
   static String staffById(int id) => '/staff/$id';
+
   static String staffAvatar(int id) => '/staff/$id/avatar';
   static String staffByRole(int id) => '/staff/role/$id';
   static String staffByDept(int id) => '/staff/department/$id';
@@ -120,4 +125,9 @@ class ApiEndpoints {
 
   static String productById(int id) => '/products/$id';
   static String invoiceById(int id) => '/invoices/$id';
+
+  ////////////////////////////////////////////////////////
+  ///
+  ////////////////////////////////////////////////////////
+ 
 }

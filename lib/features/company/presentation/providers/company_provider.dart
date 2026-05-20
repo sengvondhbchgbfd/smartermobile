@@ -13,10 +13,15 @@ import 'package:frontendmobile/shared/providers/core_providers.dart';
 // ── Notifier ───────────────────────────────────────────────────────────────
 //////////////////////////////////////////////////////////////////////////////
 class CompanyNotifier extends AsyncNotifier<CompanyState> {
+
+
   late final GetCompanyUseCase _getCompany;
   late final UpdateCompanyUseCase _updateCompany;
   late final UploadCompanyLogoUseCase _uploadLogo;
   late final RegisterCompanyUseCase _createCompany;
+
+
+
   @override
   Future<CompanyState> build() async {
     final repo = await ref.watch(companyRepositoryProvider.future);
@@ -160,6 +165,7 @@ final companyRemoteDataSourceProvider = FutureProvider<CompanyRemoteDatasource>(
 ////////////////////////////////////////////////////////////////////////////
 //
 ////////////////////////////////////////////////////////////////////////////
+///
 final companyRepositoryProvider = FutureProvider<CompanyRepositoryImpl>((
   ref,
 ) async {
