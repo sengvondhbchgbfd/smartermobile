@@ -20,6 +20,9 @@ class SecureStorageService {
     }
   }
 
+  //----------------------------
+  // READ KEY
+  //----------------------------
   Future<String?> _read(String key) async {
     if (kIsWeb) {
       final prefs = await SharedPreferences.getInstance();
@@ -29,6 +32,9 @@ class SecureStorageService {
     }
   }
 
+  //----------------------------
+  // CLEAR REMOVE
+  //----------------------------
   Future<void> _delete(String key) async {
     if (kIsWeb) {
       final prefs = await SharedPreferences.getInstance();
@@ -58,20 +64,9 @@ class SecureStorageService {
   // ─────────────────────────────
   // USER INFO
   // ─────────────────────────────
-  // Future<void> saveUserInfo({
-  //   required String userId,
-  //   required String companyId,
-  // }) async {
-  //   await Future.wait([
-  //     _write(ApiConstants.userIdKey, userId),
-  //     _write(ApiConstants.companyIdKey, companyId),
-  //   ]);
-  // }
-
-  // Future<Map<String, String?>> getUserInfo() async {
-  //   final results = await Future.wait([getUserId(), getCompanyId()]);
-  //   return {"userId": results[0], "companyId": results[1]};
-  // }
+  //////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////
 
   Future<void> saveUserInfo(UserInfo user) async {
     await Future.wait([
@@ -132,12 +127,30 @@ class SecureStorageService {
   // ─────────────────────────────
   // CLEAR ALL
   // ─────────────────────────────
+  // Future<void> clearAuth() async {
+  //   await Future.wait([
+  //     _delete(ApiConstants.accessTokenKey),
+  //     _delete(ApiConstants.refreshTokenKey),
+  //     _delete(ApiConstants.userIdKey),
+  //     _delete(ApiConstants.companyIdKey),
+  //   ]);
+
+  //////////////////////////////////////////////////////////
+  ///
+  /////////////////////////////////////////////////////////
+
   Future<void> clearAuth() async {
     await Future.wait([
       _delete(ApiConstants.accessTokenKey),
       _delete(ApiConstants.refreshTokenKey),
       _delete(ApiConstants.userIdKey),
       _delete(ApiConstants.companyIdKey),
+      _delete(ApiConstants.staffIdKey),
+      _delete(ApiConstants.usernameKey),
+      _delete(ApiConstants.fullNameKey),
+      _delete(ApiConstants.roleKey),
+      _delete(ApiConstants.statusKey),
+      _delete(ApiConstants.isManagerKey),
     ]);
   }
 }

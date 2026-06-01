@@ -98,4 +98,5 @@ class SalaryModel extends SalaryEntity {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
 }

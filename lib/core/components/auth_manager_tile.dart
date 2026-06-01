@@ -4,6 +4,7 @@ import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.da
 class AuthManagerTile extends StatelessWidget {
   final StaffEntity staff;
   const AuthManagerTile({super.key, required this.staff});
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -14,6 +15,10 @@ class AuthManagerTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.blue.shade200),
       ),
+
+      //////////////////////////////////////////////////////
+      ///
+      /////////////////////////////////////////////////////
       child: Row(
         children: [
           CircleAvatar(
@@ -33,6 +38,9 @@ class AuthManagerTile extends StatelessWidget {
                 : null,
           ),
           const SizedBox(width: 10),
+          /////////////////////////////////////////////////////
+          ///
+          ////////////////////////////////////////////////////
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

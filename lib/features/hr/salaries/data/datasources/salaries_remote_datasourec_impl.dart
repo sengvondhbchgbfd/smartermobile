@@ -2,10 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:frontendmobile/core/constants/ApiEndpoints.dart';
 import 'package:frontendmobile/features/hr/salaries/data/datasources/salaries_remote_datasource.dart';
 import 'package:frontendmobile/features/hr/salaries/data/model/salaries_model.dart';
+import 'package:frontendmobile/features/hr/salaries/data/model/salary_staff_group_model.dart';
 
 class SalaryRemoteDatasourceImpl implements SalaryRemoteDatasource {
   final Dio _dio;
-
   SalaryRemoteDatasourceImpl(this._dio);
 
   @override
@@ -19,8 +19,12 @@ class SalaryRemoteDatasourceImpl implements SalaryRemoteDatasource {
         .toList();
   }
 
-
-
+  @override
+  Future<List<SalaryStaffGroupModel>> getGroupedByStaff() async {
+    final response = await _dio.get(ApiEndpoints.salariesGroup);
+    final List data = response.data;
+    return data.map((e) => SalaryStaffGroupModel.fromJson(e)).toList();
+  }
 
   @override
   Future<SalaryModel> getById(int salaryId) async {

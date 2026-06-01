@@ -1,23 +1,19 @@
-enum AdjustmentType { bonus, deduction }
-
 class SalaryAdjustmentEntity {
-  final int adjustmentId;
-  final int companyId;
+  final int id;
   final int salaryId;
-  final int adjustedBy;
-  final AdjustmentType adjustmentType;
+  final String type; // 'bonus' | 'deduction'
   final double amount;
-  final String? reason;
+  final String? note;
+  final int adjustedByStaffId;
   final DateTime createdAt;
 
   const SalaryAdjustmentEntity({
-    required this.adjustmentId,
-    required this.companyId,
+    required this.id,
     required this.salaryId,
-    required this.adjustedBy,
-    required this.adjustmentType,
+    required this.type,
     required this.amount,
-    this.reason,
+    this.note,
+    required this.adjustedByStaffId,
     required this.createdAt,
   });
 }

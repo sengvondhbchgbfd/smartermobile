@@ -161,8 +161,7 @@ class UserNotifier extends _$UserNotifier {
 
     final result = await updateUsersUsecase(params);
     result.fold(
-      (f) =>
-          state = AsyncData(current.copyWith(users: old)), // ✅ rollback on fail
+      (f) => state = AsyncData(current.copyWith(users: old)),
       (_) => loadAll(),
     );
   }

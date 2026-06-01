@@ -8,22 +8,21 @@ import 'package:frontendmobile/shared/widgets/app_action_buttons.dart';
 import 'package:frontendmobile/shared/widgets/app_card.dart';
 import 'package:frontendmobile/shared/widgets/app_status_badge.dart';
 import '../../domain/entities/salaries_entity.dart';
+
 class SalaryCard extends ConsumerWidget {
   final SalaryEntity salary;
   final VoidCallback onEdit;
   final VoidCallback onMarkPaid;
   final VoidCallback onDelete;
 
-  
-  // final VoidCallback? onAdjustments;
-
+  final VoidCallback? onAdjustments;
   const SalaryCard({
     super.key,
     required this.salary,
     required this.onEdit,
     required this.onMarkPaid,
     required this.onDelete,
-    // required this.onAdjustments
+    required this.onAdjustments,
   });
 
   @override
@@ -37,12 +36,15 @@ class SalaryCard extends ConsumerWidget {
 
     // ── Employee: match by staff.id ───────────────────────
     final staff = staffList.where((s) => s.id == salary.staffId).firstOrNull;
-
     // ── Manager: match by staff.userId ───────────────────
     // managed_by references users.user_id not staff.id
     final manager = staffList
         .where((s) => s.userId == salary.managedBy)
         .firstOrNull;
+
+    /////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,6 +158,7 @@ class SalaryCard extends ConsumerWidget {
                       : Pallets.textSecondaryLight,
                 ),
               ),
+              IconButton(onPressed: onEdit, icon: const Icon(Icons.edit)),
             ],
           ),
 
@@ -168,8 +171,11 @@ class SalaryCard extends ConsumerWidget {
             primaryTooltip: 'Mark Paid',
             onEdit: onEdit,
             onDelete: onDelete,
-            // onAdjustments: onAdjustments,
+            onAdjustments: onAdjustments,
           ),
+          ///////////////////////////////////////////////
+          ///
+          //////////////////////////////////////////////
         ],
       ),
     );

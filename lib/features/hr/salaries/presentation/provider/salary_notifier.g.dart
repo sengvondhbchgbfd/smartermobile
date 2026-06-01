@@ -6,7 +6,7 @@ part of 'salary_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$salaryNotifierHash() => r'43e9aa6052ca7649e6ccbd2e89afe8e3f184ad2f';
+String _$salaryNotifierHash() => r'33c274f0f39a7ed5d1409ae2b5f340a70108d362';
 
 /// See also [SalaryNotifier].
 @ProviderFor(SalaryNotifier)

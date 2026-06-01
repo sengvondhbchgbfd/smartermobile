@@ -51,6 +51,9 @@ class DioClient {
       //   responseBody: true,
       // ),
       /// 2. Auth (token + refresh)
+      //////////////////////////////////////////////////////////////////
+      ///
+      /////////////////////////////////////////////////////////////////
       AuthInterceptor(dio: dio, storage: storage),
       // Cache
       CacheInterceptor(networkInfo: networkInfo, cacheService: cacheService),

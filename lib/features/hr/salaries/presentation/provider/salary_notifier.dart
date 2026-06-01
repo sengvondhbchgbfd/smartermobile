@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:dio/dio.dart' show DioException;
 import 'package:frontendmobile/features/hr/salaries/domain/entities/salaries_entity.dart';
 import 'package:frontendmobile/features/hr/salaries/domain/usecases/salaries_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -17,75 +20,92 @@ class SalaryNotifier extends _$SalaryNotifier {
 
   @override
   Future<List<SalaryEntity>> build() async {
-    ref.keepAlive();
-
     final repository = await ref.read(salaryRepositoryProvider.future);
 
-    _getAll       = GetAllSalariesUseCase(repository);
-    _getById      = GetSalaryByIdUseCase(repository);
+    _getAll = GetAllSalariesUseCase(repository);
+    _getById = GetSalaryByIdUseCase(repository);
     _getMySalaries = GetMySalariesUseCase(repository);
-    _create       = CreateSalaryUseCase(repository);
+    _create = CreateSalaryUseCase(repository);
     _updateSalary = UpdateSalaryUseCase(repository);
-    _markPaid     = MarkPaidUseCase(repository);
-    _delete       = DeleteSalaryUseCase(repository);
-    _getSummary   = GetSalarySummaryUseCase(repository);
+    _markPaid = MarkPaidUseCase(repository);
+    _delete = DeleteSalaryUseCase(repository);
+    _getSummary = GetSalarySummaryUseCase(repository);
 
-    return await _getAll();
+    return _getAll();
   }
 
-  // ── Fetch all (manual refresh) ──
-
+  // ─────────────────────────────
+  // READ OPERATIONS (SAFE REFRESH)
+  // ─────────────────────────────
 
   Future<void> fetchAll({int? staffId, String? status}) async {
-    state = const AsyncValue.loading();
     state = await AsyncValue.guard(
       () => _getAll(staffId: staffId, status: status),
     );
   }
 
-
-
-
-  // ── Fetch my salaries ──
   Future<void> fetchMySalaries() async {
-    state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _getMySalaries());
   }
-  // ── Fetch by staff ──
+
   Future<void> fetchByStaff(int staffId) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => _getAll(staffId: staffId),
-    );
+    state = await AsyncValue.guard(() => _getAll(staffId: staffId));
   }
 
-  // ── Create ──
+  // ─────────────────────────────
+  // WRITE OPERATIONS (OPTIMIZED)
+  // ─────────────────────────────
+
   Future<void> create(SalaryEntity salary) async {
-    state = const AsyncValue.loading();
-    await AsyncValue.guard(() => _create(salary));
+    final result = await AsyncValue.guard(() => _create(salary));
+
+    if (result.hasError) {
+      state = AsyncValue.error(result.error!, result.stackTrace!);
+      return;
+    }
+
     await fetchAll();
   }
 
-  // ── Update ──
   Future<void> editSalary(int salaryId, SalaryEntity salary) async {
-    state = const AsyncValue.loading();
-    await AsyncValue.guard(() => _updateSalary(salaryId, salary));
+    final result = await AsyncValue.guard(
+      () => _updateSalary(salaryId, salary),
+    );
+
+    if (result.hasError) {
+      state = AsyncValue.error(result.error!, result.stackTrace!);
+      return;
+    }
+
     await fetchAll();
   }
-  
 
-
-  // ── Mark as paid ──
   Future<void> markAsPaid(int salaryId, String paymentDate) async {
-    state = const AsyncValue.loading();
-    await AsyncValue.guard(() => _markPaid(salaryId, paymentDate));
+    final result = await AsyncValue.guard(
+      () => _markPaid(salaryId, paymentDate),
+    );
+
+    if (result.hasError) {
+      state = AsyncValue.error(result.error!, result.stackTrace!);
+      return;
+    }
     await fetchAll();
   }
 
-  // ── Delete ──
   Future<void> delete(int salaryId) async {
-    state = const AsyncValue.loading();
-    await AsyncValue.guard(() => _delete(salaryId));
-    await fetchAll();
+    try {
+      await _delete(salaryId);
+      await fetchAll();
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      final msg = code == 429
+          ? 'Too many requests. Please wait a moment.'
+          : e.response?.data?['detail'] ??
+                e.response?.data?['error'] ??
+                'Failed to delete.';
+      throw Exception(msg);
+    } catch (e) {
+      throw Exception('An unexpected error occurred: $e');
+    }
   }
 }

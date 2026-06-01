@@ -4,9 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:frontendmobile/features/hr/staff/data/model/staff/update_staff_request.dart';
 import 'package:frontendmobile/features/hr/staff/domain/usecases/staff_usecases.dart';
 import 'staff_repository_provider.dart';
-
 part 'staff_notifier.g.dart';
-
 @riverpod
 class StaffNotifier extends _$StaffNotifier {
   late final GetAllStaffUseCase _getAll;
@@ -27,7 +25,6 @@ class StaffNotifier extends _$StaffNotifier {
     ref.keepAlive();
     // ── wait for repository to be ready ──
     final repository = await ref.read(staffRepositoryProvider.future);
-
     // ── init use cases ──
     _getAll = GetAllStaffUseCase(repository);
     _getById = GetStaffByIdUseCase(repository);
@@ -40,7 +37,6 @@ class StaffNotifier extends _$StaffNotifier {
     _update = UpdateStaffUseCase(repository);
     _updateAvatar = UpdateStaffAvatarUseCase(repository);
     _delete = DeleteStaffUseCase(repository);
-
     // ── fetch once automatically ──
     return await _getAll();
   }
@@ -50,6 +46,8 @@ class StaffNotifier extends _$StaffNotifier {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _getAll());
   }
+
+  ////////////////////////
 
   Future<void> fetchById(int id) async {
     state = const AsyncValue.loading();
@@ -105,8 +103,6 @@ class StaffNotifier extends _$StaffNotifier {
     await AsyncValue.guard(() => _update(id, request, avatarFile: avatarFile));
     await fetchAll();
   }
-
-
 
   Future<void> updateAvatar(int id, File avatarFile) async {
     state = const AsyncValue.loading();

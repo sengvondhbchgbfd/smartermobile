@@ -5,14 +5,15 @@ import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.da
 class StaffPickerSheet extends StatefulWidget {
   final List<StaffEntity> staffList;
   const StaffPickerSheet({super.key, required this.staffList});
-
   @override
   State<StaffPickerSheet> createState() => _StaffPickerSheetState();
 }
 
+/////////////////////////////////////////////
+///
+////////////////////////////////////////////
 class _StaffPickerSheetState extends State<StaffPickerSheet> {
   String _query = '';
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -27,6 +28,10 @@ class _StaffPickerSheetState extends State<StaffPickerSheet> {
         )
         .toList();
 
+    ////////////////////////////////////////////////
+    ///
+    ///////////////////////////////////////////////
+
     return DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.6,
@@ -37,6 +42,10 @@ class _StaffPickerSheetState extends State<StaffPickerSheet> {
           SheetHand(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
+
+            ////////////////////////////////////////////////////////
+            ///
+            ///////////////////////////////////////////////////////
             child: TextField(
               autofocus: true,
               decoration: InputDecoration(
@@ -50,6 +59,10 @@ class _StaffPickerSheetState extends State<StaffPickerSheet> {
               onChanged: (v) => setState(() => _query = v),
             ),
           ),
+
+          /////////////////////////////////////////////////////////
+          ///
+          ////////////////////////////////////////////////////////
           const SizedBox(height: 8),
           Expanded(
             child: filtered.isEmpty

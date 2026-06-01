@@ -53,6 +53,10 @@ class UserInfo {
     required this.isManager,
   });
 
+
+
+
+
   factory UserInfo.fromJson(Map<String, dynamic> json) => UserInfo(
     userId: json['user_id'] ?? 0,
     companyId: json['company_id'] ?? 0,

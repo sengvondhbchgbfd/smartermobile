@@ -3,23 +3,20 @@ import 'package:frontendmobile/core/constants/ApiEndpoints.dart';
 import 'package:frontendmobile/core/errors/exceptions.dart';
 import 'package:frontendmobile/features/hr/salary_adjustments/data/datasource/adjust_salaries_remote_datasource.dart';
 import 'package:frontendmobile/features/hr/salary_adjustments/data/model/salaries_adjust_model.dart';
-import 'package:frontendmobile/features/hr/salary_adjustments/domain/entities/salary_adjustment_entity.dart';
+
 class SalaryAdjustmentRemoteDataSource
     implements ISalaryAdjustmentRemoteDataSource {
   final Dio _dio;
- 
+
   const SalaryAdjustmentRemoteDataSource(this._dio);
- 
+
   // ---------------------------------------------------------------------------
- 
   @override
   Future<List<SalaryAdjustmentModel>> getAdjustments({
     required int salaryId,
   }) async {
     try {
-      final response = await _dio.get(
-        ApiEndpoints.salaryAdjustments(salaryId),
-      );
+      final response = await _dio.get(ApiEndpoints.salaryAdjustments(salaryId));
       final data = response.data as List<dynamic>;
       return data
           .map((e) => SalaryAdjustmentModel.fromJson(e as Map<String, dynamic>))
@@ -28,9 +25,9 @@ class SalaryAdjustmentRemoteDataSource
       throw ServerEception(message: _parseError(e));
     }
   }
- 
+
   // ---------------------------------------------------------------------------
- 
+
   @override
   Future<SalaryAdjustmentModel> createAdjustment({
     required int salaryId,
@@ -40,11 +37,11 @@ class SalaryAdjustmentRemoteDataSource
   }) async {
     try {
       final response = await _dio.post(
-        ApiEndpoints.salaryAdjustments(salaryId),
+        ApiEndpoints.createAdjustment,
         data: {
-          'salary_id':       salaryId,
-          'adjustment_type': adjustmentType.name, 
-          'amount':          amount,
+          'salary_id': salaryId,
+          'adjustment_type': adjustmentType.name,
+          'amount': amount,
           if (reason != null && reason.isNotEmpty) 'reason': reason,
         },
       );
@@ -55,9 +52,9 @@ class SalaryAdjustmentRemoteDataSource
       throw ServerEception(message: _parseError(e));
     }
   }
- 
+
   // ---------------------------------------------------------------------------
- 
+
   @override
   Future<String> deleteAdjustment({required int adjustmentId}) async {
     try {
@@ -69,9 +66,9 @@ class SalaryAdjustmentRemoteDataSource
       throw ServerEception(message: _parseError(e));
     }
   }
- 
+
   // ---------------------------------------------------------------------------
- 
+
   String _parseError(DioException e) {
     final data = e.response?.data;
     if (data is Map<String, dynamic>) {
@@ -80,5 +77,5 @@ class SalaryAdjustmentRemoteDataSource
     return e.message ?? 'Unknown error';
   }
 }
- 
+
 // ── Riverpod provider ─────────────────────────────────────────────────────────

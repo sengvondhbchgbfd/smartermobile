@@ -48,10 +48,31 @@ class RouteNames {
   static const leavePending = "/leave-requests/pending";
 
   // ── Attendance ───────────────────────
+
   static const attendance = "/attendance";
+
+  /// STAFF
   static const attendanceMy = "/attendance/my";
-  static const attendanceDetail = "/attendance/:id";
-  static const attendanceStats = "/attendance/stats";
+  static const attendanceMonthlyStats = "/attendance/my/monthly-stats";
+
+  /// QR SCAN
+  static const attendanceScanAuth = "/attendance/scan/authenticate";
+
+  static const attendanceCheckIn = "/attendance/scan/check-in";
+
+  static const attendanceCheckOut = "/attendance/scan/check-out";
+
+  /// OFFICE QR
+  static const attendanceOfficeQr = "/attendance/office-qr";
+
+  static const attendanceOfficeQrImage = "/attendance/office-qr/image";
+
+  /// MANAGER
+  static const attendanceTodaySummary = "/attendance/summary/today";
+
+  static const attendanceDateRange = "/attendance/date-range";
+
+  static const attendanceDetail = "/attendance/:attendance_id";
 
   // ── Inventory ────────────────────────
   static const products = "/products";

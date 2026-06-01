@@ -6,7 +6,7 @@ class AppActionButtons extends StatelessWidget {
   final VoidCallback? onPrimary;
   final IconData? primaryIcon;
   final String? primaryTooltip;
-  // final VoidCallback? onAdjustments;
+  final VoidCallback? onAdjustments;
 
   const AppActionButtons({
     super.key,
@@ -15,13 +15,12 @@ class AppActionButtons extends StatelessWidget {
     this.onPrimary,
     this.primaryIcon,
     this.primaryTooltip,
-    // this.onAdjustments,
+    this.onAdjustments,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -46,12 +45,12 @@ class AppActionButtons extends StatelessWidget {
             icon: Icon(Icons.delete_outline, color: colors.error),
           ),
 
-        // if (onAdjustments != null)
-        //   IconButton(
-        //     tooltip: "Adjust",
-        //     onPressed: onAdjustments,
-        //     icon: const Icon(Icons.tune_outlined, size: 16),
-        //   ),
+        if (onAdjustments != null)
+          IconButton(
+            tooltip: "Adjust",
+            onPressed: onAdjustments,
+            icon: const Icon(Icons.tune_outlined, size: 16),
+          ),
       ],
     );
   }

@@ -2,12 +2,15 @@ import 'package:frontendmobile/config/routes/route_names.dart';
 import 'package:frontendmobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:frontendmobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:frontendmobile/features/auth/presentation/screens/splash_screen.dart';
+import 'package:frontendmobile/features/communication/chat/presentation/screens/chat_groups_screen.dart';
+import 'package:frontendmobile/features/communication/chat/presentation/screens/chat_screen.dart';
 import 'package:frontendmobile/features/company/presentation/screens/company_screen.dart';
 import 'package:frontendmobile/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/screens/wizard_screen.dart';
 import 'package:frontendmobile/features/home/presentation/screens/home_screen.dart';
+import 'package:frontendmobile/features/hr/attendance/presentation/screens/attendance_screen.dart';
+import 'package:frontendmobile/features/hr/leave/presentation/screens/leave_screen.dart';
 import 'package:frontendmobile/features/hr/salaries/presentation/screens/salary_screen.dart';
-import 'package:frontendmobile/features/hr/salary_adjustments/presentation/screens/salary_adjustment_screen.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_detail_screen.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_role_screen.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_screen.dart';
@@ -27,6 +30,12 @@ class AppRouter {
         path: RouteNames.splash,
         builder: (context, state) => const SplashScreen(),
       ),
+
+      GoRoute(
+        path: RouteNames.chat,
+        builder: (context, state) => const ChatGroupsScreen(),
+      ),
+
       GoRoute(
         path: RouteNames.profile,
         builder: (context, state) => const ProfileScreen(),
@@ -65,14 +74,23 @@ class AppRouter {
         path: RouteNames.dashboard,
         builder: (context, state) => const DashboardScreen(),
       ),
+
       // 🔥 COMPANY SCREEN ROUTE
+      // GoRoute(
+      //   path: "/companies/:id",
+      //   builder: (context, state) {
+      //     final id = int.parse(state.pathParameters['id']!);
+      //     return CompanyScreen(companyId: id);
+      //   },
+      // ),
       GoRoute(
-        path: "/companies/:id",
+        path: RouteNames.companyDetail,
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
           return CompanyScreen(companyId: id);
         },
       ),
+
       /////////////////////////////////////////////////////
       // ── HR Staff ──────────────────────────
       ////////////////////////////////////////////////////
@@ -114,17 +132,41 @@ class AppRouter {
       //   path: RouteNames.salaryAdjustments,
       //   builder: (context, state) => const SalaryAdjustmentsScreen(),
       // ),
-      GoRoute(
-        path: '/salaries/:id/adjustments',
-        builder: (context, state) {
-          final id = int.parse(state.pathParameters['id']!);
-          return SalaryAdjustmentsScreen(salaryId: id);
-        },
-      ),
 
       ////////////////////////////////////////////////////////
       ///
       ///////////////////////////////////////////////////////
+      GoRoute(
+        path: RouteNames.leaves, // /leave-requests → full tab screen
+        builder: (context, state) => const LeaveScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.leaveMy, // /leave-requests/my → staff tab directly
+        builder: (context, state) => const LeaveScreen(),
+      ),
+      GoRoute(
+        path: RouteNames
+            .leavePending, // /leave-requests/pending → manager tab directly
+        builder: (context, state) => const LeaveScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.leaveDetail, // /leave-requests/:id
+        builder: (context, state) => const LeaveScreen(),
+      ),
+
+      /////////////////////////////////////////////////
+      ///
+      ////////////////////////////////////////////////
+
+      /// GET /attendance
+      GoRoute(
+        path: RouteNames.attendance,
+        builder: (context, state) => const AttendanceScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.attendanceMy,
+        builder: (context, state) => const AttendanceScreen(),
+      ),
     ],
   );
 }

@@ -27,6 +27,8 @@ class GetStaffManagersUseCase {
   Future<List<StaffEntity>> call() => repository.getManagers();
 }
 
+
+
 class GetStaffByRoleUseCase {
   final StaffRepository repository;
   GetStaffByRoleUseCase(this.repository);

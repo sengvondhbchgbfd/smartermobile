@@ -1,40 +1,68 @@
 import 'package:frontendmobile/features/hr/salary_adjustments/domain/entities/salary_adjustment_entity.dart';
 
-class SalaryAdjustmentModel extends SalaryAdjustmentEntity {
-  const SalaryAdjustmentModel({
-    required super.adjustmentId,
-    required super.companyId,
-    required super.salaryId,
-    required super.adjustedBy,
-    required super.adjustmentType,
-    required super.amount,
-    super.reason,
-    required super.createdAt,
+enum AdjustmentType { bonus, deduction }
+
+class SalaryAdjustmentModel {
+  final int id;
+  final int salaryId;
+  final AdjustmentType type;
+  final double amount;
+  final String? note;
+  final int adjustedByStaffId;
+  final DateTime createdAt;
+
+  SalaryAdjustmentModel({
+    required this.id,
+    required this.salaryId,
+    required this.type,
+    required this.amount,
+    this.note,
+    required this.adjustedByStaffId,
+    required this.createdAt,
   });
 
   factory SalaryAdjustmentModel.fromJson(Map<String, dynamic> json) {
     return SalaryAdjustmentModel(
-      adjustmentId:   json['adjustment_id'] as int,
-      companyId:      json['company_id'] as int,
-      salaryId:       json['salary_id'] as int,
-      adjustedBy:     json['adjusted_by'] as int,
-      adjustmentType: json['adjustment_type'] == 'bonus'
-          ? AdjustmentType.bonus
-          : AdjustmentType.deduction,
-      amount:         (json['amount'] as num).toDouble(),
-      reason:         json['reason'] as String?,
-      createdAt:      DateTime.parse(json['created_at'] as String),
+      id: json['adjustment_id'],
+      salaryId: json['salary_id'],
+      type: AdjustmentType.values.firstWhere(
+        (e) => e.name == json['adjustment_type'],
+      ),
+      amount: double.tryParse(json['amount'].toString()) ?? 0.0,
+      note: json['reason'],
+      adjustedByStaffId: json['adjusted_by'],
+      createdAt: DateTime.parse(json['created_at']),
     );
   }
 
+  SalaryAdjustmentEntity toEntity() => SalaryAdjustmentEntity(
+    id: id,
+    salaryId: salaryId,
+    type: type.name,
+    amount: amount,
+    note: note,
+    adjustedByStaffId: adjustedByStaffId,
+    createdAt: createdAt,
+  );
+}
+
+class SalaryAdjustmentCreateDto {
+  final int salaryId;
+  final String type;
+  final double amount;
+  final String? note;
+
+  SalaryAdjustmentCreateDto({
+    required this.salaryId,
+    required this.type,
+    required this.amount,
+    this.note,
+  });
+
   Map<String, dynamic> toJson() => {
-    'adjustment_id':   adjustmentId,
-    'company_id':      companyId,
-    'salary_id':       salaryId,
-    'adjusted_by':     adjustedBy,
-    'adjustment_type': adjustmentType == AdjustmentType.bonus ? 'bonus' : 'deduction',
-    'amount':          amount,
-    'reason':          reason,
-    'created_at':      createdAt.toIso8601String(),
+    'salary_id': salaryId,
+    'adjustment_type': type,
+    'amount': amount,
+    if (note != null) 'reason': note,
   };
 }

@@ -16,9 +16,6 @@ class StaffRoleRemoteDataSourceImpl implements StaffRoleRemoteDataSource {
     return data.map((e) => StaffRoleModel.fromJson(e)).toList();
   }
 
-
-  
-
   @override
   Future<StaffRoleModel> getById(int id) async {
     final response = await dio.get(ApiEndpoints.staffRoleById(id));

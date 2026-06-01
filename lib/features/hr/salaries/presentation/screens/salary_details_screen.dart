@@ -22,10 +22,14 @@ class SalaryDetailsScreen extends ConsumerWidget {
     final manager = staffList
         .where((s) => s.id == salary.managedBy)
         .firstOrNull;
+
     //////////////////////////////////////////////////////////////////
     /// UI
     //////////////////////////////////////////////////////////////////
     return Scaffold(
+      ///////////////////////////////////////////////////////////////
+      /// AppBar
+      ///////////////////////////////////////////////////////////////
       appBar: AppBar(
         title: Text('Salary #${salary.salaryId}'),
         actions: [
@@ -41,8 +45,9 @@ class SalaryDetailsScreen extends ConsumerWidget {
               ),
             ),
           ),
+
           ///////////////////////////////////////////////////
-          ///
+          ///  deleted
           //////////////////////////////////////////////////
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -83,9 +88,28 @@ class SalaryDetailsScreen extends ConsumerWidget {
         ],
       ),
 
+      ///////////////////////////////////////////////////////
+      ///
+      ///////////////////////////////////////////////////////
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          ////////////////////////////////////////////////////
+          // ── Manager profile card ──
+          ////////////////////////////////////////////////////
+          SalarySection(
+            title: 'Managed By',
+            child: SalaryProfileTile(
+              name:
+                  manager?.staffRole?.roleName ?? 'Staff #${salary.managedBy}',
+              avatarUrl: manager?.avatarUrl,
+              role: manager?.staffRole?.roleName,
+              email: manager?.email,
+              phone: manager?.phone,
+            ),
+          ),
+
+          const SizedBox(height: 12),
           //////////////////////////////////////////////////////
           // ── Staff profile card ──
           ////////////////////////////////////////////////////
@@ -100,22 +124,6 @@ class SalaryDetailsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-
-          ////////////////////////////////////////////////////
-          // ── Manager profile card ──
-          ////////////////////////////////////////////////////
-          SalarySection(
-            title: 'Managed By',
-            child: SalaryProfileTile(
-              name: manager?.name ?? 'Staff #${salary.managedBy}',
-              avatarUrl: manager?.avatarUrl,
-              role: manager?.staffRole?.roleName,
-              email: manager?.email,
-              phone: manager?.phone,
-            ),
-          ),
-          const SizedBox(height: 12),
-
           ////////////////////////////////////////////////////
           // ── Status ──
           ////////////////////////////////////////////////////
@@ -145,6 +153,10 @@ class SalaryDetailsScreen extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
+
+                /////////////////////////////////////////////
+                /// Is paid not paid
+                /////////////////////////////////////////////
                 if (!isPaid)
                   ElevatedButton.icon(
                     icon: const Icon(Icons.payments_outlined),
@@ -163,11 +175,13 @@ class SalaryDetailsScreen extends ConsumerWidget {
                       if (context.mounted) Navigator.pop(context);
                     },
                   ),
+                ////////////////////////////////////////////
+                ///
+                ////////////////////////////////////////////
               ],
             ),
           ),
           const SizedBox(height: 12),
-
           ////////////////////////////////////////////////////
           // ── Salary breakdown ──
           ////////////////////////////////////////////////////
@@ -218,7 +232,6 @@ class SalaryDetailsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-
           ////////////////////////////////////////////////////
           // ── Meta ──
           ////////////////////////////////////////////////////

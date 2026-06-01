@@ -32,13 +32,14 @@ class ApiEndpoints {
 
   // ── Salaries ────────────────────────────
   static const String salaries = '/salaries/';
+  static const String salariesGroup = "/salaries/group/staff";
 
   static const String salariesMy = '/salaries/my';
   static const String salariesSummary = '/salaries/summary';
   static const String salariesAdjustments = '/salaries/adjustments';
 
   // ── Leave Requests ──────────────────────
-  static const String leaveRequests = '/leave-requests';
+  static const String leaveRequests = '/leave-requests/';
   static const String leaveRequestsMy = '/leave-requests/my';
   static const String leaveRequestsPending = '/leave-requests/pending';
   static const String leaveRequestsSummary = '/leave-requests/summary';
@@ -54,6 +55,9 @@ class ApiEndpoints {
   static const String attendanceDateRange = '/attendance/date-range';
   static const String attendance = '/attendance';
 
+  // ── attendance settings ─────────────────
+  static const String attendanceSettings = '/attendance-settings';
+  static const String attendanceSettingCreate = '/attendance-settings/';
   // ── Suppliers ───────────────────────────
   static const String suppliers = '/suppliers';
 
@@ -73,9 +77,43 @@ class ApiEndpoints {
 
   // ── Notifications ───────────────────────
   static const String notifications = '/notifications';
+  static const String notificationsMy = '/notifications/my';
+  static const String notificationsMySummary = '/notifications/my/summary';
+  static const String notificationsMyReadAll = '/notifications/my/read-all';
+  static const String notificationsMyBulkRead = '/notifications/my/bulk-read';
+  static const String notificationsClearRead = '/notifications/my/clear-read';
 
+  // dynamic
+  static String notificationById(int id) => '/notifications/my/$id';
+  static String notificationMarkRead(int id) => '/notifications/my/$id/read';
   // ── Chat ────────────────────────────────
-  static const String chat = '/chat';
+  static const String chatGroups = '/chat/groups';
+  static const String chatGroupsMy = '/chat/groups/my';
+  static const String chatDirect = '/chat/direct';
+
+  static String chatGroupById(int id) => '/chat/groups/$id';
+  static String chatGroupMembers(int id) => '/chat/groups/$id/members';
+  static String chatGroupMemberById(int groupId, int staffId) =>
+      '/chat/groups/$groupId/members/$staffId';
+  static String chatGroupOnline(int id) => '/chat/groups/$id/online';
+  static String chatGroupMessages(int id) => '/chat/groups/$id/messages';
+  static String chatGroupImages(int id) => '/chat/groups/$id/images';
+  static String chatGroupVideos(int id) => '/chat/groups/$id/videos';
+  static String chatGroupAudio(int id) => '/chat/groups/$id/audio';
+  static String chatGroupVoice(int id) => '/chat/groups/$id/voice';
+  static String chatGroupFiles(int id) => '/chat/groups/$id/files';
+  static String chatMessageReadAll(int id) =>
+      '/chat/groups/$id/messages/read-all';
+  static String chatMessageUnreadCount(int id) =>
+      '/chat/groups/$id/messages/unread-count';
+  static String chatMessageById(int groupId, int messageId) =>
+      '/chat/groups/$groupId/messages/$messageId';
+
+  static String chatMessageRead(int messageId) =>
+      '/chat/groups/messages/$messageId/read';
+
+  // ── WebSocket (use ws:// or wss://, not http) ────────────────────────────
+  static String chatWs(int groupId) => '/ws/chat/$groupId';
 
   // ── System Settings ─────────────────────
   static const String systemSettings = '/system-settings';
@@ -107,8 +145,11 @@ class ApiEndpoints {
   static String staffByUser(int id) => '/staff/user/$id';
 
   static String salaryById(int id) => '/salaries/$id';
+
   static String salaryMarkPaid(int id) => '/salaries/$id/mark-paid';
+
   static String salaryAdjustments(int id) => '/salaries/$id/adjustments';
+  static const createAdjustment = '/salaries/adjustments';
   static String adjustmentById(int id) => '/salaries/adjustments/$id';
 
   static String leaveById(int id) => '/leave-requests/$id';
@@ -129,5 +170,4 @@ class ApiEndpoints {
   ////////////////////////////////////////////////////////
   ///
   ////////////////////////////////////////////////////////
- 
 }

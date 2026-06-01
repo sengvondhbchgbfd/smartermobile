@@ -83,11 +83,7 @@ class SalaryScreen extends ConsumerWidget {
                     ////////////////////////////////////////
                     ///
                     ////////////////////////////////////////
-                
                     ref.read(salaryNotifierProvider.notifier).fetchAll(),
-
-
-
                 ////////////////////////////////////////
                 /// LIST INTO CART
                 ////////////////////////////////////////
@@ -106,14 +102,11 @@ class SalaryScreen extends ConsumerWidget {
                       ///
                       ////////////////////////
                       salary: salary,
-                      // onAdjustments: () => Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (_) => SalaryAdjustmentsScreen(
-                      //       salaryId: salary.salaryId!,
-                      //     ),
-                      //   ),
-                      // ),
+
+                      //////////////////////////////////////////
+                      ///
+                      /////////////////////////////////////////
+
                       /////////////////////////////////////////
                       /// EDITED
                       /////////////////////////////////////////
@@ -123,6 +116,18 @@ class SalaryScreen extends ConsumerWidget {
                           builder: (_) => SalaryDetailsScreen(salary: salary),
                         ),
                       ),
+
+                      onAdjustments: () {
+                        if (salary.salaryId == null) return;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SalaryAdjustmentScreen(
+                              salaryId: salary.salaryId!,
+                            ),
+                          ),
+                        );
+                      },
 
                       ///////////////////////////////////////////
                       /// PAID MARK
@@ -135,7 +140,6 @@ class SalaryScreen extends ConsumerWidget {
                             .read(salaryNotifierProvider.notifier)
                             .markAsPaid(salary.salaryId!, date);
                       },
-
                       ///////////////////////////////////////////
                       ///  DELETED
                       //////////////////////////////////////////
@@ -162,10 +166,30 @@ class SalaryScreen extends ConsumerWidget {
                             ],
                           ),
                         );
-                        if (confirm == true) {
-                          await ref
-                              .read(salaryNotifierProvider.notifier)
-                              .delete(salary.salaryId!);
+                        if (confirm == true && context.mounted) {
+                          try {
+                            await ref
+                                .read(salaryNotifierProvider.notifier)
+                                .delete(salary.salaryId!);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Salary deleted.'),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    e.toString().replaceAll('Exception: ', ''),
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
                         }
                       },
                       ///////////////////////////////////////////

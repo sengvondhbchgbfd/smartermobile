@@ -84,17 +84,21 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
   Future<void> _loadAuthStaff() async {
     final storage = ref.read(secureStorageProvider);
     final userInfo = await storage.getUserInfo();
-
     if (userInfo == null) {
       if (mounted) setState(() => _authStaffLoading = false);
       return;
     }
-
+    //////////////////////////////////
+    ///
+    //////////////////////////////////
     final staffAsync = ref.read(staffNotifierProvider);
     if (!staffAsync.hasValue) {
       if (mounted) setState(() => _authStaffLoading = false);
       return;
     }
+    /////////////////////////////////////
+    ///
+    ///////////////////////////////////
 
     final match = staffAsync.value!
         .where((s) => s.userId == userInfo.userId)
@@ -103,7 +107,7 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
     if (mounted) {
       setState(() {
         _authStaff = match;
-        _authUserId = userInfo.userId; // ← save userId directly
+        _authUserId = userInfo.userId;
         _authStaffLoading = false;
       });
     }
@@ -122,7 +126,7 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
   // ─────────────────────────────────────────────────────────
   // EFFECTIVE MANAGER — always the logged-in user's staff id
   // ─────────────────────────────────────────────────────────
-  // ✅ always sends user_id to backend
+  //  always sends user_id to backend
   int? get _effectiveManagerId => _authUserId;
 
   // ─────────────────────────────────────────────────────────
@@ -130,11 +134,14 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
   // ─────────────────────────────────────────────────────────
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-
     if (_selectedStaff == null) {
       _showError('Please select an employee.');
       return;
     }
+
+    // ─────────────────────────────────────────────────────────
+    // EFFECTIVE
+    // ─────────────────────────────────────────────────────────
 
     if (_effectiveManagerId == null) {
       _showError(
@@ -143,12 +150,14 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
       return;
     }
 
-    setState(() => _loading = true);
+    // ─────────────────────────────────────────────────────────
+    // SUBMIT
+    // ─────────────────────────────────────────────────────────
 
+    setState(() => _loading = true);
     final base = double.parse(_baseSalary.text);
     final bonus = double.parse(_bonus.text);
     final deductions = double.parse(_deductions.text);
-
     final salary = SalaryModel(
       salaryId: widget.existing?.salaryId,
       staffId: _selectedStaff!.id!,
@@ -162,23 +171,21 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
       paymentStatus: _paymentStatus,
       paymentDate: _paymentDate.text.isEmpty ? null : _paymentDate.text,
     );
-
     final notifier = ref.read(salaryNotifierProvider.notifier);
-
     if (widget.existing == null) {
       await notifier.create(salary);
     } else {
       await notifier.editSalary(widget.existing!.salaryId!, salary);
     }
-
+    // ─────────────────────────────────────────────────────────
     // ── Check for error after notifier call ──
+    // ─────────────────────────────────────────────────────────
     final err = ref.read(salaryNotifierProvider).error;
     if (err != null) {
       _showError(err.toString());
       setState(() => _loading = false);
       return;
     }
-
     setState(() => _loading = false);
     if (mounted) Navigator.pop(context);
   }
@@ -195,15 +202,20 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
   // ─────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    //////////////////////////////////////////////////////////
+    ///
+    /////////////////////////////////////////////////////////
     final isEdit = widget.existing != null;
     final staffAsync = ref.watch(staffNotifierProvider);
+    ///////////////////////////////////////////////////////
+    ///
+    //////////////////////////////////////////////////////
 
     return staffAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Failed to load staff: $e')),
       data: (staffList) {
         _resolveExisting(staffList);
-
         return Padding(
           padding: EdgeInsets.only(
             left: 16,
@@ -211,6 +223,10 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
             top: 16,
             bottom: MediaQuery.of(context).viewInsets.bottom + 24,
           ),
+
+          ////////////////////////////////////////////////////////////
+          ///
+          //////////////////////////////////////////////////////////
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -242,18 +258,9 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                   ),
                   const SizedBox(height: 20),
 
-                  // ── Employee ────────────────────────────
-                  const SectionLabel(label: 'Employee'),
-                  const SizedBox(height: 6),
-                  StaffDropdown(
-                    label: 'Select Employee',
-                    staffList: staffList,
-                    selected: _selectedStaff,
-                    onChanged: (s) => setState(() => _selectedStaff = s),
-                  ),
-                  const SizedBox(height: 16),
-
+                  /////////////////////////////////////////////////////////
                   // ── Managed By (locked to auth user) ────
+                  /////////////////////////////////////////////////////////
                   const SectionLabel(label: 'Managed By'),
                   const SizedBox(height: 8),
                   _authStaffLoading
@@ -271,7 +278,22 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                         ),
                   const SizedBox(height: 16),
 
+                  /////////////////////////////////////////////////////////
+                  // ── Employee ────────────────────────────
+                  /////////////////////////////////////////////////////////
+                  const SectionLabel(label: 'Employee'),
+                  const SizedBox(height: 6),
+                  StaffDropdown(
+                    label: 'Select Employee',
+                    staffList: staffList,
+                    selected: _selectedStaff,
+                    onChanged: (s) => setState(() => _selectedStaff = s),
+                  ),
+                  const SizedBox(height: 16),
+
+                  ////////////////////////////////////////////////////////
                   // ── Base Salary ─────────────────────────
+                  ////////////////////////////////////////////////////////
                   SalaryField(
                     controller: _baseSalary,
                     label: 'Base Salary',
@@ -279,7 +301,9 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
 
+                  ////////////////////////////////////////////////////////
                   // ── Bonus ───────────────────────────────
+                  ////////////////////////////////////////////////////////
                   SalaryField(
                     controller: _bonus,
                     label: 'Bonus',
@@ -287,7 +311,9 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
 
+                  ////////////////////////////////////////////////////////
                   // ── Deductions ──────────────────────────
+                  ////////////////////////////////////////////////////////
                   SalaryField(
                     controller: _deductions,
                     label: 'Deductions',
@@ -329,13 +355,16 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                     },
                   ),
 
+                  ////////////////////////////////////////////////////////
                   // ── Pay Period ──────────────────────────
+                  ////////////////////////////////////////////////////////
                   SalaryField(
                     controller: _payPeriodStart,
                     label: 'Pay Period Start',
                     type: SalaryFieldType.date,
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
+                  
                   SalaryField(
                     controller: _payPeriodEnd,
                     label: 'Pay Period End',
@@ -358,8 +387,7 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                     ],
                     onChanged: (v) => setState(() => _paymentStatus = v!),
                   ),
-                  const SizedBox(height: 12),
-
+                  const SizedBox(height: 12),                  
                   // ── Payment Date (optional) ─────────────
                   SalaryField(
                     controller: _paymentDate,

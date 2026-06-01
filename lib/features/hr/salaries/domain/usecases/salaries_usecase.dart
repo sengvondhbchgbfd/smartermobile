@@ -1,4 +1,6 @@
+import 'package:frontendmobile/features/hr/salaries/data/model/salary_staff_group_model.dart';
 import 'package:frontendmobile/features/hr/salaries/domain/entities/salaries_entity.dart';
+import 'package:frontendmobile/features/hr/salaries/domain/entities/salary_staff_group_entity.dart';
 import 'package:frontendmobile/features/hr/salaries/domain/repositories/salaries_repository.dart';
 
 class GetAllSalariesUseCase {
@@ -8,8 +10,15 @@ class GetAllSalariesUseCase {
       _repo.getAll(staffId: staffId, status: status);
 }
 
+class GetSalariesGroupCase {
+  final SalaryRepository _repo;
 
+  GetSalariesGroupCase(this._repo);
 
+  Future<List<SalaryStaffGroupEntity>> call() {
+    return _repo.getGroupedByStaff();
+  }
+}
 
 class GetSalaryByIdUseCase {
   final SalaryRepository _repo;
@@ -35,8 +44,6 @@ class UpdateSalaryUseCase {
   Future<SalaryEntity> call(int salaryId, SalaryEntity salary) =>
       _repo.update(salaryId, salary);
 }
-
-
 
 class MarkPaidUseCase {
   final SalaryRepository _repo;

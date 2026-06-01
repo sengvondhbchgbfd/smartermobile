@@ -3,16 +3,9 @@ import 'package:frontendmobile/features/company/data/models/register_response_mo
 import 'package:frontendmobile/features/company/domain/usecases/register_company_usecase.dart'; // ← add
 
 abstract class CompanyRemoteDatasource {
-  
-  // ← changed: takes params object, returns RegisterResponseModel
+  // ← changed: takes params object, returns RegisterResponseModel instead of raw Map
 
-
-  
   Future<RegisterResponseModel> registerCompany(RegisterCompanyParams params);
-
-
-
-
   Future<CompanyModel> getCompany(int companyId);
 
   Future<CompanyModel> updateCompany({
