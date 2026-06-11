@@ -135,6 +135,10 @@ class ChatBubble extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       builder: (_) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),

@@ -4,7 +4,11 @@ import 'package:frontendmobile/features/users/domain/entities/user_entity.dart';
 
 class UserPickerSheet extends StatefulWidget {
   final List<UserEntity> userList;
+<<<<<<< HEAD
   const UserPickerSheet({super.key, required this.userList});
+=======
+  const UserPickerSheet({required this.userList});
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 
   @override
   State<UserPickerSheet> createState() => _UserPickerSheetState();

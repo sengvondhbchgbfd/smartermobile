@@ -52,7 +52,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     //////////////////////////////////////////////////////////
     ref.listen<AsyncValue>(authProvider, (prev, next) {
       next.whenOrNull(
+<<<<<<< HEAD
         data: (_) => context.go('/chat'),
+=======
+        data: (_) => context.go('/dashboard'),
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
         error: (e, _) => ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         ),

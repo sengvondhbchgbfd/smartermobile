@@ -51,6 +51,14 @@ class StaffCard extends ConsumerWidget {
           ],
         ),
 
+<<<<<<< HEAD
+=======
+
+        ////////////////////////////////////////////////////////////////////////
+        /// Edited
+        ////////////////////////////////////////////////////////////////////////
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -58,12 +66,24 @@ class StaffCard extends ConsumerWidget {
               icon: const Icon(Icons.edit_outlined),
               onPressed: () => _showForm(context, ref),
             ),
+<<<<<<< HEAD
+=======
+
+            
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
             IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.red),
               onPressed: () => _confirmDelete(context, ref),
             ),
           ],
         ),
+<<<<<<< HEAD
+=======
+
+        ////////////////////////////////////////////////////////////////////////
+        /// 
+        ////////////////////////////////////////////////////////////////////////
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       ),
     );
   }
@@ -221,8 +241,11 @@ class StaffCard extends ConsumerWidget {
     ImageSource source,
   ) async {
     File? imageFile;
+<<<<<<< HEAD
 
     // Step 1: Get image from camera or gallery
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     if (source == ImageSource.camera) {
       imageFile = await Navigator.push<File>(
         context,
@@ -238,7 +261,10 @@ class StaffCard extends ConsumerWidget {
 
     if (imageFile == null) return;
 
+<<<<<<< HEAD
     // Step 2: Show preview screen — user decides Save or Cancel
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     if (!context.mounted) return;
     final confirmed = await Navigator.push<File>(
       context,
@@ -246,12 +272,19 @@ class StaffCard extends ConsumerWidget {
         fullscreenDialog: true,
         builder: (_) => ImagePreviewScreen(
           imageFile: imageFile!,
+<<<<<<< HEAD
           oldAvatarUrl: staff.avatarUrl, // ← passes old photo for swipe compare
+=======
+          oldAvatarUrl: staff.avatarUrl,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
         ),
       ),
     );
 
+<<<<<<< HEAD
     // Step 3: Only upload if user tapped Save
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     if (confirmed == null) return;
 
     await ref

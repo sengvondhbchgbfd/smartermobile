@@ -2,10 +2,27 @@ import 'package:flutter/material.dart';
 
 class Pallets {
   // Brand gradient
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   static const Color gradient1 = Color.fromRGBO(187, 63, 221, 1);
   static const Color gradient2 = Color.fromRGBO(251, 109, 169, 1);
   static const Color gradient3 = Color.fromRGBO(255, 159, 124, 1);
 
+<<<<<<< HEAD
+=======
+  static const LinearGradient brandGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      gradient1,
+      gradient2,
+      gradient3,
+    ],
+  );
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   // Backgrounds
   static const Color backgroundDark   = Color.fromRGBO(18, 18, 18, 1);
   static const Color backgroundLight  = Color(0xFFF5F5F5);
@@ -22,6 +39,10 @@ class Pallets {
   static const Color textSecondaryDark  = Color(0xFFA7A7A7);
   static const Color textSecondaryLight = Color(0xFF6B6B6B);
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   // Semantic
   static const Color error   = Colors.redAccent;
   static const Color success = Colors.green;

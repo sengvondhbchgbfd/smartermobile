@@ -35,10 +35,18 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
     final storage = ref.read(secureStorageProvider);
 
     _remote = NotificationRemoteDataSourceImpl(dio: dioClient.dio);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     _ws = NotificationWsDataSource(
       wsBaseUrl: ApiConstants.wsBaseUrl,
       getToken: storage.getAccessToken,
     );
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     _repo = NotificationRepositoryImpl(_remote);
 
     _getMyNotifications = GetMyNotificationsUseCase(_repo);
@@ -68,8 +76,23 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
       final current = state.valueOrNull;
       if (current == null) return;
       switch (event) {
+<<<<<<< HEAD
         case WsConnectedEvent():
           state = AsyncData(current.copyWith(wsConnected: true));
+=======
+        case WsConnectedEvent(:final unread, :final total):
+          state = AsyncData(
+            current.copyWith(
+              wsConnected: true,
+              summary: NotificationSummaryEntity(
+                total: total,
+                unread: unread,
+                read: total - unread,
+              ),
+            ),
+          );
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
         case WsNewNotificationEvent(:final notification):
           final updated = [notification, ...current.notifications];
           final summary = current.summary != null
@@ -331,7 +354,14 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
     if (current == null) return;
     state = AsyncData(
       current.copyWith(
+<<<<<<< HEAD
         selectedIds: current.notifications.map((n) => n.notificationId).toSet(),
+=======
+        selectedIds: current.notifications
+            .map((n) => n.notificationId)
+            .whereType<int>()
+            .toSet(),
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       ),
     );
   }

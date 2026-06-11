@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:frontendmobile/features/hr/attendance/presentation/screens/staff_attendance_screen.dart';
 import 'manager_attendance_screen.dart';
 // class AttendanceScreen extends StatefulWidget {
@@ -42,12 +43,20 @@ import 'manager_attendance_screen.dart';
 //     );
 //   }
 // }
+=======
+import 'package:frontendmobile/core/themes/app_pallets.dart';
+import 'package:frontendmobile/features/hr/attendance/presentation/screens/staff_attendance_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'manager_attendance_screen.dart';
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
   @override
   State<AttendanceScreen> createState() => _AttendanceScreenState();
 }
 
+<<<<<<< HEAD
 // Simple color palette used by this screen. Defined here to avoid an
 // undefined reference to `Pallets`.
 class Pallets {
@@ -58,6 +67,8 @@ class Pallets {
   static const Color textSecondaryDark = Color(0xFF9CA3AF);
 }
 
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 class _AttendanceScreenState extends State<AttendanceScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
@@ -66,7 +77,10 @@ class _AttendanceScreenState extends State<AttendanceScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+<<<<<<< HEAD
     _tabController.addListener(() => setState(() {}));
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   }
 
   @override
@@ -79,6 +93,7 @@ class _AttendanceScreenState extends State<AttendanceScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Pallets.backgroundDark,
+<<<<<<< HEAD
       body: SafeArea(
         child: Column(
           children: [
@@ -102,10 +117,61 @@ class _AttendanceScreenState extends State<AttendanceScreen>
                   ManagerAttendanceScreen(),
                 ],
               ),
+=======
+      appBar: AppBar(
+        backgroundColor: Pallets.backgroundDark,
+        elevation: 0,
+        centerTitle: false,
+        automaticallyImplyLeading: false,
+        leading: GestureDetector(
+          onTap: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/dashboard');
+            }
+          },
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.07),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.chevron_left_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+        ),
+        title: const Text(
+          'Attendance',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Pallets.gradient2,
+          labelColor: Pallets.gradient2,
+          unselectedLabelColor: Pallets.textSecondaryDark,
+          indicatorSize: TabBarIndicatorSize.label,
+          tabs: const [
+            Tab(
+              icon: Icon(Icons.person_outline_rounded),
+              text: 'My Attendance',
+            ),
+            Tab(
+              icon: Icon(Icons.admin_panel_settings_outlined),
+              text: 'Manager View',
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
             ),
           ],
         ),
       ),
+<<<<<<< HEAD
     );
   }
 
@@ -137,6 +203,11 @@ class _AttendanceScreenState extends State<AttendanceScreen>
             ),
           ),
         ],
+=======
+      body: TabBarView(
+        controller: _tabController,
+        children: const [StaffAttendanceScreen(), ManagerAttendanceScreen()],
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       ),
     );
   }

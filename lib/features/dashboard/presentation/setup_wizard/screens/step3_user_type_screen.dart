@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/providers/wizard_provider.dart';
+<<<<<<< HEAD
+=======
+import 'package:frontendmobile/shared/widgets/wizard_buttons.dart';
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 
 class Step3UserTypeScreen extends ConsumerStatefulWidget {
   const Step3UserTypeScreen({super.key});

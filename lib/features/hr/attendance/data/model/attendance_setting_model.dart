@@ -16,17 +16,26 @@ class AttendanceSettingsModel extends AttendanceSettingsEntity {
   });
 
   factory AttendanceSettingsModel.fromJson(Map<String, dynamic> json) {
+<<<<<<< HEAD
     double toDouble(dynamic v) {
+=======
+    double _toDouble(dynamic v) {
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       if (v == null) return 0;
       return (v is num) ? v.toDouble() : double.tryParse(v.toString()) ?? 0;
     }
 
+<<<<<<< HEAD
     int toInt(dynamic v, [int fallback = 0]) {
+=======
+    int _toInt(dynamic v, [int fallback = 0]) {
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       if (v == null) return fallback;
       return (v is num) ? v.toInt() : int.tryParse(v.toString()) ?? fallback;
     }
 
     return AttendanceSettingsModel(
+<<<<<<< HEAD
       settingId: toInt(json['setting_id']),
       companyId: toInt(json['company_id']),
 
@@ -34,6 +43,15 @@ class AttendanceSettingsModel extends AttendanceSettingsEntity {
       officeLongitude: toDouble(json['office_longitude']),
 
       allowedRadiusMeters: toInt(
+=======
+      settingId: _toInt(json['setting_id']),
+      companyId: _toInt(json['company_id']),
+
+      officeLatitude: _toDouble(json['office_latitude']),
+      officeLongitude: _toDouble(json['office_longitude']),
+
+      allowedRadiusMeters: _toInt(
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
         json['allowed_radius_meters'] ?? json['allowed_radius_metres'],
         100,
       ),
@@ -42,8 +60,13 @@ class AttendanceSettingsModel extends AttendanceSettingsEntity {
       officeCloseTime: json['office_close_time']?.toString() ?? '17:00:00',
       timezone: json['timezone']?.toString() ?? 'UTC',
 
+<<<<<<< HEAD
       lateThresholdMinutes: toInt(json['late_threshold_minutes'], 15),
       overtimeThresholdMinutes: toInt(json['overtime_threshold_minutes'], 480),
+=======
+      lateThresholdMinutes: _toInt(json['late_threshold_minutes'], 15),
+      overtimeThresholdMinutes: _toInt(json['overtime_threshold_minutes'], 480),
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 
       updatedAt: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'].toString())

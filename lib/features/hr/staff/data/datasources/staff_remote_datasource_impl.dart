@@ -18,6 +18,11 @@ class StaffRemoteDatasourceImpl implements StaffRemoteDataSource {
     return data.map((e) => StaffModel.fromJson(e)).toList();
   }
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   @override
   Future<StaffModel> getById(int id) async {
     final response = await dio.get(ApiEndpoints.staffById(id));
@@ -32,6 +37,13 @@ class StaffRemoteDatasourceImpl implements StaffRemoteDataSource {
     return StaffModel.fromJson(response.data);
   }
 
+<<<<<<< HEAD
+=======
+
+
+  
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   @override
   Future<List<StaffModel>> getManagers() async {
     final response = await dio.get(ApiEndpoints.staffManagers);
@@ -40,7 +52,10 @@ class StaffRemoteDatasourceImpl implements StaffRemoteDataSource {
     return data.map((e) => StaffModel.fromJson(e)).toList();
   }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   @override
   Future<List<StaffModel>> getByRole(int staffRoleId) async {
     final response = await dio.get(ApiEndpoints.staffByRole(staffRoleId));

@@ -35,7 +35,10 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   Future<UserModel> login(String username, String password) async {
     final model = LoginRequestModel(username: username, password: password);
     final response = await _dio.post('/auth/login', data: model.toJson());
+<<<<<<< HEAD
     print('LOGIN RESPONSE: ${response.data}');
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     return UserModel.fromJson(response.data);
   }
 
@@ -73,7 +76,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   //////////////////////////////////////////////////////////////////////
   @override
   Future<UserInfo> getUserById(int userId) async {
+<<<<<<< HEAD
     final response = await _dio.get("/auth/users/$userId");
+=======
+    final response = await _dio.get("/auth/users/${userId}");
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     return UserInfo.fromJson(response.data);
   }
   //////////////////////////////////////////////////////////////////////
@@ -82,7 +89,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
   @override
   Future<void> updateUser(int userId, Map<String, dynamic> data) async {
+<<<<<<< HEAD
     await _dio.patch("/auth/users$userId", data: data);
+=======
+    await _dio.patch("/auth/users${userId}", data: data);
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   }
 
   //////////////////////////////////////////////////////////////////////

@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+import 'package:frontendmobile/features/hr/salaries/data/model/salary_staff_group_model.dart';
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 import 'package:frontendmobile/features/hr/salaries/domain/entities/salaries_entity.dart';
 import 'package:frontendmobile/features/hr/salaries/domain/entities/salary_staff_group_entity.dart';
 import 'package:frontendmobile/features/hr/salaries/domain/repositories/salaries_repository.dart';

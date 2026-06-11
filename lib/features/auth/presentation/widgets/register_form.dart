@@ -273,7 +273,11 @@ class _DropdownField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
+<<<<<<< HEAD
       initialValue: value,
+=======
+      value: value,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),

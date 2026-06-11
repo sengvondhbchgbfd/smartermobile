@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+import 'dart:math';
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 
 import 'package:dio/dio.dart' show DioException;
 import 'package:frontendmobile/features/hr/salaries/domain/entities/salaries_entity.dart';

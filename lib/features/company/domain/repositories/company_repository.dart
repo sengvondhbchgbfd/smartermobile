@@ -32,6 +32,12 @@ abstract class CompanyRepository {
   Future<Either<Failure, String>> uploadLogo({
     required int companyId,
     required String filePath,
+<<<<<<< HEAD
     String? oldLogoPublicId,
+=======
+    bool isLogo = true,
+    String? oldLogoPublicId,
+    String? oldBannerPublicId,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   });
 }

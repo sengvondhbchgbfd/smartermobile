@@ -7,6 +7,7 @@ import 'package:frontendmobile/features/hr/staff/data/model/staff/update_staff_r
 abstract class StaffRemoteDataSource {
   Future<List<StaffModel>> getAll();
   Future<StaffModel> getById(int id);
+<<<<<<< HEAD
   Future<StaffModel> getMyProfile();
   Future<List<StaffModel>> getManagers();
   Future<List<StaffModel>> getByRole(int staffRoleId);
@@ -14,6 +15,24 @@ abstract class StaffRemoteDataSource {
   Future<StaffModel> getByUserId(int userId);
   Future<StaffModel> create(StaffModel staff);
   Future<StaffModel> update(int id, UpdateStaffRequest request, {File? avatarFile});
+=======
+
+  Future<StaffModel> getMyProfile();
+
+  Future<List<StaffModel>> getManagers();
+  Future<List<StaffModel>> getByRole(int staffRoleId);
+  Future<List<StaffModel>> getByDepartment(int departmentId);
+
+
+
+  Future<StaffModel> getByUserId(int userId);
+  Future<StaffModel> create(StaffModel staff);
+  Future<StaffModel> update(
+    int id,
+    UpdateStaffRequest request, {
+    File? avatarFile,
+  });
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   Future<StaffModel> updateAvatar(int id, File avatarFile);
   Future<void> delete(int id);
 }

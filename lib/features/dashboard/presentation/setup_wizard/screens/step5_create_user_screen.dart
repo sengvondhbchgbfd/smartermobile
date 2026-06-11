@@ -207,7 +207,11 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
+<<<<<<< HEAD
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
+=======
+      color: Theme.of(context).colorScheme.surfaceVariant,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       borderRadius: BorderRadius.circular(8),
     ),
     child: Column(

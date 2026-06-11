@@ -7,7 +7,11 @@ class CompanyModel extends CompanyEntity {
     super.companyCode,
     super.email,
     super.phone,
+<<<<<<< HEAD
     super.address,        // ✅ add
+=======
+    super.address,       
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     required super.planType,
     required super.status,
     super.timezone,
@@ -68,4 +72,13 @@ class CompanyModel extends CompanyEntity {
       'expires_at': expiresAt?.toIso8601String(),
     };
   }
+<<<<<<< HEAD
 }
+=======
+}
+
+//////////////////////////////////////////////////////////////
+///
+/////////////////////////////////////////////////////////////
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c

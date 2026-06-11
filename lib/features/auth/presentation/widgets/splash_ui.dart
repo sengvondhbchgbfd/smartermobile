@@ -246,9 +246,13 @@ class _BouncingDotsState extends State<_BouncingDots>
 
   @override
   void dispose() {
+<<<<<<< HEAD
     for (final c in _ctrls) {
       c.dispose();
     }
+=======
+    for (final c in _ctrls) c.dispose();
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     super.dispose();
   }
 

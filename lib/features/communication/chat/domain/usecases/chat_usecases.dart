@@ -80,9 +80,15 @@ class GetMessagesUseCase {
   const GetMessagesUseCase(this.repo);
   Future<List<ChatMessageEntity>> call({
     required int groupId,
+<<<<<<< HEAD
     int? beforeId = 0,
     int limit = 50,
   }) => repo.getMessages(groupId: groupId, beforeId: beforeId, limit: limit);
+=======
+    int skip = 0,
+    int limit = 50,
+  }) => repo.getMessages(groupId: groupId, skip: skip, limit: limit);
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 }
 
 class SendTextMessageUseCase {

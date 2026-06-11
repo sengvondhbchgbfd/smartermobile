@@ -103,9 +103,15 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   Future<List<ChatMessageEntity>> getMessages({
     required int groupId,
+<<<<<<< HEAD
     int? beforeId = 0,
     int limit = 50,
   }) => _remote.getMessages(groupId, beforeId, limit);
+=======
+    int skip = 0,
+    int limit = 50,
+  }) => _remote.getMessages(groupId, skip, limit);
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 
   @override
   Future<void> markMessageRead({required int messageId}) =>

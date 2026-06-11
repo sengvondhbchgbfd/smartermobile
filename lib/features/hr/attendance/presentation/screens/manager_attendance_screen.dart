@@ -395,9 +395,14 @@ class _ManagerAttendanceScreenState
                 );
           }
         } catch (e) {
+<<<<<<< HEAD
           if (mounted) {
             _showErrorSnackBar('Failed to send reminders: $e', () {});
           }
+=======
+          if (mounted)
+            _showErrorSnackBar('Failed to send reminders: $e', () {});
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
         }
       },
     );

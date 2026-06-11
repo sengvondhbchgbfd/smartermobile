@@ -76,7 +76,11 @@ class _SubmitLeaveFormState extends ConsumerState<SubmitLeaveForm> {
 
           // ── leave type ────────────────────────────────────────────────────
           DropdownButtonFormField<LeaveType>(
+<<<<<<< HEAD
             initialValue: _selectedType,
+=======
+            value: _selectedType,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
             items: LeaveType.values
                 .map(
                   (t) => DropdownMenuItem(

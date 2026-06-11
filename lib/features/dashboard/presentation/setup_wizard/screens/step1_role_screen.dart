@@ -81,7 +81,11 @@ class _Step1RoleState extends ConsumerState<Step1RoleScreen> {
                   style: TextStyle(color: Colors.white38, fontSize: 12),
                 ),
                 value:       _isManager,
+<<<<<<< HEAD
                 activeThumbColor: const Color(0xFF6366F1),
+=======
+                activeColor: const Color(0xFF6366F1),
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
                 onChanged:   (v) => setState(() => _isManager = v),
               ),
             ),

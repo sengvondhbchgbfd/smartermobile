@@ -24,7 +24,11 @@ class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
   final _emailCtrl = TextEditingController();
   final _maxUsersCtrl = TextEditingController();
 
+<<<<<<< HEAD
   final String _planType = 'free';
+=======
+  String _planType = 'free';
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   String? _selectedCurrency;
   String? _selectedTimezone;
 

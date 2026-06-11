@@ -73,7 +73,11 @@ class CustomDropdown<T> extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return DropdownButtonFormField<T>(
+<<<<<<< HEAD
       initialValue: value,
+=======
+      value: value,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       items: items,
       onChanged: onChanged,
       validator: validator,

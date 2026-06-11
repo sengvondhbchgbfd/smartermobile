@@ -374,7 +374,11 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
 
                   // ── Payment Status ──────────────────────
                   DropdownButtonFormField<String>(
+<<<<<<< HEAD
                     initialValue: _paymentStatus,
+=======
+                    value: _paymentStatus,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
                     decoration: const InputDecoration(
                       labelText: 'Payment Status',
                     ),

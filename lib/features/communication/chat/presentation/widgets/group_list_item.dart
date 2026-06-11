@@ -12,6 +12,7 @@ class GroupListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+<<<<<<< HEAD
     //////////////////////////////////////////////////////////////////////
     ///
     //////////////////////////////////////////////////////////////////////
@@ -25,14 +26,25 @@ class GroupListItem extends ConsumerWidget {
     //////////////////////////////////////////////////////////////////////
     ///
     //////////////////////////////////////////////////////////////////////
+=======
+    final unread = ref.watch(unreadCountProvider(group.groupId));
+    final chatState = ref.watch(chatProvider(group.groupId));
+    final isDirect = group.chatType == ChatType.direct;
+
+    // ✅ Get last message from already-loaded chat state
+    final lastMsg = chatState.messages.isNotEmpty ? chatState.messages.first : null;
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       leading: ChatAvatar(group: group),
+<<<<<<< HEAD
       //////////////////////////////////////////////////////////////////////
       ///
       //////////////////////////////////////////////////////////////////////
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       title: Row(
         children: [
           Expanded(
@@ -47,6 +59,7 @@ class GroupListItem extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+<<<<<<< HEAD
           if (lastMsg != null)
             Text(
               _formatTime(lastMsg.createdAt),
@@ -63,6 +76,23 @@ class GroupListItem extends ConsumerWidget {
                 ////////////////////////////////////////////////////////////
                 ///
                 ////////////////////////////////////////////////////////////
+=======
+          // ✅ Timestamp on the right
+          if (lastMsg != null)
+            Text(
+              _formatTime(lastMsg.createdAt),
+              style: const TextStyle(
+                fontSize: 11.5,
+                color: Color(0xFF6b8097),
+              ),
+            ),
+        ],
+      ),
+      subtitle: lastMsg != null
+          ? Row(
+              children: [
+                // ✅ Show read tick for sent messages
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
                 if (lastMsg.isRead)
                   const Icon(
                     Icons.done_all_rounded,
@@ -75,9 +105,12 @@ class GroupListItem extends ConsumerWidget {
                     size: 14,
                     color: Color(0xFF6b8097),
                   ),
+<<<<<<< HEAD
                 ////////////////////////////////////////////////////////////
                 ///
                 ////////////////////////////////////////////////////////////
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
@@ -90,19 +123,25 @@ class GroupListItem extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+<<<<<<< HEAD
                 ////////////////////////////////////////////////////////////
                 ///
                 ////////////////////////////////////////////////////////////
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
               ],
             )
           : const Text(
               'No messages yet',
               style: TextStyle(fontSize: 13, color: Color(0xFF8a9bb0)),
             ),
+<<<<<<< HEAD
 
       ////////////////////////////////////////////////////////////
       ///
       ////////////////////////////////////////////////////////////
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       trailing: unread.when(
         data: (count) => count > 0
             ? Container(
@@ -168,4 +207,8 @@ class GroupListItem extends ConsumerWidget {
     // Older — show date
     return '${dt.day}/${dt.month}';
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c

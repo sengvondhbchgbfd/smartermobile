@@ -11,6 +11,12 @@ class ProfileModel {
   final bool isManager;
   final List<String> permissions;
   final int? departmentId;
+<<<<<<< HEAD
+=======
+  final String? avatarUrl;
+  final String? memberSince;
+  final String? department;
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 
   ProfileModel({
     required this.userId,
@@ -23,6 +29,12 @@ class ProfileModel {
     required this.isManager,
     required this.permissions,
     this.departmentId,
+<<<<<<< HEAD
+=======
+    this.avatarUrl,
+    this.memberSince,
+    this.department,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   });
 
   factory ProfileModel.fromUserInfo(UserInfo user) {
@@ -39,7 +51,10 @@ class ProfileModel {
       departmentId: user.departmentId,
     );
   }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     return ProfileModel(
       userId: json['user_id'],
@@ -52,6 +67,12 @@ class ProfileModel {
       isManager: json['is_manager'] ?? false,
       permissions: List<String>.from(json['permissions'] ?? []),
       departmentId: json['department_id'],
+<<<<<<< HEAD
+=======
+      avatarUrl: json['avatar_url'],
+      memberSince: json['member_since'],
+      department: json['department'],
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     );
   }
 
@@ -67,4 +88,8 @@ class ProfileModel {
     'permissions': permissions,
     'department_id': departmentId,
   };
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c

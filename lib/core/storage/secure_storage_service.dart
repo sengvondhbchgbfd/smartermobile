@@ -78,6 +78,10 @@ class SecureStorageService {
       _write(ApiConstants.roleKey, user.role),
       _write(ApiConstants.statusKey, user.status),
       _write(ApiConstants.isManagerKey, user.isManager.toString()),
+<<<<<<< HEAD
+=======
+      _write(ApiConstants.departmentIdKey, user.departmentId?.toString() ?? ''),
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     ]);
   }
 
@@ -94,6 +98,10 @@ class SecureStorageService {
       _read(ApiConstants.roleKey),
       _read(ApiConstants.statusKey),
       _read(ApiConstants.isManagerKey),
+<<<<<<< HEAD
+=======
+      _read(ApiConstants.departmentIdKey),
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     ]);
 
     if (results[0] == null) return null;
@@ -108,7 +116,11 @@ class SecureStorageService {
       status: results[6] ?? '',
       isManager: results[7] == 'true',
       permissions: [],
+<<<<<<< HEAD
       departmentId: null,
+=======
+      departmentId: results[8] != null ? int.parse(results[8]!) : null,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     );
   }
 
@@ -151,6 +163,10 @@ class SecureStorageService {
       _delete(ApiConstants.roleKey),
       _delete(ApiConstants.statusKey),
       _delete(ApiConstants.isManagerKey),
+<<<<<<< HEAD
+=======
+      _delete(ApiConstants.departmentIdKey),
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     ]);
   }
 }

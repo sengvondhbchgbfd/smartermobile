@@ -35,9 +35,13 @@ dependencies:
   file_picker: ^8.1.2
   cached_network_image: ^3.3.1
 
+<<<<<<< HEAD
   fl_chart: ^0.70.0
   custom_quick_alert: ^2.1.1
 
+=======
+  
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 
 
 

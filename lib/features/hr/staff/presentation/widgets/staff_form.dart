@@ -1,10 +1,17 @@
+<<<<<<< HEAD
 import 'package:flutter/foundation.dart';
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/hr/staff/data/model/staff/update_staff_request.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_role_notifier.dart';
+<<<<<<< HEAD
+=======
+import 'package:frontendmobile/features/profile/presentation/providers/profile_providers.dart';
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
 
 class StaffForm extends ConsumerStatefulWidget {
@@ -92,6 +99,10 @@ class _StaffFormState extends ConsumerState<StaffForm> {
           staffRoleId: _selectedRoleId,
         ),
       );
+<<<<<<< HEAD
+=======
+      ref.read(profileNotifierProvider.notifier).refresh();
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     } else {
       await notifier.create(
         StaffEntity(
@@ -231,7 +242,11 @@ class _StaffFormState extends ConsumerState<StaffForm> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: DropdownButtonFormField<String>(
+<<<<<<< HEAD
         initialValue: _gender,
+=======
+        value: _gender,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
         decoration: const InputDecoration(
           labelText: 'Gender',
           border: OutlineInputBorder(),
@@ -261,17 +276,26 @@ class _StaffFormState extends ConsumerState<StaffForm> {
               style: const TextStyle(color: Colors.red),
             ),
             data: (state) => DropdownButtonFormField<int>(
+<<<<<<< HEAD
               initialValue: _selectedUserId,
+=======
+              value: _selectedUserId,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
               decoration: const InputDecoration(
                 labelText: 'Link to User Account',
                 border: OutlineInputBorder(),
               ),
               items: state.users
                   .map(
+<<<<<<< HEAD
                     (u) => DropdownMenuItem(
                       value: u.id,
                       child: Text(u.fullName ?? u.username),
                     ),
+=======
+                    (u) =>
+                        DropdownMenuItem(value: u.id, child: Text(u.fullName)),
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
                   )
                   .toList(),
               onChanged: (val) => setState(() => _selectedUserId = val),
@@ -314,7 +338,11 @@ class _StaffFormState extends ConsumerState<StaffForm> {
                     ],
                   )
                 : DropdownButtonFormField<int>(
+<<<<<<< HEAD
                     initialValue: _selectedRoleId,
+=======
+                    value: _selectedRoleId,
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
                     decoration: const InputDecoration(
                       labelText: 'Staff Role',
                       border: OutlineInputBorder(),

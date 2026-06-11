@@ -63,6 +63,7 @@ abstract class ChatRepository {
 
   Future<List<ChatMessageEntity>> getMessages({
     required int groupId,
+<<<<<<< HEAD
     int? beforeId,
     int limit = 50,
   });
@@ -76,6 +77,18 @@ abstract class ChatRepository {
   
   // ── WebSocket ───────|
 
+=======
+    int skip = 0,
+    int limit = 50,
+  });
+
+  Future<void> markMessageRead({required int messageId});
+
+  Future<void> markAllRead(int groupId);
+  Future<int> getUnreadCount(int groupId);
+  Future<void> deleteMessage({required int groupId, required int messageId});
+  // ── WebSocket ───────|
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   Stream<WsEventEntity> connectToGroup(int groupId);
   void disconnectFromGroup(int groupId);
 }

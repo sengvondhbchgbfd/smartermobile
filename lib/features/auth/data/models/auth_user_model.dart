@@ -22,19 +22,31 @@ class UserModel {
   );
 }
 
+<<<<<<< HEAD
 
 
 class UserInfo {
   final int userId;
 
 
+=======
+////////////////////////////////////////////////////////////////////////////////
+/// User Info Model
+////////////////////////////////////////////////////////////////////////////////
+
+class UserInfo {
+  final int userId;
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   final int companyId;
   final String username;
   final String fullName;
   final String role;
   final int? departmentId;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   final List<String> permissions;
   final int staffId;
   final String status;
@@ -53,10 +65,13 @@ class UserInfo {
     required this.isManager,
   });
 
+<<<<<<< HEAD
 
 
 
 
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   factory UserInfo.fromJson(Map<String, dynamic> json) => UserInfo(
     userId: json['user_id'] ?? 0,
     companyId: json['company_id'] ?? 0,
@@ -71,5 +86,9 @@ class UserInfo {
     isManager: json['is_manager'] ?? false,
   );
 
+<<<<<<< HEAD
    operator [](String other) {}
+=======
+  operator [](String other) {}
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 }

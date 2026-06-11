@@ -51,9 +51,16 @@ class UserDatasourceImpl implements UserDatasource {
 
   @override
   Future<Map<String, dynamic>> createUser(RegisterUserParams model) async {
+<<<<<<< HEAD
     final res = await dio.post('/users/', data: model);
     return res.data;
   }
+=======
+    final res = await dio.post('/users/', data: model.toJson());
+    return res.data;
+  }
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   //=============================================================
   //
   //=============================================================
@@ -82,7 +89,11 @@ class UserDatasourceImpl implements UserDatasource {
 
   @override
   Future<List<RoleEntity>> getRoles() async {
+<<<<<<< HEAD
     final res = await dio.get('/roles/'); // ✅ trailing slash
+=======
+    final res = await dio.get('/roles/');
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     final List data = res.data as List;
     return data
         .map((e) => RoleModel.fromJson(e as Map<String, dynamic>))
@@ -96,7 +107,11 @@ class UserDatasourceImpl implements UserDatasource {
 
   @override
   Future<Map<String, dynamic>> createRole(Map<String, dynamic> data) async {
+<<<<<<< HEAD
     final res = await dio.post('/roles/', data: data); // ✅ already correct
+=======
+    final res = await dio.post('/roles/', data: data);
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     return res.data;
   }
 
@@ -115,7 +130,11 @@ class UserDatasourceImpl implements UserDatasource {
 
   @override
   Future<List<DepartmentEntity>> getDepartments() async {
+<<<<<<< HEAD
     final res = await dio.get('/departments/'); // ✅ trailing slash
+=======
+    final res = await dio.get('/departments/');
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     final List data = res.data as List;
     return data
         .map((e) => DepartmentModel.fromJson(e as Map<String, dynamic>))

@@ -13,15 +13,21 @@ import 'package:frontendmobile/shared/providers/core_providers.dart';
 // ── Notifier ───────────────────────────────────────────────────────────────
 //////////////////////////////////////////////////////////////////////////////
 class CompanyNotifier extends AsyncNotifier<CompanyState> {
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   late final GetCompanyUseCase _getCompany;
   late final UpdateCompanyUseCase _updateCompany;
   late final UploadCompanyLogoUseCase _uploadLogo;
   late final RegisterCompanyUseCase _createCompany;
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   @override
   Future<CompanyState> build() async {
     final repo = await ref.watch(companyRepositoryProvider.future);
@@ -121,17 +127,36 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
   Future<bool> uploadLogo({
     required int companyId,
     required String filePath,
+<<<<<<< HEAD
     String? oldLogoPublicId,
   }) async {
     final current = state.valueOrNull ?? const CompanyState();
     state = AsyncData(current.copyWith(isUpdating: true, error: null));
+=======
+    bool isLogo = true, // ✅ flag
+    String? oldLogoPublicId,
+    String? oldBannerPublicId, // ✅ add
+  }) async {
+    final current = state.valueOrNull ?? const CompanyState();
+    state = AsyncData(current.copyWith(isUpdating: true, error: null));
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     final result = await _uploadLogo(
       UploadLogoParams(
         companyId: companyId,
         filePath: filePath,
+<<<<<<< HEAD
         oldLogoPublicId: oldLogoPublicId,
       ),
     );
+=======
+        isLogo: isLogo, // ✅ pass flag
+        oldLogoPublicId: oldLogoPublicId,
+        oldBannerPublicId: oldBannerPublicId,
+      ),
+    );
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
     bool success = false;
     result.fold(
       (failure) {

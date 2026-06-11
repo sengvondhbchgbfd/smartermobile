@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 class FilteredUsersScreen extends ConsumerWidget {
   final String type;
   final int id;
@@ -11,12 +15,31 @@ class FilteredUsersScreen extends ConsumerWidget {
     required this.id,
     required this.title,
   });
+<<<<<<< HEAD
+=======
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncState = ref.watch(userNotifierProvider);
     return asyncState.when(
+<<<<<<< HEAD
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text("Error: $e")),
+=======
+      //////////////////////////////////////////////////////////////////////////
+      /// Loading and Error
+      //////////////////////////////////////////////////////////////////////////
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text("Error: $e")),
+
+      //////////////////////////////////////////////////////////////////////////
+      /// Set Data
+      //////////////////////////////////////////////////////////////////////////
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       data: (state) {
         final filtered = state.users.where((user) {
           if (type == "role") {
@@ -25,6 +48,12 @@ class FilteredUsersScreen extends ConsumerWidget {
             return user.departmentId == id;
           }
         }).toList();
+<<<<<<< HEAD
+=======
+        ////////////////////////////////////////////////////////////////////////
+        ///
+        ////////////////////////////////////////////////////////////////////////
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
 
         return Scaffold(
           appBar: AppBar(title: Text("Users in $title")),
@@ -42,6 +71,12 @@ class FilteredUsersScreen extends ConsumerWidget {
                   },
                 ),
         );
+<<<<<<< HEAD
+=======
+        ////////////////////////////////////////////////////////////////////////
+        ///
+        ////////////////////////////////////////////////////////////////////////
+>>>>>>> 9f1638c8060e11abffb348266a42c22f5d24569c
       },
     );
   }
