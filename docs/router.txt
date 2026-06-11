@@ -1,0 +1,5 @@
+It have 3 type |=>
+------------------
+- Navigator 1.0
+- GoRouter
+- AutoRoute

@@ -1,0 +1,8 @@
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
+// import 'package:frontendmobile/features/users/presentation/provider/users_state.dart';
+
+// export 'user_notifier.dart';
+// final userProvider = AsyncNotifierProvider<UserNotifier, UserState>(
+//   UserNotifier.new,
+// );

@@ -1,0 +1,157 @@
+UseCase |=> is a single action from the domain layer. It wraps one repository call and represents one business operation.
+
+UI / Provider
+     ↓
+  UseCase          ← thin wrapper, one job only
+     ↓
+ Repository        ← abstract contract
+     ↓
+RepositoryImpl     ← actual implementation
+     ↓
+ Datasource        ← API call
+
+ ////////////normal UseCase
+ import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontendmobile/core/networks/dio_client.dart';
+import 'package:frontendmobile/core/storage/secure_storage_service.dart';
+import 'package:frontendmobile/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:frontendmobile/features/auth/data/datasources/auth_remote_datasource_impl.dart';
+import 'package:frontendmobile/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:frontendmobile/features/auth/domain/repositories/auth_repository.dart';
+
+// ── Core providers ───────────────────────────
+final secureStorageProvider = Provider<SecureStorageService>((ref) {
+  return SecureStorageService(const FlutterSecureStorage());
+});
+
+final dioClientProvider = Provider<DioClient>((ref) {
+  return DioClient(ref.read(secureStorageProvider));
+});
+
+final dioProvider = Provider<Dio>((ref) {
+  return ref.read(dioClientProvider).dio;
+});
+
+// ── Auth providers ───────────────────────────
+final authRemoteProvider = Provider<AuthRemoteDatasource>((ref) {
+  return AuthRemoteDatasourceImpl(ref.read(dioProvider));
+});
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return AuthRepositoryImpl(ref.read(authRemoteProvider));
+});
+
+// ── Register notifier ────────────────────────
+class RegisterNotifier extends StateNotifier<AsyncValue<void>> {
+  final AuthRepository _repository;
+  RegisterNotifier(this._repository) : super(const AsyncData(null));
+
+  Future<void> register({
+    required String companyName,
+    required String companyCode,
+    required String username,
+    required String password,
+    required String fullName,
+    required String timezone,
+    required String currency,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      await _repository.register(
+        companyName: companyName,
+        companyCode: companyCode,
+        username: username,
+        password: password,
+        fullName: fullName,
+        timezone: timezone,
+        currency: currency,
+      );
+      state = const AsyncData(null);
+    } on DioException catch (e) {
+      state = AsyncError(
+        e.response?.data['detail'] ?? 'Register failed',
+        StackTrace.current,
+      );
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+    }
+  }
+}
+
+final registerProvider =
+    StateNotifierProvider<RegisterNotifier, AsyncValue<void>>(
+      (ref) => RegisterNotifier(ref.read(authRepositoryProvider)),
+    );
+
+// ── Login notifier ───────────────────────────
+
+class AuthNotifier extends StateNotifier<AsyncValue<void>> {
+  final AuthRepository _repository;
+  final SecureStorageService _storage;
+
+  AuthNotifier(this._repository, this._storage) : super(const AsyncData(null));
+
+  //------------------------------------------------
+  //logout
+
+  Future<void> login(String username, String password) async {
+    state = const AsyncLoading();
+    try {
+      final user = await _repository.login(username, password);
+
+      // ✅ save access token only — no refresh token from API
+      await _storage.saveTokens(accessToken: user.accessToken);
+
+      // ✅ save user info separately
+      await _storage.saveUserInfo(
+        userId: user.user.userId.toString(),
+        companyId: user.user.companyId.toString(),
+      );
+
+      state = const AsyncData(null);
+    } on DioException catch (e) {
+      state = AsyncError(
+        e.response?.data['detail'] ?? 'Login failed',
+        StackTrace.current,
+      );
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+    }
+  }
+
+
+  // --------------------------------------
+  // ✅ logout
+  Future<void> logout() async {
+    state = const AsyncLoading();
+    try {
+      await _repository.logout(); // call backend
+      await _storage.clearAll(); // clear all tokens
+      state = const AsyncData(null);
+    } on DioException catch (e) {
+      state = AsyncError(
+        e.response?.data['detail'] ?? 'Logout failed',
+        StackTrace.current,
+      );
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+    }
+  }
+}
+
+final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<void>>(
+  (ref) => AuthNotifier(
+    ref.read(authRepositoryProvider),
+    ref.read(secureStorageProvider),
+  ),
+);
+
+//////////////////////
+
+Without UseCase:
+UI → AuthNotifier → AuthRepository → Datasource → API
+
+With UseCase:
+UI → AuthNotifier → LoginUseCase → AuthRepository → Datasource → API

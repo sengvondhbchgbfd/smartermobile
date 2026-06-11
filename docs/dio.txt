@@ -1,0 +1,37 @@
+1. |==> DioClient
+This file is the central HTTP networking configuration using the Dio package
++ |==> Meaning
+It acts as a custom API client wrapper around Dio, so all API calls in your app go through one configured place.
++ |==> Why it exists
+Without DioClient, every repository would duplicate:
+headers
+token logic
+error handling
+👉 This file centralizes everything.
+
+====================================================
+
+2. secure_storage_service.dart
+This file handles secure local storage using flutter_secure_storage
++ |==> Meaning
+It is a wrapper service for storing sensitive data safely on device
+
++ ==> What it stores
+Usually:
+Access token
+Refresh token
+User credentials (if needed)
+Session data
+
+Example |=>
+await storage.write(key: 'token', value: token);
+final token = await storage.read(key: 'token');
+await storage.delete(key: 'token');
+await storage.deleteAll();
+
++ |==>  Why it exists
+You should NOT directly use flutter_secure_storage everywhere.
+Instead:
+Centralized access
+Easier testing
+Easier replacement (if storage changes later)

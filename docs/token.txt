@@ -1,0 +1,7 @@
+final token = await storage.getAccessToken();
+
+if (token == null) {
+  context.go(RouteNames.login);
+} else {
+  context.go(RouteNames.home);
+}
