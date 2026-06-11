@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:frontendmobile/core/errors/failures.dart';
+import 'package:frontendmobile/features/users/domain/entities/user_entity.dart';
 import 'package:frontendmobile/features/users/domain/repositories/users_repository.dart';
 
 class UpdateUsersParams {
@@ -19,22 +20,20 @@ class UpdateUsersParams {
     required this.status,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      "username": username,
-      "full_name": fullName,
-      "role_id": roleId,
-      "department_id": departmentId,
-      "status": status,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    "username": username,
+    "full_name": fullName,
+    "role_id": roleId,
+    "department_id": departmentId,
+    "status": status,
+  };
 }
 
 class UpdateUsersUsecase {
   final UserRepository repo;
   UpdateUsersUsecase(this.repo);
 
-  Future<Either<Failure, void>> call(UpdateUsersParams params) async {
+  Future<Either<Failure, UserEntity>> call(UpdateUsersParams params) async {
     return await repo.updateUser(params);
   }
 }

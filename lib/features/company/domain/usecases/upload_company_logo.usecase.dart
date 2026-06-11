@@ -5,12 +5,16 @@ import 'package:frontendmobile/features/company/domain/repositories/company_repo
 class UploadLogoParams {
   final int companyId;
   final String filePath;
-  final String? oldLogoPublicId; 
+  final bool isLogo;
+  final String? oldLogoPublicId;
+  final String? oldBannerPublicId;
 
   const UploadLogoParams({
     required this.companyId,
     required this.filePath,
-    this.oldLogoPublicId, 
+    this.isLogo = true,
+    this.oldLogoPublicId,
+    this.oldBannerPublicId,
   });
 }
 
@@ -22,7 +26,9 @@ class UploadCompanyLogoUseCase {
     return repository.uploadLogo(
       companyId: params.companyId,
       filePath: params.filePath,
-      oldLogoPublicId: params.oldLogoPublicId, 
+      isLogo: params.isLogo, // ✅
+      oldLogoPublicId: params.oldLogoPublicId,
+      oldBannerPublicId: params.oldBannerPublicId, // ✅
     );
   }
 }

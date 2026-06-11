@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frontendmobile/core/constants/ApiEndpoints.dart';
 import '../models/notification_model.dart';
-
 abstract class NotificationRemoteDataSource {
   Future<List<NotificationModel>> getMyNotifications({bool unreadOnly = false});
   Future<NotificationSummaryModel> getSummary();

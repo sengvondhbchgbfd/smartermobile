@@ -13,15 +13,10 @@ import 'package:frontendmobile/shared/providers/core_providers.dart';
 // ── Notifier ───────────────────────────────────────────────────────────────
 //////////////////////////////////////////////////////////////////////////////
 class CompanyNotifier extends AsyncNotifier<CompanyState> {
-
-
   late final GetCompanyUseCase _getCompany;
   late final UpdateCompanyUseCase _updateCompany;
   late final UploadCompanyLogoUseCase _uploadLogo;
   late final RegisterCompanyUseCase _createCompany;
-
-
-
   @override
   Future<CompanyState> build() async {
     final repo = await ref.watch(companyRepositoryProvider.future);
@@ -121,17 +116,23 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
   Future<bool> uploadLogo({
     required int companyId,
     required String filePath,
+    bool isLogo = true, // ✅ flag
     String? oldLogoPublicId,
+    String? oldBannerPublicId, // ✅ add
   }) async {
     final current = state.valueOrNull ?? const CompanyState();
     state = AsyncData(current.copyWith(isUpdating: true, error: null));
+
     final result = await _uploadLogo(
       UploadLogoParams(
         companyId: companyId,
         filePath: filePath,
+        isLogo: isLogo, // ✅ pass flag
         oldLogoPublicId: oldLogoPublicId,
+        oldBannerPublicId: oldBannerPublicId,
       ),
     );
+
     bool success = false;
     result.fold(
       (failure) {

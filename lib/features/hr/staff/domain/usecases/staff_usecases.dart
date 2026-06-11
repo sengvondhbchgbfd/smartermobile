@@ -21,6 +21,8 @@ class GetMyStaffProfileUseCase {
   Future<StaffEntity> call() => repository.getMyProfile();
 }
 
+
+
 class GetStaffManagersUseCase {
   final StaffRepository repository;
   GetStaffManagersUseCase(this.repository);

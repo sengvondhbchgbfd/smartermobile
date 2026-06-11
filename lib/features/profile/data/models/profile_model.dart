@@ -11,6 +11,9 @@ class ProfileModel {
   final bool isManager;
   final List<String> permissions;
   final int? departmentId;
+  final String? avatarUrl;
+  final String? memberSince;
+  final String? department;
 
   ProfileModel({
     required this.userId,
@@ -23,6 +26,9 @@ class ProfileModel {
     required this.isManager,
     required this.permissions,
     this.departmentId,
+    this.avatarUrl,
+    this.memberSince,
+    this.department,
   });
 
   factory ProfileModel.fromUserInfo(UserInfo user) {
@@ -39,7 +45,6 @@ class ProfileModel {
       departmentId: user.departmentId,
     );
   }
-
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     return ProfileModel(
       userId: json['user_id'],
@@ -52,6 +57,9 @@ class ProfileModel {
       isManager: json['is_manager'] ?? false,
       permissions: List<String>.from(json['permissions'] ?? []),
       departmentId: json['department_id'],
+      avatarUrl: json['avatar_url'],
+      memberSince: json['member_since'],
+      department: json['department'],
     );
   }
 

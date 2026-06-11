@@ -22,18 +22,17 @@ class UserModel {
   );
 }
 
-
+////////////////////////////////////////////////////////////////////////////////
+/// User Info Model
+////////////////////////////////////////////////////////////////////////////////
 
 class UserInfo {
   final int userId;
-
-
   final int companyId;
   final String username;
   final String fullName;
   final String role;
   final int? departmentId;
-
 
   final List<String> permissions;
   final int staffId;
@@ -53,10 +52,6 @@ class UserInfo {
     required this.isManager,
   });
 
-
-
-
-
   factory UserInfo.fromJson(Map<String, dynamic> json) => UserInfo(
     userId: json['user_id'] ?? 0,
     companyId: json['company_id'] ?? 0,
@@ -71,5 +66,5 @@ class UserInfo {
     isManager: json['is_manager'] ?? false,
   );
 
-   operator [](String other) {}
+  operator [](String other) {}
 }

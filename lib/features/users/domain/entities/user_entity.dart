@@ -1,5 +1,7 @@
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
 
+const _undefined = Object();
+
 class UserEntity {
   final int id;
   final int? companyId;
@@ -30,7 +32,7 @@ class UserEntity {
     this.avatarPublicId,
     this.createdAt,
     this.updatedAt,
-    this.staff, // ✅ add this
+    this.staff,
   });
 
   UserEntity copyWith({
@@ -38,32 +40,48 @@ class UserEntity {
     int? companyId,
     String? username,
     String? fullName,
-    int? roleId,
-    int? departmentId,
-    String? roleName,
-    String? departmentName,
+    int? roleId,                              // ← non-nullable, safe
+    Object? departmentId = _undefined,
+    Object? roleName = _undefined,
+    Object? departmentName = _undefined,
     String? status,
-    String? avatarUrl,
-    String? avatarPublicId,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    StaffEntity? staff,
+    Object? avatarUrl = _undefined,
+    Object? avatarPublicId = _undefined,
+    Object? createdAt = _undefined,
+    Object? updatedAt = _undefined,
+    Object? staff = _undefined,
   }) {
     return UserEntity(
       id: id ?? this.id,
       companyId: companyId ?? this.companyId,
       username: username ?? this.username,
       fullName: fullName ?? this.fullName,
-      roleId: roleId ?? this.roleId,
-      departmentId: departmentId ?? this.departmentId,
-      roleName: roleName ?? this.roleName,
-      departmentName: departmentName ?? this.departmentName,
+      roleId: roleId ?? this.roleId,          // ← safe, never null
+      departmentId: departmentId == _undefined
+          ? this.departmentId
+          : departmentId as int?,
+      roleName: roleName == _undefined
+          ? this.roleName
+          : roleName as String?,
+      departmentName: departmentName == _undefined
+          ? this.departmentName
+          : departmentName as String?,
       status: status ?? this.status,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      avatarPublicId: avatarPublicId ?? this.avatarPublicId,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      staff: staff ?? this.staff, // ✅ preserved
+      avatarUrl: avatarUrl == _undefined
+          ? this.avatarUrl
+          : avatarUrl as String?,
+      avatarPublicId: avatarPublicId == _undefined
+          ? this.avatarPublicId
+          : avatarPublicId as String?,
+      createdAt: createdAt == _undefined
+          ? this.createdAt
+          : createdAt as DateTime?,
+      updatedAt: updatedAt == _undefined
+          ? this.updatedAt
+          : updatedAt as DateTime?,
+      staff: staff == _undefined
+          ? this.staff
+          : staff as StaffEntity?,
     );
   }
 }

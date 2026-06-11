@@ -9,6 +9,12 @@ class ProfileEntity {
   final bool isManager;
   final List<String> permissions;
   final int? departmentId;
+  /////////////////////////////////
+  // staffProfile
+  ////////////////////////////////
+  final String? avatarUrl;
+  final String? memberSince;
+  final String? department;
 
   ProfileEntity({
     required this.userId,
@@ -21,5 +27,8 @@ class ProfileEntity {
     required this.isManager,
     required this.permissions,
     this.departmentId,
+    this.avatarUrl,
+    this.memberSince,
+    this.department,
   });
 }

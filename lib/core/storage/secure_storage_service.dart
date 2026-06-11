@@ -78,6 +78,7 @@ class SecureStorageService {
       _write(ApiConstants.roleKey, user.role),
       _write(ApiConstants.statusKey, user.status),
       _write(ApiConstants.isManagerKey, user.isManager.toString()),
+      _write(ApiConstants.departmentIdKey, user.departmentId?.toString() ?? ''),
     ]);
   }
 
@@ -94,6 +95,7 @@ class SecureStorageService {
       _read(ApiConstants.roleKey),
       _read(ApiConstants.statusKey),
       _read(ApiConstants.isManagerKey),
+      _read(ApiConstants.departmentIdKey),
     ]);
 
     if (results[0] == null) return null;
@@ -108,7 +110,7 @@ class SecureStorageService {
       status: results[6] ?? '',
       isManager: results[7] == 'true',
       permissions: [],
-      departmentId: null,
+      departmentId: results[8] != null ? int.parse(results[8]!) : null,
     );
   }
 
@@ -151,6 +153,7 @@ class SecureStorageService {
       _delete(ApiConstants.roleKey),
       _delete(ApiConstants.statusKey),
       _delete(ApiConstants.isManagerKey),
+      _delete(ApiConstants.departmentIdKey),
     ]);
   }
 }

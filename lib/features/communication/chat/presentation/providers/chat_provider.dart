@@ -36,8 +36,6 @@ final getMyGroupsUCProvider = Provider<GetMyGroupsUseCase>((ref) {
   return GetMyGroupsUseCase(repository);
 });
 
-////////////////////////////////////////////////////////////////////////////////
-
 final getGroupUCProvider = Provider<GetGroupUseCase>((ref) {
   final repository = ref.watch(chatRepositoryProvider).requireValue;
   return GetGroupUseCase(repository);
@@ -147,6 +145,25 @@ final disconnectChatUCProvider = Provider<DisconnectFromChatUseCase>((ref) {
 // Group list Provider
 // ─────────────────────────────────────────────────────────────────────────────
 
+// class GroupListNotifier
+//     extends StateNotifier<AsyncValue<List<ChatGroupEntity>>> {
+//   final GetMyGroupsUseCase _getMyGroups;
+
+//   GroupListNotifier(this._getMyGroups) : super(const AsyncLoading()) {
+//     load();
+//   }
+
+//   Future<void> load() async {
+//     state = const AsyncLoading();
+//     try {
+//       final groups = await _getMyGroups();
+//       state = AsyncData(groups);
+//     } catch (e, st) {
+//       state = AsyncError(e, st);
+//     }
+//   }
+// }
+
 final groupListProvider = FutureProvider<List<ChatGroupEntity>>((ref) async {
   final uc = ref.watch(getMyGroupsUCProvider);
   return uc();
@@ -175,8 +192,6 @@ final currentUserIdProvider = FutureProvider<int>((ref) async {
 class ChatNotifier extends StateNotifier<ChatState> {
   final int groupId;
   final int currentStaffId;
-  final int currentUserId;
-  final Set<int> _pendingLocalIds = {};
 
   final GetMessagesUseCase _getMessages;
   final SendTextMessageUseCase _sendText;
@@ -198,7 +213,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
   ChatNotifier({
     required this.groupId,
     required this.currentStaffId,
-    required this.currentUserId,
     required GetMessagesUseCase getMessages,
     required SendTextMessageUseCase sendText,
     required SendImageUseCase sendImage,
@@ -245,35 +259,24 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   Future<void> loadMessages({bool refresh = false}) async {
     if (state.loadingMessages) return;
-    if (!refresh && !state.hasMore) return; // ← was missing this guard
-
-    state = state.copyWith(
-      loadingMessages: true,
-      clearError: true,
-      // reset cursor on refresh
-      clearOldestId: refresh,
-    );
-
+    final skip = refresh ? 0 : state.messages.length;
+    state = state.copyWith(loadingMessages: true, clearError: true);
     try {
       final fetched = await _getMessages(
         groupId: groupId,
-        beforeId: refresh ? null : state.oldestMessageId,
+        skip: skip,
         limit: 50,
       );
 
+      // API returns oldest→newest, reverse so index 0 = newest
       final ordered = fetched.reversed.toList();
+      // refresh: replace all | paginate: append older at end
       final all = refresh ? ordered : [...state.messages, ...ordered];
 
       state = state.copyWith(
         messages: all,
         loadingMessages: false,
         hasMore: fetched.length == 50,
-        // last item after reversing = oldest = next cursor
-        oldestMessageId: fetched.isNotEmpty
-            ? fetched
-                  .last
-                  .messageId // fetched is DESC from API, last = oldest
-            : state.oldestMessageId,
       );
     } catch (e) {
       state = state.copyWith(loadingMessages: false, error: e.toString());
@@ -306,16 +309,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     switch (event.eventType) {
       case WsEventType.newMessage:
         final msg = ChatMessageModel.fromWsPayload(event.payload);
-        if (msg.senderId == currentUserId && _pendingLocalIds.isNotEmpty) {
-          final localId = _pendingLocalIds.first; // ← localId defined here
-          _pendingLocalIds.remove(localId);
-          state = state.copyWith(
-            messages: state.messages
-                .map((m) => m.messageId == localId ? msg : m)
-                .toList(),
-          );
-          break;
-        }
+        // ✅ Check by messageId only — no loose matching
         if (!state.messages.any((m) => m.messageId == msg.messageId)) {
           state = state.copyWith(messages: [msg, ...state.messages]);
         }
@@ -409,18 +403,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   Future<void> sendText(String content, {int? replyToId}) async {
     if (content.trim().isEmpty) return;
-    final localId =
-        DateTime.now().millisecondsSinceEpoch; // ← rename to localId
-
-    _pendingLocalIds.add(localId);
-
-    _pendingLocalIds.add(localId); // ← add here
-
+    final localMessageId = DateTime.now().millisecondsSinceEpoch;
     final optimisticMessage = ChatMessageModel(
-      messageId: localId, // ← use localId
+      messageId: localMessageId,
       groupId: groupId,
       companyId: 0,
-      senderId: currentUserId, // ← fixed from previous step
+      senderId: currentStaffId,
       senderName: 'Me',
       messageType: MessageType.text,
       content: content,
@@ -429,20 +417,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
       isRead: false,
       createdAt: DateTime.now(),
     );
-
     state = state.copyWith(
       messages: [optimisticMessage, ...state.messages],
       sendingMessage: true,
       clearError: true,
     );
-
     try {
       await _sendText(groupId: groupId, content: content, replyToId: replyToId);
       state = state.copyWith(sendingMessage: false);
     } catch (e) {
-      _pendingLocalIds.remove(localId); // ← clean up on failure
       state = state.copyWith(
-        messages: state.messages.where((m) => m.messageId != localId).toList(),
+        messages: state.messages
+            .where((m) => m.messageId != localMessageId)
+            .toList(),
         sendingMessage: false,
         error: e.toString(),
       );
@@ -562,7 +549,6 @@ final chatProvider = StateNotifierProvider.family<ChatNotifier, ChatState, int>(
     return ChatNotifier(
       groupId: groupId,
       currentStaffId: ref.watch(currentStaffIdProvider).requireValue,
-      currentUserId: ref.watch(currentUserIdProvider).requireValue,
       getMessages: ref.watch(getMessagesUCProvider),
       sendText: ref.watch(sendTextUCProvider),
       sendImage: ref.watch(sendImageUCProvider),

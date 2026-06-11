@@ -51,6 +51,11 @@ class StaffCard extends ConsumerWidget {
           ],
         ),
 
+
+        ////////////////////////////////////////////////////////////////////////
+        /// Edited
+        ////////////////////////////////////////////////////////////////////////
+
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -58,12 +63,18 @@ class StaffCard extends ConsumerWidget {
               icon: const Icon(Icons.edit_outlined),
               onPressed: () => _showForm(context, ref),
             ),
+
+            
             IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.red),
               onPressed: () => _confirmDelete(context, ref),
             ),
           ],
         ),
+
+        ////////////////////////////////////////////////////////////////////////
+        /// 
+        ////////////////////////////////////////////////////////////////////////
       ),
     );
   }
@@ -221,8 +232,6 @@ class StaffCard extends ConsumerWidget {
     ImageSource source,
   ) async {
     File? imageFile;
-
-    // Step 1: Get image from camera or gallery
     if (source == ImageSource.camera) {
       imageFile = await Navigator.push<File>(
         context,
@@ -238,7 +247,6 @@ class StaffCard extends ConsumerWidget {
 
     if (imageFile == null) return;
 
-    // Step 2: Show preview screen — user decides Save or Cancel
     if (!context.mounted) return;
     final confirmed = await Navigator.push<File>(
       context,
@@ -246,12 +254,11 @@ class StaffCard extends ConsumerWidget {
         fullscreenDialog: true,
         builder: (_) => ImagePreviewScreen(
           imageFile: imageFile!,
-          oldAvatarUrl: staff.avatarUrl, // ← passes old photo for swipe compare
+          oldAvatarUrl: staff.avatarUrl,
         ),
       ),
     );
 
-    // Step 3: Only upload if user tapped Save
     if (confirmed == null) return;
 
     await ref

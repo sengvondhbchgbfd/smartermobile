@@ -16,6 +16,8 @@ abstract class CompanyRemoteDatasource {
   Future<String> uploadLogo({
     required int companyId,
     required String filePath,
+    bool isLogo = true,
     String? oldLogoPublicId,
+    String? oldBannerPublicId,
   });
 }

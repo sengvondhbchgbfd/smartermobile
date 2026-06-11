@@ -18,16 +18,17 @@ class ApiEndpoints {
   // ── Departments ─────────────────────────
   static const String departments = '/departments';
   // ── Users ───────────────────────────────
+
   static const String usersV1 = '/users';
 
   // ── Staff Roles ─────────────────────────
   static const String staffRoles = '/staff-roles/';
 
   // ── Staff ───────────────────────────────
-
   static const String staff = '/staff/';
 
   static const String staffMy = '/staff/my';
+
   static const String staffManagers = '/staff/managers';
 
   // ── Salaries ────────────────────────────

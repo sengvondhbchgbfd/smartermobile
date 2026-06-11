@@ -12,27 +12,17 @@ class GroupListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    //////////////////////////////////////////////////////////////////////
-    ///
-    //////////////////////////////////////////////////////////////////////
     final unread = ref.watch(unreadCountProvider(group.groupId));
     final chatState = ref.watch(chatProvider(group.groupId));
     final isDirect = group.chatType == ChatType.direct;
-    final lastMsg = chatState.messages.isNotEmpty
-        ? chatState.messages.first
-        : null;
 
-    //////////////////////////////////////////////////////////////////////
-    ///
-    //////////////////////////////////////////////////////////////////////
+    // ✅ Get last message from already-loaded chat state
+    final lastMsg = chatState.messages.isNotEmpty ? chatState.messages.first : null;
 
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       leading: ChatAvatar(group: group),
-      //////////////////////////////////////////////////////////////////////
-      ///
-      //////////////////////////////////////////////////////////////////////
       title: Row(
         children: [
           Expanded(
@@ -47,22 +37,21 @@ class GroupListItem extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          // ✅ Timestamp on the right
           if (lastMsg != null)
             Text(
               _formatTime(lastMsg.createdAt),
-              style: const TextStyle(fontSize: 11.5, color: Color(0xFF6b8097)),
+              style: const TextStyle(
+                fontSize: 11.5,
+                color: Color(0xFF6b8097),
+              ),
             ),
         ],
       ),
-      //////////////////////////////////////////////////////////////////////
-      ///
-      //////////////////////////////////////////////////////////////////////
       subtitle: lastMsg != null
           ? Row(
               children: [
-                ////////////////////////////////////////////////////////////
-                ///
-                ////////////////////////////////////////////////////////////
+                // ✅ Show read tick for sent messages
                 if (lastMsg.isRead)
                   const Icon(
                     Icons.done_all_rounded,
@@ -75,9 +64,6 @@ class GroupListItem extends ConsumerWidget {
                     size: 14,
                     color: Color(0xFF6b8097),
                   ),
-                ////////////////////////////////////////////////////////////
-                ///
-                ////////////////////////////////////////////////////////////
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
@@ -90,19 +76,12 @@ class GroupListItem extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                ////////////////////////////////////////////////////////////
-                ///
-                ////////////////////////////////////////////////////////////
               ],
             )
           : const Text(
               'No messages yet',
               style: TextStyle(fontSize: 13, color: Color(0xFF8a9bb0)),
             ),
-
-      ////////////////////////////////////////////////////////////
-      ///
-      ////////////////////////////////////////////////////////////
       trailing: unread.when(
         data: (count) => count > 0
             ? Container(

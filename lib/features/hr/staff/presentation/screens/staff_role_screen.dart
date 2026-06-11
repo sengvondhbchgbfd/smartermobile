@@ -13,7 +13,6 @@ class StaffRoleScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(staffRoleNotifierProvider.notifier);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Staff Roles'),

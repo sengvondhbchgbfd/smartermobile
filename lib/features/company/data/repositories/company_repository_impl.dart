@@ -85,13 +85,17 @@ class CompanyRepositoryImpl implements CompanyRepository {
   Future<Either<Failure, String>> uploadLogo({
     required int companyId,
     required String filePath,
+    bool isLogo = true,
     String? oldLogoPublicId,
+    String? oldBannerPublicId,
   }) async {
     try {
       final url = await remoteDatasource.uploadLogo(
         companyId: companyId,
         filePath: filePath,
+        isLogo: isLogo,
         oldLogoPublicId: oldLogoPublicId,
+        oldBannerPublicId: oldBannerPublicId,
       );
       return Right(url);
     } on ServerEception catch (e) {

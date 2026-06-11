@@ -63,7 +63,6 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       await _datasource.register(model);
     } on DioException catch (e) {
-      print('REPOSITORY CAUGHT DIOEXCEPTION');
       throw ApiErrorHandler.getMessage(e);
     }
   }

@@ -14,7 +14,6 @@ class StaffScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(staffNotifierProvider.notifier);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Staff'),

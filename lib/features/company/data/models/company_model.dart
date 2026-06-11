@@ -7,7 +7,7 @@ class CompanyModel extends CompanyEntity {
     super.companyCode,
     super.email,
     super.phone,
-    super.address,        // ✅ add
+    super.address,       
     required super.planType,
     required super.status,
     super.timezone,
@@ -69,3 +69,8 @@ class CompanyModel extends CompanyEntity {
     };
   }
 }
+
+//////////////////////////////////////////////////////////////
+///
+/////////////////////////////////////////////////////////////
+

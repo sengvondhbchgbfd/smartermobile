@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
+
 class FilteredUsersScreen extends ConsumerWidget {
   final String type;
   final int id;
@@ -11,12 +12,23 @@ class FilteredUsersScreen extends ConsumerWidget {
     required this.id,
     required this.title,
   });
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncState = ref.watch(userNotifierProvider);
     return asyncState.when(
+      //////////////////////////////////////////////////////////////////////////
+      /// Loading and Error
+      //////////////////////////////////////////////////////////////////////////
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text("Error: $e")),
+
+      //////////////////////////////////////////////////////////////////////////
+      /// Set Data
+      //////////////////////////////////////////////////////////////////////////
       data: (state) {
         final filtered = state.users.where((user) {
           if (type == "role") {
@@ -25,6 +37,9 @@ class FilteredUsersScreen extends ConsumerWidget {
             return user.departmentId == id;
           }
         }).toList();
+        ////////////////////////////////////////////////////////////////////////
+        ///
+        ////////////////////////////////////////////////////////////////////////
 
         return Scaffold(
           appBar: AppBar(title: Text("Users in $title")),
@@ -42,6 +57,9 @@ class FilteredUsersScreen extends ConsumerWidget {
                   },
                 ),
         );
+        ////////////////////////////////////////////////////////////////////////
+        ///
+        ////////////////////////////////////////////////////////////////////////
       },
     );
   }

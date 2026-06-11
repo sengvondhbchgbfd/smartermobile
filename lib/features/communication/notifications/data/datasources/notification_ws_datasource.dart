@@ -73,9 +73,20 @@ class NotificationWsDataSource {
       return;
     }
 
-    final uri = Uri.parse('$_wsBaseUrl/ws/notifications?token=$token');
+    final uri = Uri.parse('$_wsBaseUrl/api/v1/ws/notifications?token=$token');
+    print('🔌 WS URI: $uri');
     _channel = WebSocketChannel.connect(uri);
-
+    // ✅ force handshake
+    try {
+      await _channel!.ready;
+      print('✅ WS handshake success');
+    } catch (e) {
+      print('❌ WS handshake failed: $e');
+      _channel = null;
+      _controller.add(WsErrorEvent(e.toString()));
+      _scheduleReconnect();
+      return;
+    }
     _sub = _channel!.stream.listen(
       _onMessage,
       onError: (e) {
@@ -84,6 +95,7 @@ class NotificationWsDataSource {
       },
       onDone: _scheduleReconnect,
     );
+
     ///////////////////////////////////////////////////////////////////////////////
     // Send ping every 30 s to keep the connection alive
     ///////////////////////////////////////////////////////////////////////////////
@@ -105,27 +117,14 @@ class NotificationWsDataSource {
       if (event == 'connected') {
         _controller.add(
           WsConnectedEvent(
-            userId: map['user_id'] as int,
-            unread: map['unread'] as int,
-            total: map['total'] as int,
+            userId: map['user_id'] as int? ?? 0,
+            unread: map['unread'] as int? ?? 0,
+            total: map['total'] as int? ?? 0,
           ),
         );
       } else if (event == 'new_notification') {
         _controller.add(
-          WsNewNotificationEvent(
-            NotificationModel.fromJson({
-              'notification_id': map['notification_id'],
-              'user_id': map['user_id'],
-              'company_id': map['company_id'] ?? 0,
-              'title': map['title'],
-              'message': map['message'],
-              'type': map['type'],
-              'is_read': map['is_read'],
-              'reference_id': map['reference_id'],
-              'reference_type': map['reference_type'],
-              'created_at': map['created_at'],
-            }),
-          ),
+          WsNewNotificationEvent(NotificationModel.fromJson(map)),
         );
       } else if (type == 'pong') {
         _controller.add(WsPongEvent());

@@ -35,7 +35,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   Future<UserModel> login(String username, String password) async {
     final model = LoginRequestModel(username: username, password: password);
     final response = await _dio.post('/auth/login', data: model.toJson());
-    print('LOGIN RESPONSE: ${response.data}');
     return UserModel.fromJson(response.data);
   }
 

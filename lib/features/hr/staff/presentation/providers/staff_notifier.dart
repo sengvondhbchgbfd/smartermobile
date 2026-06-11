@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
+import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:frontendmobile/features/hr/staff/data/model/staff/update_staff_request.dart';
 import 'package:frontendmobile/features/hr/staff/domain/usecases/staff_usecases.dart';
 import 'staff_repository_provider.dart';
 part 'staff_notifier.g.dart';
+
 @riverpod
 class StaffNotifier extends _$StaffNotifier {
   late final GetAllStaffUseCase _getAll;
@@ -21,11 +23,8 @@ class StaffNotifier extends _$StaffNotifier {
 
   @override
   Future<List<StaffEntity>> build() async {
-    // ← keep provider alive so it's not destroyed when leaving the screen
     ref.keepAlive();
-    // ── wait for repository to be ready ──
     final repository = await ref.read(staffRepositoryProvider.future);
-    // ── init use cases ──
     _getAll = GetAllStaffUseCase(repository);
     _getById = GetStaffByIdUseCase(repository);
     _getMyProfile = GetMyStaffProfileUseCase(repository);
@@ -37,17 +36,13 @@ class StaffNotifier extends _$StaffNotifier {
     _update = UpdateStaffUseCase(repository);
     _updateAvatar = UpdateStaffAvatarUseCase(repository);
     _delete = DeleteStaffUseCase(repository);
-    // ── fetch once automatically ──
     return await _getAll();
   }
 
-  // ── Manual refresh ──
   Future<void> fetchAll() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _getAll());
   }
-
-  ////////////////////////
 
   Future<void> fetchById(int id) async {
     state = const AsyncValue.loading();
@@ -88,31 +83,55 @@ class StaffNotifier extends _$StaffNotifier {
     });
   }
 
+  // ── CREATE ──
   Future<void> create(StaffEntity staff) async {
-    state = const AsyncValue.loading();
-    await AsyncValue.guard(() => _create(staff));
-    await fetchAll();
+    final created = await _create(staff);
+    final current = state.valueOrNull ?? [];
+    state = AsyncData([...current, created]);
+    if (created.userId != null) {
+      ref.read(userNotifierProvider.notifier).patchStaff(created);
+    }
   }
 
+  // ── UPDATE ──
   Future<void> updates(
     int id,
     UpdateStaffRequest request, {
     File? avatarFile,
   }) async {
-    state = const AsyncValue.loading();
-    await AsyncValue.guard(() => _update(id, request, avatarFile: avatarFile));
-    await fetchAll();
+    final updated = await _update(id, request, avatarFile: avatarFile);
+    final current = state.valueOrNull ?? [];
+    state = AsyncData(
+      current.map((s) => s.id == id ? updated : s).toList(),
+    );
+    if (updated.userId != null) {
+      ref.read(userNotifierProvider.notifier).patchStaff(updated);
+    }
   }
 
+  // ── UPDATE AVATAR ──
   Future<void> updateAvatar(int id, File avatarFile) async {
-    state = const AsyncValue.loading();
-    await AsyncValue.guard(() => _updateAvatar(id, avatarFile));
-    await fetchAll();
+    final updated = await _updateAvatar(id, avatarFile);
+    final current = state.valueOrNull ?? [];
+    state = AsyncData(
+      current.map((s) => s.id == id ? updated : s).toList(),
+    );
+    if (updated.userId != null) {
+      ref.read(userNotifierProvider.notifier).patchStaff(updated);
+    }
   }
 
+  // ── DELETE ──
   Future<void> delete(int id) async {
-    state = const AsyncValue.loading();
-    await AsyncValue.guard(() => _delete(id));
-    await fetchAll();
+    final current = state.valueOrNull ?? [];
+    final target = current.firstWhere(
+      (s) => s.id == id,
+      orElse: () => throw Exception('Staff not found'),
+    );
+    await _delete(id);
+    state = AsyncData(current.where((s) => s.id != id).toList());
+    if (target.userId != null) {
+      ref.read(userNotifierProvider.notifier).removeStaff(target.userId!);
+    }
   }
 }

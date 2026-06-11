@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/hr/staff/data/model/staff/update_staff_request.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_role_notifier.dart';
+import 'package:frontendmobile/features/profile/presentation/providers/profile_providers.dart';
 import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
 
 class StaffForm extends ConsumerStatefulWidget {
@@ -92,6 +92,7 @@ class _StaffFormState extends ConsumerState<StaffForm> {
           staffRoleId: _selectedRoleId,
         ),
       );
+      ref.read(profileNotifierProvider.notifier).refresh();
     } else {
       await notifier.create(
         StaffEntity(
@@ -268,10 +269,8 @@ class _StaffFormState extends ConsumerState<StaffForm> {
               ),
               items: state.users
                   .map(
-                    (u) => DropdownMenuItem(
-                      value: u.id,
-                      child: Text(u.fullName ?? u.username),
-                    ),
+                    (u) =>
+                        DropdownMenuItem(value: u.id, child: Text(u.fullName)),
                   )
                   .toList(),
               onChanged: (val) => setState(() => _selectedUserId = val),
