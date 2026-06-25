@@ -1,5 +1,4 @@
 import '../../domain/entities/system_setting_entity.dart';
-
 class SystemSettingModel extends SystemSettingEntity {
   const SystemSettingModel({
     required super.settingId,
@@ -13,13 +12,17 @@ class SystemSettingModel extends SystemSettingEntity {
 
   factory SystemSettingModel.fromJson(Map<String, dynamic> json) {
     return SystemSettingModel(
-      settingId: json['setting_id'] as int,
-      companyId: json['company_id'] as int,
-      key: json['key'] as String,
+      settingId: json['setting_id'] as int? ?? 0,
+      companyId: json['company_id'] as int? ?? 0,
+      key: json['key'] as String? ?? '',
       value: json['value'] as String?,
       description: json['description'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : DateTime.now(),
     );
   }
 

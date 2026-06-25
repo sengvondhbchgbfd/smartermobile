@@ -6,12 +6,12 @@ part of 'profile_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$profileLocalHash() => r'e0e0d8daea3537bc795edfedcdf1155ef2f55ac1';
+String _$profileLocalHash() => r'561d3abd97fbacd5cfaa59000b3004cac9b3934b';
 
 /// See also [profileLocal].
 @ProviderFor(profileLocal)
 final profileLocalProvider =
-    AutoDisposeFutureProvider<ProfileLocalDatasourceImpl>.internal(
+    AutoDisposeFutureProvider<ProfileLocalDatasource>.internal(
       profileLocal,
       name: r'profileLocalProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -23,14 +23,13 @@ final profileLocalProvider =
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef ProfileLocalRef =
-    AutoDisposeFutureProviderRef<ProfileLocalDatasourceImpl>;
-String _$profileRepositoryHash() => r'44d48d7be9298419dd6f306cd15d3efb2ded133f';
+typedef ProfileLocalRef = AutoDisposeFutureProviderRef<ProfileLocalDatasource>;
+String _$profileRepositoryHash() => r'7212ba34d7dc530abf1e6b689a370cb55747d3f8';
 
 /// See also [profileRepository].
 @ProviderFor(profileRepository)
 final profileRepositoryProvider =
-    AutoDisposeFutureProvider<ProfileRepositoryImpl>.internal(
+    AutoDisposeFutureProvider<ProfileRepository>.internal(
       profileRepository,
       name: r'profileRepositoryProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -42,8 +41,7 @@ final profileRepositoryProvider =
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef ProfileRepositoryRef =
-    AutoDisposeFutureProviderRef<ProfileRepositoryImpl>;
+typedef ProfileRepositoryRef = AutoDisposeFutureProviderRef<ProfileRepository>;
 String _$getProfileUseCaseHash() => r'2ed926614150ae43de37db7fa1491f43052b4aa8';
 
 /// See also [getProfileUseCase].
@@ -62,7 +60,7 @@ final getProfileUseCaseProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef GetProfileUseCaseRef = AutoDisposeFutureProviderRef<GetProfileUseCase>;
-String _$profileNotifierHash() => r'9097c327cec9f424cec165b5da7d56d9c32d811b';
+String _$profileNotifierHash() => r'ef9de76d19bca439b1eea526b6ade36089716aae';
 
 /// See also [ProfileNotifier].
 @ProviderFor(ProfileNotifier)

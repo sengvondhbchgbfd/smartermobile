@@ -11,8 +11,6 @@ class CompanyRepositoryImpl implements CompanyRepository {
   final CompanyRemoteDatasource remoteDatasource;
   CompanyRepositoryImpl(this.remoteDatasource);
 
-
-  
   // ── Register Company ──────────────────────────────────────────────────
   @override
   Future<Either<Failure, RegisterResponseEntity>> registerCompany(
@@ -21,15 +19,12 @@ class CompanyRepositoryImpl implements CompanyRepository {
     try {
       final result = await remoteDatasource.registerCompany(params);
       return Right(result);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
   }
-
-
-  
 
   // ── Get Company ───────────────────────────────────────────────────────
   @override
@@ -37,14 +32,12 @@ class CompanyRepositoryImpl implements CompanyRepository {
     try {
       final result = await remoteDatasource.getCompany(companyId);
       return Right(result);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
   }
-
-
 
   // ── Update Company ────────────────────────────────────────────────────
   @override
@@ -53,8 +46,8 @@ class CompanyRepositoryImpl implements CompanyRepository {
     String? companyName,
     String? email,
     String? phone,
-    String? address, 
-    int? max_users, 
+    String? address,
+    int? max_users,
     String? timezone,
     String? currency,
   }) async {
@@ -64,7 +57,7 @@ class CompanyRepositoryImpl implements CompanyRepository {
       if (email != null) data['email'] = email;
       if (phone != null) data['phone'] = phone;
       if (address != null) data['address'] = address;
-      if (max_users != null) data['max_users'] = max_users; 
+      if (max_users != null) data['max_users'] = max_users;
       if (timezone != null) data['timezone'] = timezone;
       if (currency != null) data['currency'] = currency;
 
@@ -73,7 +66,7 @@ class CompanyRepositoryImpl implements CompanyRepository {
         data: data,
       );
       return Right(result);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
@@ -98,7 +91,7 @@ class CompanyRepositoryImpl implements CompanyRepository {
         oldBannerPublicId: oldBannerPublicId,
       );
       return Right(url);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));

@@ -2,7 +2,7 @@ class ApiConstants {
   static const String baseUrl = String.fromEnvironment(
     "BASE_URL",
     // defaultValue: "http://localhost:8000 //192.168.217.130 ||  192.168.171.130 | 192.168.51.130 | 192.168.51.130 | 192.168.91.130 | 192.168.244.130',
-    defaultValue: "http://192.168.117.130:8000",
+    defaultValue: "http://192.168.63.130:8000",
   );
 
   static const String apiVersion = '/api/v1';

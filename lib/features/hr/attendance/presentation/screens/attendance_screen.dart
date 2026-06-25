@@ -28,10 +28,23 @@ class _AttendanceScreenState extends State<AttendanceScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final iconBg = isDark
+        ? Colors.white.withOpacity(0.07)
+        : Colors.black.withOpacity(0.07);
+    final iconColor = isDark ? Colors.white : Pallets.textPrimaryLight;
+
     return Scaffold(
-      backgroundColor: Pallets.backgroundDark,
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: Pallets.backgroundDark,
+        backgroundColor: bgColor,
         elevation: 0,
         centerTitle: false,
         automaticallyImplyLeading: false,
@@ -45,21 +58,14 @@ class _AttendanceScreenState extends State<AttendanceScreen>
           },
           child: Container(
             margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.07),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.chevron_left_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
+            decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+            child: Icon(Icons.chevron_left_rounded, color: iconColor, size: 22),
           ),
         ),
-        title: const Text(
+        title: Text(
           'Attendance',
           style: TextStyle(
-            color: Colors.white,
+            color: textPrimary,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -68,7 +74,7 @@ class _AttendanceScreenState extends State<AttendanceScreen>
           controller: _tabController,
           indicatorColor: Pallets.gradient2,
           labelColor: Pallets.gradient2,
-          unselectedLabelColor: Pallets.textSecondaryDark,
+          unselectedLabelColor: textSecondary,
           indicatorSize: TabBarIndicatorSize.label,
           tabs: const [
             Tab(

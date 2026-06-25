@@ -7,7 +7,6 @@ import '../repositories/system_setting_repository.dart';
 class GetAllSettingsUseCase {
   final SystemSettingRepository _repo;
   const GetAllSettingsUseCase(this._repo);
-
   Future<List<SystemSettingEntity>> call() => _repo.getAll();
 }
 

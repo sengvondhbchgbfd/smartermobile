@@ -1,110 +1,84 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontendmobile/core/network/dio_client.dart';
-
+import 'package:frontendmobile/config/di/dependency_injection.dart';
+import 'package:frontendmobile/core/errors/exceptions.dart';
+import 'package:frontendmobile/features/settings/presentation/providers/settings_state.dart';
 import '../../data/datasources/system_setting_remote_datasource.dart';
 import '../../data/repositories/system_setting_repository_impl.dart';
-import '../../domain/entities/system_setting_entity.dart';
 import '../../domain/repositories/system_setting_repository.dart';
 import '../../domain/usecase/system_setting_usecase.dart';
 
-final dioClientProvider = Provider<DioClient>((ref) => throw UnimplementedError(
-  'Register dioClientProvider in your ProviderScope overrides.',
-));
+// ---------------------------------------------------------------------------
+// Data / Repo / UseCase providers
+// ---------------------------------------------------------------------------
 
 final systemSettingDataSourceProvider =
-    Provider<SystemSettingRemoteDataSource>((ref) {
-  return SystemSettingRemoteDataSourceImpl(ref.read(dioClientProvider));
+    FutureProvider<SystemSettingRemoteDataSource>((ref) async {
+      final dioClient = await ref.watch(dioClientProvider.future);
+      return SystemSettingRemoteDataSourceImpl(dioClient);
+    });
+
+final systemSettingRepositoryProvider = FutureProvider<SystemSettingRepository>(
+  (ref) async {
+    final ds = await ref.watch(systemSettingDataSourceProvider.future);
+    return SystemSettingRepositoryImpl(ds);
+  },
+);
+
+final getAllSettingsUseCaseProvider = FutureProvider((ref) async {
+  final repo = await ref.watch(systemSettingRepositoryProvider.future);
+  return GetAllSettingsUseCase(repo);
 });
 
-final systemSettingRepositoryProvider = Provider<SystemSettingRepository>((ref) {
-  return SystemSettingRepositoryImpl(ref.read(systemSettingDataSourceProvider));
+final getSettingByIdUseCaseProvider = FutureProvider((ref) async {
+  final repo = await ref.watch(systemSettingRepositoryProvider.future);
+  return GetSettingByIdUseCase(repo);
 });
 
-// ---------------------------------------------------------------------------
-// Usecase providers
-// ---------------------------------------------------------------------------
+final createSettingUseCaseProvider = FutureProvider((ref) async {
+  final repo = await ref.watch(systemSettingRepositoryProvider.future);
+  return CreateSettingUseCase(repo);
+});
 
-final getAllSettingsUseCaseProvider =
-    Provider((ref) => GetAllSettingsUseCase(ref.read(systemSettingRepositoryProvider)));
+final updateSettingUseCaseProvider = FutureProvider((ref) async {
+  final repo = await ref.watch(systemSettingRepositoryProvider.future);
+  return UpdateSettingUseCase(repo);
+});
 
-final getSettingByIdUseCaseProvider =
-    Provider((ref) => GetSettingByIdUseCase(ref.read(systemSettingRepositoryProvider)));
+final upsertSettingByKeyUseCaseProvider = FutureProvider((ref) async {
+  final repo = await ref.watch(systemSettingRepositoryProvider.future);
+  return UpsertSettingByKeyUseCase(repo);
+});
 
-final createSettingUseCaseProvider =
-    Provider((ref) => CreateSettingUseCase(ref.read(systemSettingRepositoryProvider)));
+final bulkUpsertSettingsUseCaseProvider = FutureProvider((ref) async {
+  final repo = await ref.watch(systemSettingRepositoryProvider.future);
+  return BulkUpsertSettingsUseCase(repo);
+});
 
-final updateSettingUseCaseProvider =
-    Provider((ref) => UpdateSettingUseCase(ref.read(systemSettingRepositoryProvider)));
-
-final upsertSettingByKeyUseCaseProvider =
-    Provider((ref) => UpsertSettingByKeyUseCase(ref.read(systemSettingRepositoryProvider)));
-
-final bulkUpsertSettingsUseCaseProvider =
-    Provider((ref) => BulkUpsertSettingsUseCase(ref.read(systemSettingRepositoryProvider)));
-
-final deleteSettingUseCaseProvider =
-    Provider((ref) => DeleteSettingUseCase(ref.read(systemSettingRepositoryProvider)));
-
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
-
-class SettingsState {
-  final List<SystemSettingEntity> settings;
-  final bool    isLoading;
-  final String? error;
-
-  const SettingsState({
-    this.settings  = const [],
-    this.isLoading = false,
-    this.error,
-  });
-
-  SettingsState copyWith({
-    List<SystemSettingEntity>? settings,
-    bool?   isLoading,
-    String? error,
-  }) =>
-      SettingsState(
-        settings:  settings  ?? this.settings,
-        isLoading: isLoading ?? this.isLoading,
-        error:     error,
-      );
-}
+final deleteSettingUseCaseProvider = FutureProvider((ref) async {
+  final repo = await ref.watch(systemSettingRepositoryProvider.future);
+  return DeleteSettingUseCase(repo);
+});
 
 // ---------------------------------------------------------------------------
 // Notifier
 // ---------------------------------------------------------------------------
 
 class SettingsNotifier extends StateNotifier<SettingsState> {
-  final GetAllSettingsUseCase     _getAll;
-  final CreateSettingUseCase      _create;
-  final UpdateSettingUseCase      _update;
-  final UpsertSettingByKeyUseCase _upsertByKey;
-  final BulkUpsertSettingsUseCase _bulkUpsert;
-  final DeleteSettingUseCase      _delete;
+  final Ref _ref;
+  SystemSettingRepository? _cachedRepo;
 
-  SettingsNotifier({
-    required GetAllSettingsUseCase     getAll,
-    required CreateSettingUseCase      create,
-    required UpdateSettingUseCase      update,
-    required UpsertSettingByKeyUseCase upsertByKey,
-    required BulkUpsertSettingsUseCase bulkUpsert,
-    required DeleteSettingUseCase      delete,
-  })  : _getAll      = getAll,
-        _create      = create,
-        _update      = update,
-        _upsertByKey = upsertByKey,
-        _bulkUpsert  = bulkUpsert,
-        _delete      = delete,
-        super(const SettingsState());
+  SettingsNotifier(this._ref) : super(const SettingsState());
 
-  // ── Load ──────────────────────────────────────────────────────────────────
+  Future<SystemSettingRepository> get _repo async {
+    _cachedRepo ??= await _ref.read(systemSettingRepositoryProvider.future);
+    return _cachedRepo!;
+  }
 
   Future<void> loadAll() async {
     state = state.copyWith(isLoading: true);
     try {
-      final result = await _getAll();
+      final repo = await _repo;
+      final result = await GetAllSettingsUseCase(repo)();
       state = state.copyWith(settings: result, isLoading: false);
     } on ApiException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
@@ -113,15 +87,18 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     }
   }
 
-  // ── Create ────────────────────────────────────────────────────────────────
-
   Future<bool> create({
     required String key,
     required String value,
     String? description,
   }) async {
     try {
-      final created = await _create(key: key, value: value, description: description);
+      final repo = await _repo;
+      final created = await CreateSettingUseCase(repo)(
+        key: key,
+        value: value,
+        description: description,
+      );
       state = state.copyWith(settings: [...state.settings, created]);
       return true;
     } on ApiException catch (e) {
@@ -130,16 +107,17 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     }
   }
 
-  // ── Update ────────────────────────────────────────────────────────────────
-
   Future<bool> update({
-    required int    settingId,
+    required int settingId,
     required String value,
-    String?         description,
+    String? description,
   }) async {
     try {
-      final updated = await _update(
-        settingId: settingId, value: value, description: description,
+      final repo = await _repo;
+      final updated = await UpdateSettingUseCase(repo)(
+        settingId: settingId,
+        value: value,
+        description: description,
       );
       state = state.copyWith(
         settings: state.settings
@@ -153,20 +131,19 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     }
   }
 
-  // ── Upsert by key ─────────────────────────────────────────────────────────
-
-  Future<bool> upsertByKey({
-    required String key,
-    required String value,
-  }) async {
+  Future<bool> upsertByKey({required String key, required String value}) async {
     try {
-      final result = await _upsertByKey(key: key, value: value);
+      final repo = await _repo;
+      final result = await UpsertSettingByKeyUseCase(repo)(
+        key: key,
+        value: value,
+      );
       final exists = state.settings.any((s) => s.settingId == result.settingId);
       state = state.copyWith(
         settings: exists
             ? state.settings
-                .map((s) => s.settingId == result.settingId ? result : s)
-                .toList()
+                  .map((s) => s.settingId == result.settingId ? result : s)
+                  .toList()
             : [...state.settings, result],
       );
       return true;
@@ -176,12 +153,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     }
   }
 
-  // ── Bulk upsert ───────────────────────────────────────────────────────────
-
   Future<bool> bulkUpsert(List<({String key, String value})> items) async {
     try {
-      final results = await _bulkUpsert(items);
-      final map     = {for (final r in results) r.settingId: r};
+      final repo = await _repo;
+      final results = await BulkUpsertSettingsUseCase(repo)(items);
+      final map = {for (final r in results) r.settingId: r};
       final updated = state.settings.map((s) => map[s.settingId] ?? s).toList();
       final newOnes = results.where(
         (r) => !state.settings.any((s) => s.settingId == r.settingId),
@@ -194,11 +170,10 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     }
   }
 
-  // ── Delete ────────────────────────────────────────────────────────────────
-
   Future<bool> delete(int settingId) async {
     try {
-      await _delete(settingId);
+      final repo = await _repo;
+      await DeleteSettingUseCase(repo)(settingId);
       state = state.copyWith(
         settings: state.settings
             .where((s) => s.settingId != settingId)
@@ -215,17 +190,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 }
 
 // ---------------------------------------------------------------------------
-// Provider
+// Provider — simple, no Noop classes, no loading constructor
 // ---------------------------------------------------------------------------
 
-final settingsProvider =
-    StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
-  return SettingsNotifier(
-    getAll:      ref.read(getAllSettingsUseCaseProvider),
-    create:      ref.read(createSettingUseCaseProvider),
-    update:      ref.read(updateSettingUseCaseProvider),
-    upsertByKey: ref.read(upsertSettingByKeyUseCaseProvider),
-    bulkUpsert:  ref.read(bulkUpsertSettingsUseCaseProvider),
-    delete:      ref.read(deleteSettingUseCaseProvider),
-  );
-});
+final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>(
+  (ref) {
+    return SettingsNotifier(ref);
+  },
+);

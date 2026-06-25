@@ -22,7 +22,7 @@ class SalaryAdjustmentRemoteDataSource
           .map((e) => SalaryAdjustmentModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw ServerEception(message: _parseError(e));
+      throw ServerException(message: _parseError(e));
     }
   }
 
@@ -49,7 +49,7 @@ class SalaryAdjustmentRemoteDataSource
         response.data as Map<String, dynamic>,
       );
     } on DioException catch (e) {
-      throw ServerEception(message: _parseError(e));
+      throw ServerException(message: _parseError(e));
     }
   }
 
@@ -63,7 +63,7 @@ class SalaryAdjustmentRemoteDataSource
       );
       return (response.data as Map<String, dynamic>)['message'] as String;
     } on DioException catch (e) {
-      throw ServerEception(message: _parseError(e));
+      throw ServerException(message: _parseError(e));
     }
   }
 

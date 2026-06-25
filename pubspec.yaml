@@ -34,6 +34,9 @@ dependencies:
   web_socket_channel: ^3.0.1
   file_picker: ^8.1.2
   cached_network_image: ^3.3.1
+  # ----------------------------------------
+  shimmer: ^3.0.0
+  decimal: ^2.3.3
 
   
 
@@ -75,6 +78,7 @@ dependencies:
 
   # ── Functional Error Handling ─────────────────
   dartz: ^0.10.1
+  collection: ^1.19.1
 
 dev_dependencies:
   flutter_test:

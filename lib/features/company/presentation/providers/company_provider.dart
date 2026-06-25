@@ -20,7 +20,6 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
   @override
   Future<CompanyState> build() async {
     final repo = await ref.watch(companyRepositoryProvider.future);
-
     _getCompany = GetCompanyUseCase(repo);
     _updateCompany = UpdateCompanyUseCase(repo);
     _uploadLogo = UploadCompanyLogoUseCase(repo);
@@ -77,12 +76,14 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
   ////////////////////////////////////////////////////////////////////////////
 
   Future<void> fetchCompany(int companyId) async {
-    await future;
+    final current = state.valueOrNull ?? const CompanyState();
+    state = AsyncData(current.copyWith(isUpdating: true));
 
-    state = const AsyncLoading();
     final result = await _getCompany(companyId);
     state = result.fold(
-      (failure) => AsyncError(failure.message, StackTrace.current),
+      (failure) => AsyncData(
+        current.copyWith(isUpdating: false, error: failure.message),
+      ),
       (company) => AsyncData(CompanyState(company: company)),
     );
   }

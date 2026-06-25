@@ -11,7 +11,6 @@ abstract class LeaveRemoteDataSource {
   });
   Future<List<LeaveModel>> getMyLeaves({int skip = 0, int limit = 50});
   Future<LeaveModel> cancelLeave(int leaveId);
-
   // ── Manager ────────────────────────────────────────────────────────────────
   Future<List<LeaveModel>> getAllLeaves({
     int skip = 0,
@@ -19,6 +18,7 @@ abstract class LeaveRemoteDataSource {
     LeaveStatus? status,
     LeaveType? leaveType,
   });
+  // ── Manager ────────────────────────────────────────────────────────────────
   Future<List<LeaveModel>> getPendingLeaves({int skip = 0, int limit = 50});
   Future<Map<String, dynamic>> getLeaveSummary();
   Future<LeaveModel> getLeaveById(int leaveId);

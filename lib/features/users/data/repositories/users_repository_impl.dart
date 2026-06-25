@@ -27,7 +27,7 @@ class UsersRepositoryImpl implements UserRepository {
     try {
       final result = await datasource.getUsers(skip, limit);
       return Right(result);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
@@ -43,7 +43,7 @@ class UsersRepositoryImpl implements UserRepository {
       final result = await datasource.getUserById(id);
       final user = UserModel.fromJson(result);
       return Right(user);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
@@ -62,7 +62,7 @@ class UsersRepositoryImpl implements UserRepository {
       final response = await datasource.createUser(params);
       final user = UserModel.fromJson(response);
       return Right(user);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
@@ -84,7 +84,7 @@ class UsersRepositoryImpl implements UserRepository {
       );
       final user = UserModel.fromJson(response);
       return Right(user);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
@@ -100,7 +100,7 @@ class UsersRepositoryImpl implements UserRepository {
     try {
       await datasource.deleteUser(userId);
       return const Right(null);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
@@ -116,7 +116,7 @@ class UsersRepositoryImpl implements UserRepository {
     try {
       final result = await datasource.getRoles();
       return Right(result);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     }
   }
@@ -145,7 +145,7 @@ class UsersRepositoryImpl implements UserRepository {
     try {
       final result = await datasource.getDepartments();
       return Right(result);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     }
   }

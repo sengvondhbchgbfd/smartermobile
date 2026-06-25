@@ -5,21 +5,14 @@ import 'attendance_providers.dart';
 import 'attendance_state.dart';
 
 part 'attendance_notifier.g.dart';
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Staff Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 @riverpod
 class StaffAttendance extends _$StaffAttendance {
-  bool _initialized = false;
-  bool get isLoaded => _initialized;
-
+  // Fix #2: removed broken _initialized guard — build() is pure
   @override
   Future<StaffAttendanceState> build() async {
-    if (_initialized) {
-      return state.value ?? const StaffAttendanceState();
-    }
-    _initialized = true;
     return const StaffAttendanceState();
   }
 
@@ -73,13 +66,9 @@ class StaffAttendance extends _$StaffAttendance {
 // ─────────────────────────────────────────────────────────────────────────────
 @riverpod
 class ScanAttendance extends _$ScanAttendance {
+  // Fix #3: removed ref.watch() for use cases — resolved lazily per method
   @override
   Future<ScanAttendanceState> build() async {
-    await ref.watch(scanAuthenticateUseCaseProvider.future);
-    await ref.watch(checkInUseCaseProvider.future);
-    await ref.watch(checkOutUseCaseProvider.future);
-    await ref.watch(getOfficeQrUseCaseProvider.future);
-    await ref.watch(downloadOfficeQrImageUseCaseProvider.future);
     return const ScanAttendanceState();
   }
 
@@ -94,10 +83,8 @@ class ScanAttendance extends _$ScanAttendance {
       final s = state.value ?? const ScanAttendanceState();
       final data = e.response?.data;
       Map<String, dynamic>? detail;
-      if (data is Map<String, dynamic>) {
-        if (data['detail'] is Map<String, dynamic>) {
-          detail = data['detail'];
-        }
+      if (data is Map<String, dynamic> && data['detail'] is Map<String, dynamic>) {
+        detail = data['detail'] as Map<String, dynamic>;
       }
       state = AsyncData(
         s.copyWith(
@@ -204,7 +191,7 @@ class ScanAttendance extends _$ScanAttendance {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Attendance Settings Notifier
-// ✅ sync build() — .value is NEVER null, no AsyncLoading race condition
+// sync build() — state is plain AttendanceSettingsState, never AsyncValue
 // ─────────────────────────────────────────────────────────────────────────────
 @riverpod
 class AttendanceSettings extends _$AttendanceSettings {
@@ -216,19 +203,18 @@ class AttendanceSettings extends _$AttendanceSettings {
     return const AttendanceSettingsState();
   }
 
+  // Fix #1: state is plain — no AsyncData wrapping, no state.value
   Future<void> _run(Future<void> Function() fn) async {
-    final current = state.value ?? const AttendanceSettingsState();
-    state = AsyncData(current.copyWith(isLoading: true, error: null));
+    state = state.copyWith(isLoading: true, error: null);
     try {
       await fn();
     } on DioException catch (e) {
-      final s = state.value ?? const AttendanceSettingsState();
-      state = AsyncData(
-        s.copyWith(isLoading: false, error: ApiErrorHandler.getMessage(e)),
+      state = state.copyWith(
+        isLoading: false,
+        error: ApiErrorHandler.getMessage(e),
       );
     } catch (e) {
-      final s = state.value ?? const AttendanceSettingsState();
-      state = AsyncData(s.copyWith(isLoading: false, error: e.toString()));
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -240,17 +226,10 @@ class AttendanceSettings extends _$AttendanceSettings {
   Future<void> fetchSettings() async {
     if (!_shouldRefetch()) return;
     await _run(() async {
-      final useCase = await ref.read(
-        getAttendanceSettingsUseCaseProvider.future,
-      );
+      final useCase = await ref.read(getAttendanceSettingsUseCaseProvider.future);
       final result = await useCase();
       _lastFetchTime = DateTime.now();
-      state = AsyncData(
-        (state.value ?? const AttendanceSettingsState()).copyWith(
-          settings: result,
-          isLoading: false,
-        ),
-      );
+      state = state.copyWith(settings: result, isLoading: false);
     });
   }
 
@@ -264,9 +243,7 @@ class AttendanceSettings extends _$AttendanceSettings {
     String? officeCloseTime,
     String? timezone,
   }) => _run(() async {
-    final useCase = await ref.read(
-      updateAttendanceSettingsUseCaseProvider.future,
-    );
+    final useCase = await ref.read(updateAttendanceSettingsUseCaseProvider.future);
     final result = await useCase(
       officeLatitude: officeLatitude,
       officeLongitude: officeLongitude,
@@ -278,22 +255,13 @@ class AttendanceSettings extends _$AttendanceSettings {
       timezone: timezone,
     );
     _lastFetchTime = DateTime.now();
-    state = AsyncData(
-      (state.value ?? const AttendanceSettingsState()).copyWith(
-        settings: result,
-        isLoading: false,
-      ),
-    );
+    state = state.copyWith(settings: result, isLoading: false);
   });
 
-  void clearError() {
-    final s = state.value ?? const AttendanceSettingsState();
-    state = AsyncData(s.copyWith(error: null));
-  }
+  void clearError() => state = state.copyWith(error: null);
 
   void clearSettings() {
-    final s = state.value ?? const AttendanceSettingsState();
-    state = AsyncData(s.copyWith(settings: null));
+    state = state.copyWith(settings: null);
     _lastFetchTime = null;
   }
 }
@@ -303,12 +271,9 @@ class AttendanceSettings extends _$AttendanceSettings {
 // ─────────────────────────────────────────────────────────────────────────────
 @riverpod
 class ManagerAttendance extends _$ManagerAttendance {
+  // Fix #3: removed ref.watch() for use cases
   @override
   Future<ManagerAttendanceState> build() async {
-    await ref.watch(getAllAttendanceUseCaseProvider.future);
-    await ref.watch(getAttendanceByIdUseCaseProvider.future);
-    await ref.watch(getTodaySummaryUseCaseProvider.future);
-    await ref.watch(getByDateRangeUseCaseProvider.future);
     return const ManagerAttendanceState();
   }
 
@@ -330,9 +295,9 @@ class ManagerAttendance extends _$ManagerAttendance {
 
   Future<void> fetchAllAttendance({
     String? filterDate,
-    int? month, // ← add
-    int? year, // ← add
-    int? staffId, // ← add
+    int? month,
+    int? year,
+    int? staffId,
   }) => _run(() async {
     final useCase = await ref.read(getAllAttendanceUseCaseProvider.future);
     final list = await useCase(

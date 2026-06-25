@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_role_notifier.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/widgets/error_view.dart';
 import 'package:go_router/go_router.dart';
-import '../widgets/staff_role_card.dart';
-import '../widgets/staff_role_form.dart';
+import '../widgets/role/staff_role_card.dart';
+import '../widgets/role/staff_role_form.dart';
 import '../../domain/entities/staff_role_entity.dart';
 
 class StaffRoleScreen extends ConsumerWidget {

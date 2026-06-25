@@ -4,7 +4,6 @@ import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/dashboard/data/models/models.dart';
 import 'package:go_router/go_router.dart';
 
-// Each module carries its target route. Null = coming soon (shows snackbar).
 final List<DashboardModule> modules = const [
   DashboardModule(
     title: 'User Control',
@@ -27,7 +26,6 @@ final List<DashboardModule> modules = const [
     color: Colors.purple,
     route: RouteNames.chat,
   ),
-
   DashboardModule(
     title: 'HR / Staff',
     subtitle: 'Employees',
@@ -35,27 +33,40 @@ final List<DashboardModule> modules = const [
     color: Colors.blue,
     route: RouteNames.staff,
   ),
-
   DashboardModule(
     title: 'Inventory',
     subtitle: 'Products & Stock',
     icon: Icons.inventory_2_rounded,
     color: Colors.teal,
-    route: null, // not yet implemented
+    route: RouteNames.products,
+  ),
+  DashboardModule(
+    title: 'Categories',
+    subtitle: 'Product Groups',
+    icon: Icons.category_rounded,
+    color: Colors.cyan,
+    route: RouteNames.categories,
   ),
   DashboardModule(
     title: 'Invoices',
     subtitle: 'Billing System',
     icon: Icons.receipt_long_rounded,
     color: Colors.orange,
-    route: null, // not yet implemented
+    route: RouteNames.invoices,
   ),
   DashboardModule(
-    title: 'CRM',
-    subtitle: 'Customers',
+    title: 'Customers',
+    subtitle: 'CRM',
     icon: Icons.groups_rounded,
     color: Colors.red,
-    route: null, // not yet implemented
+    route: RouteNames.customers,
+  ),
+  DashboardModule(
+    title: 'Suppliers',
+    subtitle: 'Vendors',
+    icon: Icons.local_shipping_rounded,
+    color: Colors.brown,
+    route: RouteNames.suppliers,
   ),
   DashboardModule(
     title: 'Payroll',
@@ -63,6 +74,14 @@ final List<DashboardModule> modules = const [
     icon: Icons.payments_rounded,
     color: Colors.amber,
     route: RouteNames.salaries,
+  ),
+
+  DashboardModule(
+    title: 'Leave',
+    subtitle: 'Time Off Requests',
+    icon: Icons.event_busy_rounded,
+    color: Colors.deepPurple,
+    route: RouteNames.leaves,
   ),
 ];
 
@@ -116,7 +135,6 @@ Widget buildModules(double screenWidth) {
                 RouteNames.users,
                 RouteNames.settings,
               };
-
               Future.microtask(() {
                 if (_tabRoutes.contains(route)) {
                   context.go(route);

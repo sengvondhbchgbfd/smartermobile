@@ -4,8 +4,8 @@ import 'package:frontendmobile/config/routes/route_names.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/widgets/error_view.dart';
-import 'package:frontendmobile/features/hr/staff/presentation/widgets/staff_card.dart';
-import 'package:frontendmobile/features/hr/staff/presentation/widgets/staff_form.dart';
+import 'package:frontendmobile/features/hr/staff/presentation/widgets/staff/staff_card.dart';
+import 'package:frontendmobile/features/hr/staff/presentation/widgets/staff/staff_form.dart';
 import 'package:go_router/go_router.dart';
 
 class StaffScreen extends ConsumerWidget {
@@ -33,8 +33,9 @@ class StaffScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.people_outline),
             tooltip: 'Managers',
-            onPressed: notifier.fetchManagers,
+            onPressed: notifier.getManagers,
           ),
+
           /////////////////////////////
           ///
           /////////////////////////////
@@ -63,11 +64,20 @@ class StaffScreen extends ConsumerWidget {
       body: ref
           .watch(staffNotifierProvider)
           .when(
+            ////////////////////////////
+            ///
+            ////////////////////////////
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) =>
                 ErrorView(message: '$e', onRetry: notifier.fetchAll),
+            ////////////////////////////
+            ///
+            ////////////////////////////
             data: (list) => list.isEmpty
                 ? const Center(child: Text('No staff found.'))
+                ////////////////////////////
+                ///  show data views
+                ////////////////////////////
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: list.length,
@@ -76,9 +86,9 @@ class StaffScreen extends ConsumerWidget {
           ),
     );
   }
-  ///////////////////////////////////////////////////////
+  ////////////////////////////////////////////
   ///
-  //////////////////////////////////////////////////////
+  ///////////////////////////////////////////
 
   void _showForm(BuildContext context, StaffEntity? existing) {
     showModalBottomSheet(

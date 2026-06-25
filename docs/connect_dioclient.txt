@@ -1,0 +1,51 @@
+ Direct ✅ Best for BizCore?
+ // All features share one DioClient, no registration needed
+@riverpod
+Future<CustomerRepository> customerRepository(Ref ref) async {
+  final dioClient = await ref.watch(dioClientProvider.future);
+  final ds = CustomerRemoteDataSourceImpl(dioClient);
+  return CustomerRepositoryImpl(ds);
+}
+
+////////////////////////////////////////////////////////////
+ Override — when you need to swap per feature
+
+ // Step 1: stub in feature
+final featureDioClientProvider = Provider<DioClient>(
+  (ref) => throw UnimplementedError(),
+);
+
+// Step 2: register in main.dart
+final container = ProviderContainer(
+  overrides: [
+    featureDioClientProvider.overrideWith(
+      (ref) => ref.watch(dioClientProvider).requireValue,
+    ),
+  ],
+);
+
+/////////////////////////////////////////////////////////////
+
+ Family — when different features need different base URLs
+
+ final dioClientFamilyProvider = Provider.family<DioClient, String>(
+  (ref, baseUrl) => DioClient(baseUrl: baseUrl),
+);
+
+// usage
+final client = ref.watch(dioClientFamilyProvider('https://payment.api.com'));
+
+
+//////////////////////////////////////////////////////////////
+Scoped Container — micro-frontend isolation
+
+final featureContainer = ProviderContainer(
+  parent: rootContainer,
+  overrides: [dioClientProvider.overrideWithValue(specialClient)],
+);
+
+//////////////////////////////////////////////////////////////
+Environment-based — swap via build flavors
+final dioClientProvider = Provider((ref) {
+  return DioClient(baseUrl: AppConfig.baseUrl); // dev/staging/prod
+});

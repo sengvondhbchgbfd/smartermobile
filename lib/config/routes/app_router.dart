@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:frontendmobile/config/routes/app_shell.dart';
 import 'package:frontendmobile/config/routes/route_names.dart';
 import 'package:frontendmobile/features/auth/presentation/screens/register_screen.dart';
@@ -10,18 +11,35 @@ import 'package:frontendmobile/features/company/presentation/screens/company_scr
 import 'package:frontendmobile/features/company/presentation/widgets/company_edit_screen.dart';
 import 'package:frontendmobile/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/screens/wizard_screen.dart';
+import 'package:frontendmobile/features/dashboard/presentation/searching/page/search_page.dart';
 import 'package:frontendmobile/features/home/presentation/screens/home_screen.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/screens/attendance_screen.dart';
+import 'package:frontendmobile/features/hr/attendance/presentation/screens/attendance_settings_page.dart';
 import 'package:frontendmobile/features/hr/leave/presentation/screens/leave_screen.dart';
 import 'package:frontendmobile/features/hr/salaries/presentation/screens/salary_screen.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_detail_screen.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_role_screen.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_screen.dart';
+import 'package:frontendmobile/features/inventory/categories/presentation/screens/categories_detail.dart';
+import 'package:frontendmobile/features/inventory/categories/presentation/screens/categories_screen.dart';
+import 'package:frontendmobile/features/inventory/customer/presentation/screens/customer_detail_screen.dart';
+import 'package:frontendmobile/features/inventory/invoice/presentation/screens/invoice_detail_screen.dart';
+import 'package:frontendmobile/features/inventory/invoice/presentation/screens/invoice_screen.dart';
+import 'package:frontendmobile/features/inventory/product/presentation/screens/product_detail_screen.dart';
+import 'package:frontendmobile/features/inventory/product/presentation/screens/product_screen.dart';
+import 'package:frontendmobile/features/inventory/supplier/presentation/screens/supplier_detail_screen.dart';
 import 'package:frontendmobile/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:frontendmobile/features/profile/domain/entities/profile_entity.dart';
 import 'package:frontendmobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:frontendmobile/features/profile/presentation/widgets/profile_edit_card.dart';
+import 'package:frontendmobile/features/settings/domain/entities/system_setting_entity.dart';
+import 'package:frontendmobile/features/settings/domain/models/setting_create_extra.dart';
+import 'package:frontendmobile/features/settings/presentation/screens/setting_detail_page.dart';
+import 'package:frontendmobile/features/settings/presentation/screens/settings_screen.dart';
+import 'package:frontendmobile/features/settings/presentation/widgets/setting_create_page.dart';
+import 'package:frontendmobile/features/settings/presentation/widgets/setting_edit_page.dart';
+import 'package:frontendmobile/features/settings/presentation/widgets/theme_mode_page.dart';
 import 'package:frontendmobile/features/users/domain/entities/user_entity.dart';
 import 'package:frontendmobile/features/users/presentation/screen/user_screen.dart';
 import 'package:frontendmobile/features/users/presentation/screen/fillter_users_screen.dart';
@@ -31,12 +49,17 @@ import 'package:frontendmobile/features/users/presentation/widgets/creates/creat
 import 'package:frontendmobile/features/users/presentation/widgets/creates/create_user_page.dart';
 import 'package:frontendmobile/features/users/presentation/widgets/update_user_page.dart';
 import 'package:go_router/go_router.dart';
+import 'package:frontendmobile/features/inventory/supplier/presentation/screens/supplier_screen.dart'
+    hide SupplierDetailScreen;
+import 'package:frontendmobile/features/inventory/customer/presentation/screens/customer_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: RouteNames.splash,
+    initialLocation: RouteNames.login,
     routes: [
+      //////////////////////////////////////////////////////////////////////////
       // ── Auth / Onboarding (no shell) ──────────────────────────────────────
+      //////////////////////////////////////////////////////////////////////////
       GoRoute(
         path: RouteNames.splash,
         builder: (context, state) => const SplashScreen(),
@@ -62,12 +85,13 @@ class AppRouter {
         builder: (context, state) => const HomeScreen(),
       ),
 
+      //////////////////////////////////////////////////////////////////////////
       // ── Pushed screens — full screen, NO shell ────────────────────────────
+      //////////////////////////////////////////////////////////////////////////
       GoRoute(
         path: RouteNames.profile,
         builder: (context, state) => const ProfileScreen(),
       ),
-
       GoRoute(
         path: RouteNames.editedProfile,
         builder: (context, state) {
@@ -84,7 +108,9 @@ class AppRouter {
         builder: (context, state) => const NotificationScreen(),
       ),
 
+      //////////////////////////////////////////////////////////////////////////
       // ── Company ───────────────────────────────────────────────────────────
+      //////////////////////////////////////////////////////////////////////////
       GoRoute(
         path: RouteNames.companyDetail,
         builder: (context, state) {
@@ -100,7 +126,9 @@ class AppRouter {
         },
       ),
 
+      //////////////////////////////////////////////////////////////////////////
       // ── HR Staff ──────────────────────────────────────────────────────────
+      //////////////////////////////////////////////////////////////////////////
       GoRoute(
         path: RouteNames.staffRoles,
         builder: (context, state) => const StaffRoleScreen(),
@@ -109,6 +137,7 @@ class AppRouter {
         path: RouteNames.staff,
         builder: (context, state) => const StaffScreen(),
       ),
+
       GoRoute(
         path: RouteNames.staffDetail,
         builder: (context, state) {
@@ -116,10 +145,16 @@ class AppRouter {
           return StaffDetailScreen(staffId: id);
         },
       ),
+
       GoRoute(
         path: RouteNames.salaries,
         builder: (context, state) => const SalaryScreen(),
       ),
+
+      ////////////////////////////////////////////////////////////////////////
+      ///
+      ///////////////////////////////////////////////////////////////////////
+      
       GoRoute(
         path: RouteNames.leaves,
         builder: (context, state) => const LeaveScreen(),
@@ -137,7 +172,9 @@ class AppRouter {
         builder: (context, state) => const LeaveScreen(),
       ),
 
+      //////////////////////////////////////////////////////////////////////////
       // ── Users (outside shell — full screen pages) ─────────────────────────
+      //////////////////////////////////////////////////////////////////////////
       GoRoute(
         path: '/users/create-user',
         builder: (context, state) => const CreateUserPage(),
@@ -176,7 +213,244 @@ class AppRouter {
         },
       ),
 
+      //////////////////////////////////////////////////////////////////////////
+      // ── Inventory ─────────────────────────────────────────────────────────
+      //////////////////////////////////////////////////////////////////////////
+      GoRoute(
+        path: RouteNames.categories,
+        builder: (context, state) => const CategoriesScreen(),
+      ),
+
+      GoRoute(
+        path: RouteNames.categoryDetail,
+        name: 'categoryDetail',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return CategoryDetailScreen(categoryId: id);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.products,
+        builder: (context, state) => const ProductsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.productDetail,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return ProductDetailScreen(productId: id);
+        },
+      ),
+
+      //////////////////////////////////////////////////////////////////////////
+      // ── Suppliers ─────────────────────────────────────────────────────────
+      //////////////////////////////////////////////////////////////////////////
+      GoRoute(
+        path: RouteNames.suppliers,
+        builder: (context, state) => const SuppliersScreen(),
+      ),
+      // ── keep but use placeholder ──
+      GoRoute(
+        path: RouteNames.supplierDetail,
+        builder: (context, state) {
+          final idStr = state.pathParameters['id'];
+          final id = int.tryParse(idStr ?? '');
+          if (id == null) {
+            return const Scaffold(
+              body: Center(child: Text('Invalid supplier id.')),
+            );
+          }
+          return SupplierDetailScreen(supplierId: id);
+        },
+      ),
+
+      GoRoute(
+        path: RouteNames.customers,
+        builder: (context, state) => const CustomersScreen(),
+      ),
+
+      //////////////////////////////////////////////////////////////////////////
+      // ── keep but use placeholder ──
+      //////////////////////////////////////////////////////////////////////////
+      GoRoute(
+        path: RouteNames.customerDetail,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return CustomerDetailScreen(customerId: id);
+        },
+      ),
+
+      //////////////////////////////////////////////////////////////////////////
+      // ── Invoices ──────────────────────────────────────────────────────────
+      //////////////////////////////////////////////////////////////////////////
+      GoRoute(
+        path: RouteNames.invoices,
+        builder: (context, state) => const InvoicesScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.invoiceDetail,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return InvoiceDetailScreen(invoiceId: id);
+        },
+      ),
+
+      ///////////////////////////////settings///////////////////////////////////
+      ///
+      //////////////////////////////////////////////////////////////////////////
+      GoRoute(
+        path: RouteNames.settings,
+        builder: (context, state) => const SystemSettingsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.systemSettingCreate,
+        builder: (_, state) {
+          final extra = state.extra;
+          if (extra is SettingCreateExtra) {
+            return SettingCreatePage(
+              prefillKey: extra.key,
+              prefillHint: extra.hint,
+            );
+          }
+          return const SettingCreatePage();
+        },
+      ),
+      GoRoute(
+        path: RouteNames.systemSettingEdit,
+        builder: (_, state) =>
+            SettingEditPage(setting: state.extra as SystemSettingEntity),
+      ),
+
+      GoRoute(
+        path: RouteNames.theme,
+        builder: (context, state) => const ThemeModePage(),
+      ),
+
+      GoRoute(
+        path: '/settings/payroll/currency',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'currency_code',
+          label: 'Currency Code',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+      GoRoute(
+        path: '/settings/payroll/day',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'payroll_day',
+          label: 'Payroll Day',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+      GoRoute(
+        path: '/settings/payroll/overtime',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'overtime_rate_multiplier',
+          label: 'Overtime Rate',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+
+      // Leave
+      GoRoute(
+        path: '/settings/leave/annual',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'annual_leave_days',
+          label: 'Annual Leave Days',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+      GoRoute(
+        path: '/settings/leave/sick',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'sick_leave_days',
+          label: 'Sick Leave Days',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+      GoRoute(
+        path: '/settings/leave/approval',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'leave_approval_required',
+          label: 'Approval Required',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+
+      // Inventory
+      GoRoute(
+        path: '/settings/inventory/low-stock',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'low_stock_threshold',
+          label: 'Low Stock Threshold',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+      GoRoute(
+        path: '/settings/inventory/movement-approval',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'stock_movement_approval',
+          label: 'Movement Approval',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+
+      // Notifications
+      GoRoute(
+        path: '/settings/notifications/retention',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'notification_retention_days',
+          label: 'Retention Days',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+      GoRoute(
+        path: '/settings/notifications/push',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'push_notifications_enabled',
+          label: 'Push Notifications',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+
+      // Company
+      GoRoute(
+        path: '/settings/company/timezone',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'company_timezone',
+          label: 'Timezone',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+      GoRoute(
+        path: '/settings/company/language',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'company_language',
+          label: 'Language',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+      GoRoute(
+        path: '/settings/company/max-staff',
+        builder: (context, state) => SettingDetailPage(
+          settingKey: 'max_staff_count',
+          label: 'Max Staff Count',
+          existing: state.extra as SystemSettingEntity?,
+        ),
+      ),
+
+      GoRoute(
+        path: '/settings/attendance',
+        builder: (context, state) => const AttendanceSettingsPage(),
+      ),
+
+      //////////////////////////////////////////////////////////////////////////
       // ── Shell (persistent bottom nav) ─────────────────────────────────────
+      //////////////////////////////////////////////////////////////////////////
+      GoRoute(
+        path: RouteNames.searchPage,
+        builder: (context, state) => const SearchPage(),
+      ),
+
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [
@@ -194,6 +468,7 @@ class AppRouter {
               ),
             ],
           ),
+
           GoRoute(
             path: RouteNames.chat,
             builder: (context, state) => const ChatGroupsScreen(),
@@ -202,11 +477,6 @@ class AppRouter {
           GoRoute(
             path: RouteNames.users,
             builder: (context, state) => const UserScreen(),
-          ),
-
-          GoRoute(
-            path: RouteNames.settings,
-            builder: (context, state) => const ProfileScreen(),
           ),
         ],
       ),

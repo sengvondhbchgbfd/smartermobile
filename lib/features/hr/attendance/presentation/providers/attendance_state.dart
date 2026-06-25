@@ -117,11 +117,7 @@ class AttendanceSettingsState {
 class ManagerAttendanceState {
   final List<AttendanceEntity> records;
   final AttendanceEntity? selected;
-
-  
   final Map<String, dynamic> todaySummary;
-
-
   final bool isLoading;
   final String? error;
 

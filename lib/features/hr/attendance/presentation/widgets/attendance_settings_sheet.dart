@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/managers/office_location_picker.dart';
 
-// ── Simple settings model (replace with real domain models) ───────────────
+// ── Settings model ─────────────────────────────────────────────────────────
 
 class AttendanceSettings {
   AttendanceSettings({
@@ -35,17 +36,18 @@ class AttendanceSettingsSheet extends StatefulWidget {
     super.key,
     required this.initial,
     required this.onSave,
+    this.asPage = false,
   });
 
   final AttendanceSettings initial;
   final Future<void> Function(AttendanceSettings) onSave;
+  final bool asPage;
 
   static Future<void> show(
     BuildContext context, {
     required AttendanceSettings initial,
     required Future<void> Function(AttendanceSettings) onSave,
   }) {
-    // ✅ showGeneralDialog stays within ProviderScope
     return showGeneralDialog(
       context: context,
       barrierDismissible: false,
@@ -64,23 +66,17 @@ class _AttendanceSettingsSheetState extends State<AttendanceSettingsSheet>
   late final TabController _tabs;
   late final AttendanceSettings _settings;
 
-  // Geofence controllers
   late final TextEditingController _latCtrl;
   late final TextEditingController _lngCtrl;
   late final TextEditingController _radiusCtrl;
-
-  // Policy controllers
   late final TextEditingController _lateCtrl;
   late final TextEditingController _overtimeCtrl;
-
   late final TextEditingController _openTimeCtrl;
   late final TextEditingController _closeTimeCtrl;
   late final TextEditingController _timezoneCtrl;
 
-  // Department
   late List<String> _departments;
   final _deptCtrl = TextEditingController();
-
   bool _saving = false;
 
   @override
@@ -88,23 +84,14 @@ class _AttendanceSettingsSheetState extends State<AttendanceSettingsSheet>
     super.initState();
     _tabs = TabController(length: 3, vsync: this);
     _settings = widget.initial;
-
     _latCtrl = TextEditingController(text: _settings.officeLat.toString());
     _lngCtrl = TextEditingController(text: _settings.officeLng.toString());
-    _radiusCtrl = TextEditingController(
-      text: _settings.geofenceRadius.toString(),
-    );
-    _lateCtrl = TextEditingController(
-      text: _settings.lateThresholdMinutes.toString(),
-    );
-    _overtimeCtrl = TextEditingController(
-      text: _settings.overtimeThresholdMinutes.toString(),
-    );
-
+    _radiusCtrl = TextEditingController(text: _settings.geofenceRadius.toString());
+    _lateCtrl = TextEditingController(text: _settings.lateThresholdMinutes.toString());
+    _overtimeCtrl = TextEditingController(text: _settings.overtimeThresholdMinutes.toString());
     _openTimeCtrl = TextEditingController(text: _settings.officeOpenTime);
     _closeTimeCtrl = TextEditingController(text: _settings.officeCloseTime);
     _timezoneCtrl = TextEditingController(text: _settings.timezone);
-
     _departments = List.from(_settings.departments);
   }
 
@@ -127,34 +114,27 @@ class _AttendanceSettingsSheetState extends State<AttendanceSettingsSheet>
     _settings
       ..officeLat = double.tryParse(_latCtrl.text) ?? _settings.officeLat
       ..officeLng = double.tryParse(_lngCtrl.text) ?? _settings.officeLng
-      ..geofenceRadius =
-          int.tryParse(_radiusCtrl.text) ?? _settings.geofenceRadius
-      ..lateThresholdMinutes =
-          int.tryParse(_lateCtrl.text) ?? _settings.lateThresholdMinutes
-      ..overtimeThresholdMinutes =
-          int.tryParse(_overtimeCtrl.text) ?? _settings.overtimeThresholdMinutes
+      ..geofenceRadius = int.tryParse(_radiusCtrl.text) ?? _settings.geofenceRadius
+      ..lateThresholdMinutes = int.tryParse(_lateCtrl.text) ?? _settings.lateThresholdMinutes
+      ..overtimeThresholdMinutes = int.tryParse(_overtimeCtrl.text) ?? _settings.overtimeThresholdMinutes
       ..officeOpenTime = _openTimeCtrl.text.trim().isNotEmpty
-          ? _openTimeCtrl.text.trim()
-          : _settings.officeOpenTime
+          ? _openTimeCtrl.text.trim() : _settings.officeOpenTime
       ..officeCloseTime = _closeTimeCtrl.text.trim().isNotEmpty
-          ? _closeTimeCtrl.text.trim()
-          : _settings.officeCloseTime
+          ? _closeTimeCtrl.text.trim() : _settings.officeCloseTime
       ..timezone = _timezoneCtrl.text.trim().isNotEmpty
-          ? _timezoneCtrl.text.trim()
-          : _settings.timezone
+          ? _timezoneCtrl.text.trim() : _settings.timezone
       ..departments = _departments;
 
     setState(() => _saving = true);
     try {
       await widget.onSave(_settings);
-      if (mounted) Navigator.pop(context);
+      // ← only pop if used as bottom sheet, not as page
+      // (page's onSave handles its own pop via context.pop())
+      if (mounted && !widget.asPage) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Save failed: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -162,30 +142,72 @@ class _AttendanceSettingsSheetState extends State<AttendanceSettingsSheet>
     }
   }
 
-  // ── Build ──────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surfaceColor = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final textPrimary = isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight;
+    final textSecondary = isDark ? Pallets.textSecondaryDark : Pallets.textSecondaryLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text('Attendance Settings'),
+        backgroundColor: surfaceColor,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false, // ← we handle leading manually
+        leading: widget.asPage
+            ? IconButton(
+                // ← close icon when full page
+                icon: Icon(Icons.close, color: textSecondary),
+                onPressed: () => Navigator.pop(context),
+              )
+            : IconButton(
+                // ← back arrow when bottom sheet
+                icon: Icon(Icons.arrow_back, color: textSecondary),
+                onPressed: () => Navigator.pop(context),
+              ),
+        title: Text(
+          'Attendance Settings',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 17,
+            color: textPrimary,
+          ),
+        ),
         actions: [
-          TextButton(
-            onPressed: _saving ? null : _save,
-            child: _saving
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text(
-                    'Save',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: TextButton(
+              onPressed: _saving ? null : _save,
+              child: _saving
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Pallets.gradient2,
+                      ),
+                    )
+                  : Text(
+                      'Save',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Pallets.gradient2,
+                        fontSize: 15,
+                      ),
+                    ),
+            ),
           ),
         ],
         bottom: TabBar(
           controller: _tabs,
+          indicatorColor: Pallets.gradient2,
+          labelColor: Pallets.gradient2,
+          unselectedLabelColor: textSecondary,
+          dividerColor: borderColor,
           tabs: const [
             Tab(icon: Icon(Icons.location_on_outlined), text: 'Geofence'),
             Tab(icon: Icon(Icons.policy_outlined), text: 'Policy'),
@@ -196,11 +218,7 @@ class _AttendanceSettingsSheetState extends State<AttendanceSettingsSheet>
       body: TabBarView(
         controller: _tabs,
         children: [
-          _GeofenceTab(
-            latCtrl: _latCtrl,
-            lngCtrl: _lngCtrl,
-            radiusCtrl: _radiusCtrl,
-          ),
+          _GeofenceTab(latCtrl: _latCtrl, lngCtrl: _lngCtrl, radiusCtrl: _radiusCtrl),
           _PolicyTab(
             lateCtrl: _lateCtrl,
             overtimeCtrl: _overtimeCtrl,
@@ -223,7 +241,7 @@ class _AttendanceSettingsSheetState extends State<AttendanceSettingsSheet>
   }
 }
 
-// ── Tab: Geofence ─────────────────────────────────────────────────────────
+// ── Tab: Geofence ──────────────────────────────────────────────────────────
 
 class _GeofenceTab extends StatelessWidget {
   const _GeofenceTab({
@@ -238,56 +256,52 @@ class _GeofenceTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _InfoBanner(
+        const _InfoBanner(
           icon: Icons.location_on,
           color: Colors.blue,
-          message:
-              'Set the office GPS coordinates and the allowed check-in radius. '
+          message: 'Set the office GPS coordinates and the allowed check-in radius. '
               'Staff must be within this radius to check in/out.',
         ),
         const SizedBox(height: 20),
-
         _SettingsField(
           controller: latCtrl,
           label: 'Office Latitude',
           hint: 'e.g. 11.5564',
           icon: Icons.explore_outlined,
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: true,
-            signed: true,
-          ),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
         ),
         const SizedBox(height: 14),
-
         _SettingsField(
           controller: lngCtrl,
           label: 'Office Longitude',
           hint: 'e.g. 104.9282',
           icon: Icons.explore_outlined,
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: true,
-            signed: true,
-          ),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
         ),
         const SizedBox(height: 14),
-
-        ElevatedButton.icon(
+        FilledButton.icon(                              // ← FilledButton instead of ElevatedButton
           onPressed: () async {
             final result = await OfficeLocationPicker.show(context);
-
             if (result != null) {
               latCtrl.text = result.latitude.toString();
               lngCtrl.text = result.longitude.toString();
             }
           },
-          icon: const Icon(Icons.map),
-          label: const Text("Pick from Map"),
+          style: FilledButton.styleFrom(
+            backgroundColor: Pallets.gradient2,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          icon: const Icon(Icons.map_outlined),
+          label: const Text('Pick from Map'),
         ),
         const SizedBox(height: 14),
-
         _SettingsField(
           controller: radiusCtrl,
           label: 'Allowed Radius (metres)',
@@ -297,23 +311,25 @@ class _GeofenceTab extends StatelessWidget {
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         ),
         const SizedBox(height: 20),
-
-        // Visual hint card
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.blue.shade50,
+            color: Colors.blue.withOpacity(isDark ? 0.12 : 0.07),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.shade100),
+            border: Border.all(color: Colors.blue.withOpacity(0.25)),
           ),
           child: Row(
             children: [
-              Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+              Icon(Icons.info_outline,
+                  color: isDark ? Colors.blue.shade300 : Colors.blue.shade700, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Tip: Open Google Maps, long-press your office, and copy the coordinates.',
-                  style: TextStyle(fontSize: 12, color: Colors.blue.shade700),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.blue.shade300 : Colors.blue.shade700,
+                  ),
                 ),
               ),
             ],
@@ -324,7 +340,8 @@ class _GeofenceTab extends StatelessWidget {
   }
 }
 
-// ── Tab: Policy ───────────────────────────────────────────────────────────
+// ── Tab: Policy ────────────────────────────────────────────────────────────
+
 class _PolicyTab extends StatelessWidget {
   const _PolicyTab({
     required this.lateCtrl,
@@ -342,25 +359,25 @@ class _PolicyTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary = isDark ? Pallets.textSecondaryDark : Pallets.textSecondaryLight;
+
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _InfoBanner(
+        const _InfoBanner(
           icon: Icons.policy,
           color: Colors.orange,
-          message:
-              'Define office hours, timezone, late threshold, and overtime rules.',
+          message: 'Define office hours, timezone, late threshold, and overtime rules.',
         ),
         const SizedBox(height: 20),
-
-        // ── Office Hours ──────────────────────────────────────────────
-        const Text(
+        Text(
           'OFFICE HOURS',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
-            color: Colors.grey,
+            color: textSecondary,                     // ← was hardcoded grey
           ),
         ),
         const SizedBox(height: 10),
@@ -385,15 +402,13 @@ class _PolicyTab extends StatelessWidget {
           icon: Icons.public_outlined,
         ),
         const SizedBox(height: 24),
-
-        // ── Thresholds ────────────────────────────────────────────────
-        const Text(
+        Text(
           'THRESHOLDS',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
-            color: Colors.grey,
+            color: textSecondary,                     // ← was hardcoded grey
           ),
         ),
         const SizedBox(height: 10),
@@ -435,15 +450,17 @@ class _PolicyPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white70 : Colors.black87;
     final overtimeH = overtimeMinutes ~/ 60;
     final overtimeM = overtimeMinutes % 60;
 
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: Colors.orange.withOpacity(isDark ? 0.12 : 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.shade100),
+        border: Border.all(color: Colors.orange.withOpacity(0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -452,18 +469,18 @@ class _PolicyPreviewCard extends StatelessWidget {
             'Current Policy',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.orange.shade700,
+              color: isDark ? Colors.orange.shade300 : Colors.orange.shade700,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             '• Staff arriving more than $lateMinutes min after shift start are marked Late.',
-            style: const TextStyle(fontSize: 13),
+            style: TextStyle(fontSize: 13, color: textColor),
           ),
           const SizedBox(height: 4),
           Text(
             '• Overtime is counted after ${overtimeH}h ${overtimeM}m of work.',
-            style: const TextStyle(fontSize: 13),
+            style: TextStyle(fontSize: 13, color: textColor),
           ),
         ],
       ),
@@ -471,7 +488,7 @@ class _PolicyPreviewCard extends StatelessWidget {
   }
 }
 
-// ── Tab: Staff & Departments ──────────────────────────────────────────────
+// ── Tab: Staff & Departments ───────────────────────────────────────────────
 
 class _StaffDeptTab extends StatelessWidget {
   const _StaffDeptTab({
@@ -488,26 +505,29 @@ class _StaffDeptTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight;
+    final textSecondary = isDark ? Pallets.textSecondaryDark : Pallets.textSecondaryLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final surfaceColor = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _InfoBanner(
+        const _InfoBanner(
           icon: Icons.people,
           color: Colors.purple,
-          message:
-              'Manage departments. Staff list and transfer actions are available '
+          message: 'Manage departments. Staff list and transfer actions are available '
               'in the full HR module.',
         ),
         const SizedBox(height: 20),
-
-        // ── Add department ──────────────────────────────────────────────
-        const Text(
+        Text(
           'DEPARTMENTS',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
-            color: Colors.grey,
+            color: textSecondary,                     // ← was hardcoded grey
           ),
         ),
         const SizedBox(height: 10),
@@ -516,14 +536,22 @@ class _StaffDeptTab extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: deptCtrl,
-                decoration: const InputDecoration(
+                style: TextStyle(color: textPrimary),
+                decoration: InputDecoration(
                   hintText: 'New department name',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
+                  hintStyle: TextStyle(color: textSecondary),
+                  prefixIcon: Icon(Icons.corporate_fare_outlined, color: textSecondary),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: borderColor),
                   ),
-                  prefixIcon: Icon(Icons.corporate_fare_outlined),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Pallets.gradient2, width: 1.5),
+                  ),
+                  filled: true,
+                  fillColor: surfaceColor,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
                 onSubmitted: (v) {
                   if (v.trim().isNotEmpty) onAddDept(v.trim());
@@ -531,19 +559,15 @@ class _StaffDeptTab extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            ElevatedButton(
+            FilledButton(                              // ← FilledButton instead of ElevatedButton
               onPressed: () {
-                if (deptCtrl.text.trim().isNotEmpty) {
-                  onAddDept(deptCtrl.text.trim());
-                }
+                if (deptCtrl.text.trim().isNotEmpty) onAddDept(deptCtrl.text.trim());
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
+              style: FilledButton.styleFrom(
+                backgroundColor: Pallets.gradient2,   // ← brand color instead of purple
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text('Add'),
             ),
@@ -554,56 +578,55 @@ class _StaffDeptTab extends StatelessWidget {
           Center(
             child: Text(
               'No departments yet.',
-              style: TextStyle(color: Colors.grey.shade500),
+              style: TextStyle(color: textSecondary),
             ),
           )
         else
           ...List.generate(departments.length, (i) {
-            return Card(
+            return Container(
               margin: const EdgeInsets.only(bottom: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
               ),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Colors.purple.shade50,
+                  backgroundColor: Pallets.gradient2.withOpacity(0.15),
                   child: Icon(
                     Icons.corporate_fare,
-                    color: Colors.purple.shade400,
+                    color: Pallets.gradient2,          // ← brand color
                     size: 18,
                   ),
                 ),
                 title: Text(
                   departments[i],
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: textPrimary,               // ← theme-aware
+                  ),
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                   onPressed: () => onRemoveDept(i),
                 ),
               ),
             );
           }),
-
         const SizedBox(height: 24),
-
-        // ── Staff list link ─────────────────────────────────────────────
         OutlinedButton.icon(
           onPressed: () {
-            // TODO: navigate to full staff list / HR module
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Navigate to Staff List – wire this up!'),
-              ),
+              const SnackBar(content: Text('Navigate to Staff List – wire this up!')),
             );
           },
-          icon: const Icon(Icons.people_outline),
-          label: const Text('View / Manage Staff List'),
+          icon: Icon(Icons.people_outline, color: Pallets.gradient2),
+          label: Text('View / Manage Staff List',
+              style: TextStyle(color: Pallets.gradient2)),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            side: BorderSide(color: Pallets.gradient2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       ],
@@ -611,7 +634,7 @@ class _StaffDeptTab extends StatelessWidget {
   }
 }
 
-// ── Reusable sub-widgets ───────────────────────────────────────────────────
+// ── Reusable widgets ───────────────────────────────────────────────────────
 
 class _InfoBanner extends StatelessWidget {
   const _InfoBanner({
@@ -626,12 +649,14 @@ class _InfoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withOpacity(isDark ? 0.12 : 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withOpacity(0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -641,7 +666,10 @@ class _InfoBanner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(fontSize: 13, color: color.withOpacity(0.85)),
+              style: TextStyle(
+                fontSize: 13,
+                color: color.withOpacity(isDark ? 0.9 : 0.85),
+              ),
             ),
           ),
         ],
@@ -669,15 +697,33 @@ class _SettingsField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight;
+    final textSecondary = isDark ? Pallets.textSecondaryDark : Pallets.textSecondaryLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final surfaceColor = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
+      style: TextStyle(color: textPrimary),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: Icon(icon),
-        border: const OutlineInputBorder(),
+        labelStyle: TextStyle(color: textSecondary),
+        hintStyle: TextStyle(color: textSecondary),
+        prefixIcon: Icon(icon, color: textSecondary),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Pallets.gradient2, width: 1.5),
+        ),
+        filled: true,
+        fillColor: surfaceColor,
       ),
     );
   }

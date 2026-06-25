@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/communication/notifications/presentation/providers/notification_provider.dart';
-import 'package:frontendmobile/features/communication/notifications/presentation/providers/notification_state.dart';
+import 'package:frontendmobile/features/communication/notifications/presentation/widgets/empty_state.dart';
+import 'package:frontendmobile/features/communication/notifications/presentation/widgets/filter_bar.dart';
 import 'package:frontendmobile/features/communication/notifications/presentation/widgets/notification_tile.dart';
-import 'package:go_router/go_router.dart';
 
 class NotificationScreen extends ConsumerStatefulWidget {
   const NotificationScreen({super.key});
@@ -21,6 +21,10 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
       ref.read(notificationNotifierProvider.notifier).loadMyNotifications();
     });
   }
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +46,10 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                     .read(notificationNotifierProvider.notifier)
                     .clearSelection(),
               )
+            ////////////////////////////////////////////////////////////////////
             // ── Custom arrowhead back button ──────────────────────────
-            : const _BackButton(),
+            ////////////////////////////////////////////////////////////////////
+            : const BackButton(),
         title: isSelecting
             ? Text(
                 '${selectedIds.length} selected',
@@ -73,13 +79,24 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                     ),
                 ],
               ),
+
+        ////////////////////////////////////////////////////////////////////
+        ///  All Button
+        ////////////////////////////////////////////////////////////////////
         actions: [
           if (isSelecting) ...[
+            ////////////////////////////////////////////////////////////////
+            ///
+            ////////////////////////////////////////////////////////////////
             TextButton(
               onPressed: () =>
                   ref.read(notificationNotifierProvider.notifier).selectAll(),
               child: Text('All', style: TextStyle(color: Pallets.gradient2)),
             ),
+
+            /////////////////////////////////////////////////////////////////
+            ///
+            ////////////////////////////////////////////////////////////////
             IconButton(
               icon: const Icon(Icons.done_all, color: Colors.white),
               tooltip: 'Mark selected read',
@@ -87,6 +104,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                   .read(notificationNotifierProvider.notifier)
                   .bulkMarkRead(),
             ),
+            ////////////////////////////////////////////////////////////////
+            ///
+            ////////////////////////////////////////////////////////////////
           ] else ...[
             if (unread > 0)
               IconButton(
@@ -96,9 +116,16 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                     .read(notificationNotifierProvider.notifier)
                     .markAllRead(),
               ),
+
+            ////////////////////////////////////////////////////////////////
+            ///
+            ////////////////////////////////////////////////////////////////
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert, color: Colors.white),
               color: Pallets.surfaceDark,
+              ////////////////////////////////////////////////////////////////
+              ///
+              ////////////////////////////////////////////////////////////////
               onSelected: (value) {
                 switch (value) {
                   case 'select':
@@ -113,6 +140,10 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                     break;
                 }
               },
+
+              ////////////////////////////////////////////////////////////////
+              ///
+              ////////////////////////////////////////////////////////////////
               itemBuilder: (_) => [
                 const PopupMenuItem(
                   value: 'select',
@@ -124,6 +155,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                     ],
                   ),
                 ),
+                ////////////////////////////////////////////////////////////////
+                ///
+                ////////////////////////////////////////////////////////////////
                 const PopupMenuItem(
                   value: 'delete_read',
                   child: Row(
@@ -141,14 +175,21 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                     ],
                   ),
                 ),
+                ////////////////////////////////////////////////////////////////
+                ///
+                ////////////////////////////////////////////////////////////////
               ],
             ),
           ],
         ],
       ),
+
+      ////////////////////////////////////////////////////////////////////
+      ///
+      ////////////////////////////////////////////////////////////////////
       body: Column(
         children: [
-          const _FilterBar(),
+          const FilterBar(),
           Expanded(
             child: notifAsync.when(
               loading: () => Center(
@@ -185,9 +226,16 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                   ],
                 ),
               ),
+
+              ////////////////////////////////////////////////////////////////
+              ///
+              ////////////////////////////////////////////////////////////////
               data: (data) {
                 final notifications = data.notifications;
-                if (notifications.isEmpty) return const _EmptyState();
+                if (notifications.isEmpty) return const EmptyState();
+                /////////////////////////////////////////////////////////////
+                ///
+                ////////////////////////////////////////////////////////////
 
                 return RefreshIndicator(
                   color: Pallets.gradient2,
@@ -202,9 +250,14 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                         Divider(height: 1, color: Pallets.borderDark),
                     itemBuilder: (context, index) {
                       final n = notifications[index];
+
                       final isSelected = data.selectedIds.contains(
                         n.notificationId,
                       );
+
+                      ////////////////////////////////////////////////////////
+                      ///
+                      ///////////////////////////////////////////////////////
                       return NotificationTile(
                         notification: n,
                         isSelecting: data.isSelecting,
@@ -224,6 +277,10 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                             }
                           }
                         },
+
+                        //////////////////////////////////////////////////////
+                        //
+                        /////////////////////////////////////////////////////
                         onLongPress: () {
                           if (!data.isSelecting) {
                             ref
@@ -236,6 +293,10 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                             }
                           }
                         },
+
+                        //////////////////////////////////////////////////////
+                        //
+                        /////////////////////////////////////////////////////
                         onDismissed: () {
                           if (n.notificationId != null) {
                             ref
@@ -249,155 +310,6 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                 );
               },
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Custom arrowhead back button ──────────────────────────────────────────────
-
-class _BackButton extends StatelessWidget {
-  const _BackButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => context.pop(),
-      child: Center(
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: Pallets.surfaceDark,
-            borderRadius: BorderRadius.circular(11),
-            border: Border.all(color: Pallets.borderDark),
-          ),
-          child: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
-            size: 16,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Filter bar ────────────────────────────────────────────────────────────────
-
-class _FilterBar extends ConsumerWidget {
-  const _FilterBar();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final filter =
-        ref.watch(notificationNotifierProvider).valueOrNull?.filter ??
-        NotificationFilter.all;
-
-    return Container(
-      color: Pallets.surfaceDark,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          _Chip(
-            label: 'All',
-            selected: filter == NotificationFilter.all,
-            onTap: () => ref
-                .read(notificationNotifierProvider.notifier)
-                .setFilter(NotificationFilter.all),
-          ),
-          const SizedBox(width: 8),
-          _Chip(
-            label: 'Unread',
-            selected: filter == NotificationFilter.unread,
-            onTap: () => ref
-                .read(notificationNotifierProvider.notifier)
-                .setFilter(NotificationFilter.unread),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _Chip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? Pallets.gradient2 : Pallets.backgroundDark,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? Pallets.gradient2 : Pallets.borderDark,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : Pallets.textSecondaryDark,
-            fontSize: 13,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Empty state ───────────────────────────────────────────────────────────────
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Pallets.surfaceDark,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              Icons.notifications_off_outlined,
-              color: Pallets.textSecondaryDark,
-              size: 36,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'No notifications',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            "You're all caught up!",
-            style: TextStyle(color: Pallets.textSecondaryDark, fontSize: 13),
           ),
         ],
       ),

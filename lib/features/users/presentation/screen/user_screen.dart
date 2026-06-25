@@ -227,7 +227,6 @@ class _UserScreenState extends ConsumerState<UserScreen>
           duration: const Duration(milliseconds: 250),
           opacity: _fabVisible ? 1.0 : 0.0,
           child: Padding(
-            // ✅ lifts FAB above bottom nav bar
             padding: const EdgeInsets.only(bottom: 70),
             child: FloatingActionButton(
               backgroundColor: Pallets.gradient2,

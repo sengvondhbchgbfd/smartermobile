@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/core/utils/attendance_export_helper.dart';
 import 'package:frontendmobile/core/utils/attendance_filter_helpers.dart';
 import 'package:frontendmobile/core/utils/date_formatter.dart';
@@ -19,10 +20,6 @@ import '../providers/attendance_notifier.dart' hide AttendanceSettings;
 import '../../domain/entities/attendance_entity.dart';
 import '../widgets/attendance_stats_row.dart';
 import '../widgets/attendance_month_header.dart';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Screen
-// ─────────────────────────────────────────────────────────────────────────────
 
 class ManagerAttendanceScreen extends ConsumerStatefulWidget {
   const ManagerAttendanceScreen({super.key});
@@ -125,7 +122,7 @@ class _ManagerAttendanceScreenState
         );
   }
 
-  // ── Filter: single date ─────────────────────────────────────────────────────
+  // ── Filters ─────────────────────────────────────────────────────────────────
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -147,8 +144,6 @@ class _ManagerAttendanceScreenState
         .read(managerAttendanceProvider.notifier)
         .fetchAllAttendance(filterDate: _filterDate);
   }
-
-  // ── Filter: date range ──────────────────────────────────────────────────────
 
   Future<void> _pickDateRange() async {
     final range = await showDateRangePicker(
@@ -176,8 +171,6 @@ class _ManagerAttendanceScreenState
         .fetchByDateRange(startDate: _rangeStart!, endDate: _rangeEnd!);
   }
 
-  // ── Filter: clear ───────────────────────────────────────────────────────────
-
   void _clearFilter() {
     setState(() {
       _filterDate = null;
@@ -189,8 +182,6 @@ class _ManagerAttendanceScreenState
     });
     ref.read(managerAttendanceProvider.notifier).fetchAllAttendance();
   }
-
-  // ── Filter: by staff ID ─────────────────────────────────────────────────────
 
   void _fetchByStaff(String raw) {
     final id = int.tryParse(raw.trim());
@@ -214,7 +205,7 @@ class _ManagerAttendanceScreenState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Correction saved for record #${record.attendanceId} · Reason: ${result.reason}',
+          'Correction saved for #${record.attendanceId} · ${result.reason}',
         ),
         backgroundColor: Colors.blue.shade700,
         behavior: SnackBarBehavior.floating,
@@ -229,21 +220,18 @@ class _ManagerAttendanceScreenState
 
   void _showStaffProfile(AttendanceEntity record) {
     final allRecords = ref.read(managerAttendanceProvider).value?.records ?? [];
-    final settings = ref.read(attendanceSettingsProvider).value?.settings;
-    final leaves = ref.read(staffLeaveProvider).value?.leaves ?? []; // ← add
-
+    final settings = ref.read(attendanceSettingsProvider).settings;
+    final leaves = ref.read(staffLeaveProvider).value?.leaves ?? [];
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (_) => StaffProfileSheet(
         profile: buildStaffProfile(
           record: record,
           allRecords: allRecords,
           settings: settings,
-          leaves: leaves, // ← add
+          leaves: leaves,
         ),
       ),
     );
@@ -281,9 +269,7 @@ class _ManagerAttendanceScreenState
               startDate: DateFormatter.fmtApi(req.startDate),
               endDate: DateFormatter.fmtApi(req.endDate),
             );
-
         if (!mounted) return;
-
         final records =
             ref.read(managerAttendanceProvider).value?.records ?? [];
         if (records.isEmpty) {
@@ -298,7 +284,6 @@ class _ManagerAttendanceScreenState
           }
           return;
         }
-
         final dateRange =
             '${DateFormatter.fmt(req.startDate)} → ${DateFormatter.fmt(req.endDate)}';
         final filename =
@@ -329,18 +314,11 @@ class _ManagerAttendanceScreenState
   // ── Remind ──────────────────────────────────────────────────────────────────
 
   Future<void> _openRemind() async {
-    // Always fetch today's records fresh before opening
     await ref
         .read(managerAttendanceProvider.notifier)
-        .fetchAllAttendance(
-          filterDate: fmtDate(DateTime.now()), // today only
-        );
-
+        .fetchAllAttendance(filterDate: fmtDate(DateTime.now()));
     if (!mounted) return;
-
     final records = ref.read(managerAttendanceProvider).value?.records ?? [];
-
-    // Now filter is meaningful — all records are from today
     final unchecked = records
         .where((r) => r.checkInTime == null || r.checkInTime!.isEmpty)
         .map(
@@ -352,10 +330,8 @@ class _ManagerAttendanceScreenState
           ),
         )
         .toList();
-
     if (!mounted) return;
-
-    RemindDialog.show(
+    await RemindDialog.show(
       context,
       uncheckedStaff: unchecked,
       onSendReminder: (staffUserIds) async {
@@ -384,23 +360,23 @@ class _ManagerAttendanceScreenState
               ),
             );
           }
-          // Restore the original month view after reminding
-          if (mounted) {
-            ref
-                .read(managerAttendanceProvider.notifier)
-                .fetchAllAttendance(
-                  filterDate: _filterDate,
-                  month: _month,
-                  year: _year,
-                );
-          }
         } catch (e) {
           if (mounted)
             _showErrorSnackBar('Failed to send reminders: $e', () {});
         }
       },
     );
+    if (mounted) {
+      ref
+          .read(managerAttendanceProvider.notifier)
+          .fetchAllAttendance(
+            filterDate: _filterDate,
+            month: _month,
+            year: _year,
+          );
+    }
   }
+
   // ── Settings ────────────────────────────────────────────────────────────────
 
   Future<void> _openSettings() async {
@@ -408,32 +384,25 @@ class _ManagerAttendanceScreenState
     final notifier = ref.read(attendanceSettingsProvider.notifier);
     await notifier.fetchSettings();
     if (!mounted) return;
-
-    final settings = ref.read(attendanceSettingsProvider).value?.settings;
-    if (settings == null) {
-      _showSaveResult(
-        ref.read(attendanceSettingsProvider).value?.error ??
-            'Failed to load settings',
-      );
+    final s = ref.read(attendanceSettingsProvider);
+    if (s.settings == null) {
+      _showSaveResult(s.error ?? 'Failed to load settings');
       return;
     }
-
-    if (!mounted) return;
-    final snapshot = AttendanceSettings(
-      officeLat: settings.officeLatitude,
-      officeLng: settings.officeLongitude,
-      geofenceRadius: settings.allowedRadiusMeters,
-      lateThresholdMinutes: settings.lateThresholdMinutes,
-      overtimeThresholdMinutes: settings.overtimeThresholdMinutes,
-      officeOpenTime: settings.officeOpenTime,
-      officeCloseTime: settings.officeCloseTime,
-      timezone: settings.timezone,
+    final formData = AttendanceSettings(
+      officeLat: s.settings!.officeLatitude,
+      officeLng: s.settings!.officeLongitude,
+      geofenceRadius: s.settings!.allowedRadiusMeters,
+      lateThresholdMinutes: s.settings!.lateThresholdMinutes,
+      overtimeThresholdMinutes: s.settings!.overtimeThresholdMinutes,
+      officeOpenTime: s.settings!.officeOpenTime,
+      officeCloseTime: s.settings!.officeCloseTime,
+      timezone: s.settings!.timezone,
       departments: const [],
     );
-
     await AttendanceSettingsSheet.show(
       context,
-      initial: snapshot,
+      initial: formData,
       onSave: (newSettings) async {
         await notifier.updateSettings(
           officeLatitude: newSettings.officeLat,
@@ -446,13 +415,12 @@ class _ManagerAttendanceScreenState
           timezone: newSettings.timezone,
         );
         if (!mounted) return;
-        final error = ref.read(attendanceSettingsProvider).value?.error;
-        _showSaveResult(error);
+        _showSaveResult(ref.read(attendanceSettingsProvider).error);
       },
     );
   }
 
-  // ── Snackbar ────────────────────────────────────────────────────────────────
+  // ── Snackbars ───────────────────────────────────────────────────────────────
 
   void _showErrorSnackBar(String message, VoidCallback onDismiss) {
     if (!mounted) return;
@@ -487,7 +455,7 @@ class _ManagerAttendanceScreenState
     );
   }
 
-  // ── Computed getters ────────────────────────────────────────────────────────
+  // ── Computed ────────────────────────────────────────────────────────────────
 
   String get _filterLabel => buildFilterLabel(
     filterDate: _filterDate,
@@ -506,98 +474,257 @@ class _ManagerAttendanceScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surfaceColor = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
     final asyncState = ref.watch(managerAttendanceProvider);
     final isScanLoading =
         ref.watch(scanAttendanceProvider).value?.isLoading ?? false;
+
     return Scaffold(
+      backgroundColor: bgColor,
       body: SafeArea(
         child: asyncState.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          loading: () => Center(
+            child: CircularProgressIndicator(color: Pallets.gradient2),
+          ),
+          error: (e, _) => Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline, color: Pallets.error, size: 48),
+                const SizedBox(height: 12),
+                Text(
+                  'Something went wrong',
+                  style: TextStyle(
+                    color: textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$e',
+                  style: TextStyle(color: textSecondary, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: _loadInitialData,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Pallets.gradient2,
+                  ),
+                ),
+              ],
+            ),
+          ),
           data: (state) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /////////////////////////////////////////////////////////
-              ///
-              ////////////////////////////////////////////////////////
+              // ── Stats card ────────────────────────────────────────
               if (state.todaySummary.isNotEmpty)
-                AttendanceStatsRow(stats: state.todaySummary),
-              AttendanceMonthHeader.manager(
-                month: _month,
-                year: _year,
-                onPrevious: () => _changeMonth(-1),
-                onNext: () => _changeMonth(1),
-                filterLabel: _filterLabel,
-                hasFilter: _hasFilter,
-                showSearch: _showSearch,
-                onPickDate: _pickDate,
-                onPickDateRange: _pickDateRange,
-                onToggleSearch: () =>
-                    setState(() => _showSearch = !_showSearch),
-                onClearFilter: _clearFilter,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderColor),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: AttendanceStatsRow(stats: state.todaySummary),
+                  ),
+                ),
+
+              const SizedBox(height: 12),
+
+              // ── Month header card ─────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: surfaceColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: AttendanceMonthHeader.manager(
+                    month: _month,
+                    year: _year,
+                    onPrevious: () => _changeMonth(-1),
+                    onNext: () => _changeMonth(1),
+                    filterLabel: _filterLabel,
+                    hasFilter: _hasFilter,
+                    showSearch: _showSearch,
+                    onPickDate: _pickDate,
+                    onPickDateRange: _pickDateRange,
+                    onToggleSearch: () =>
+                        setState(() => _showSearch = !_showSearch),
+                    onClearFilter: _clearFilter,
+                  ),
+                ),
               ),
-              /////////////////////////////////////////////////////////
-              ///
-              ////////////////////////////////////////////////////////
+
+              // ── Search field ──────────────────────────────────────
               if (_showSearch)
-                StaffSearchField(
-                  controller: _searchController,
-                  onSubmit: _fetchByStaff,
-                  onClear: () {
-                    _searchController.clear();
-                    setState(() {
-                      _filterStaffId = null;
-                      _showSearch = false;
-                    });
-                    ref
-                        .read(managerAttendanceProvider.notifier)
-                        .fetchAllAttendance();
-                  },
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: StaffSearchField(
+                      controller: _searchController,
+                      onSubmit: _fetchByStaff,
+                      onClear: () {
+                        _searchController.clear();
+                        setState(() {
+                          _filterStaffId = null;
+                          _showSearch = false;
+                        });
+                        ref
+                            .read(managerAttendanceProvider.notifier)
+                            .fetchAllAttendance();
+                      },
+                    ),
+                  ),
                 ),
 
-              /////////////////////////////////////////////////////////
-              ///
-              ////////////////////////////////////////////////////////
-              ManagerToolbar(
-                isScanLoading: isScanLoading,
-                onShowQr: _showOfficeQrDialog,
-                onRefreshQr: () async {
-                  await ref
-                      .read(scanAttendanceProvider.notifier)
-                      .fetchOfficeQr();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Office QR refreshed.'),
-                        behavior: SnackBarBehavior.floating,
+              const SizedBox(height: 10),
+
+              // ── Toolbar card ──────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: surfaceColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: borderColor),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    );
-                  }
-                },
-                onExport: _openExport,
-                onRemind: _openRemind,
-                onSettings: _openSettings,
-              ),
-
-              /////////////////////////////////////////////////////////
-              ///
-              ////////////////////////////////////////////////////////
-              const SizedBox(height: 4),
-              Expanded(
-                child: RecordsList(
-                  isLoading: state.isLoading,
-                  records: state.records,
-                  selectedId: state.selected?.attendanceId,
-                  onTap: _onRecordTap,
-                  onLongPress: _onRecordLongPress,
-                  onRefresh: () => ref
-                      .read(managerAttendanceProvider.notifier)
-                      .fetchAllAttendance(filterDate: _filterDate),
+                    ],
+                  ),
+                  child: ManagerToolbar(
+                    isScanLoading: isScanLoading,
+                    onShowQr: _showOfficeQrDialog,
+                    onRefreshQr: () async {
+                      await ref
+                          .read(scanAttendanceProvider.notifier)
+                          .fetchOfficeQr();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Office QR refreshed.'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    },
+                    onExport: _openExport,
+                    onRemind: _openRemind,
+                    onSettings: _openSettings,
+                  ),
                 ),
               ),
 
-              /////////////////////////////////////////////////////////
-              ///
-              ////////////////////////////////////////////////////////
+              const SizedBox(height: 10),
+
+              // ── Active filter chip ────────────────────────────────
+              if (_hasFilter)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Pallets.gradient2.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Pallets.gradient2.withOpacity(0.4),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.filter_alt_outlined,
+                              size: 14,
+                              color: Pallets.gradient2,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _filterLabel,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Pallets.gradient2,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            GestureDetector(
+                              onTap: _clearFilter,
+                              child: Icon(
+                                Icons.close,
+                                size: 14,
+                                color: Pallets.gradient2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // ── Records list ──────────────────────────────────────
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: RecordsList(
+                      isLoading: state.isLoading,
+                      records: state.records,
+                      selectedId: state.selected?.attendanceId,
+                      onTap: _onRecordTap,
+                      onLongPress: _onRecordLongPress,
+                      onRefresh: () => ref
+                          .read(managerAttendanceProvider.notifier)
+                          .fetchAllAttendance(filterDate: _filterDate),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
             ],
           ),
         ),

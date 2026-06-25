@@ -111,7 +111,6 @@ class UsersStatCard extends StatelessWidget {
               ),
             ),
           ],
-
           const SizedBox(height: 8),
 
           ////////////////////////////////////////////////////////////////

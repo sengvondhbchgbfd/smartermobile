@@ -6,7 +6,7 @@ part of 'attendance_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$staffAttendanceHash() => r'3e77ef0312e27453d0abec282424affa96993282';
+String _$staffAttendanceHash() => r'3797081f9b3a89e47a44fe453fb875ed2e34d46a';
 
 /// See also [StaffAttendance].
 @ProviderFor(StaffAttendance)
@@ -25,7 +25,7 @@ final staffAttendanceProvider =
     );
 
 typedef _$StaffAttendance = AutoDisposeAsyncNotifier<StaffAttendanceState>;
-String _$scanAttendanceHash() => r'5db85ba66636b8e0197551ce949df8b478004ea2';
+String _$scanAttendanceHash() => r'eab999eca3e7633ac1ca29eec3ba3e1b2dbac47a';
 
 /// See also [ScanAttendance].
 @ProviderFor(ScanAttendance)
@@ -45,12 +45,12 @@ final scanAttendanceProvider =
 
 typedef _$ScanAttendance = AutoDisposeAsyncNotifier<ScanAttendanceState>;
 String _$attendanceSettingsHash() =>
-    r'3b1d3e68a08f58acae030cf721949b53c5727b87';
+    r'13d510be6af572cd62114c7404e0f9649509b537';
 
 /// See also [AttendanceSettings].
 @ProviderFor(AttendanceSettings)
 final attendanceSettingsProvider =
-    AutoDisposeAsyncNotifierProvider<
+    AutoDisposeNotifierProvider<
       AttendanceSettings,
       AttendanceSettingsState
     >.internal(
@@ -63,9 +63,8 @@ final attendanceSettingsProvider =
       allTransitiveDependencies: null,
     );
 
-typedef _$AttendanceSettings =
-    AutoDisposeAsyncNotifier<AttendanceSettingsState>;
-String _$managerAttendanceHash() => r'0c02727d12ebc15d0fd0459c6715cf3f248e54cd';
+typedef _$AttendanceSettings = AutoDisposeNotifier<AttendanceSettingsState>;
+String _$managerAttendanceHash() => r'9940f2275d791c7e08018340a3672a6248eb9298';
 
 /// See also [ManagerAttendance].
 @ProviderFor(ManagerAttendance)

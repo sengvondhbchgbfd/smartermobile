@@ -33,16 +33,13 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
   Future<NotificationState> build() async {
     final dioClient = await ref.watch(dioClientProvider.future);
     final storage = ref.read(secureStorageProvider);
-
     _remote = NotificationRemoteDataSourceImpl(dio: dioClient.dio);
-
     _ws = NotificationWsDataSource(
       wsBaseUrl: ApiConstants.wsBaseUrl,
       getToken: storage.getAccessToken,
     );
 
     _repo = NotificationRepositoryImpl(_remote);
-
     _getMyNotifications = GetMyNotificationsUseCase(_repo);
     _getSummary = GetSummaryUseCase(_repo);
     _getAllNotifications = GetAllNotificationsUseCase(_repo);
@@ -52,9 +49,7 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
     _bulkMarkRead = BulkMarkReadUseCase(_repo);
     _deleteOne = DeleteOneUseCase(_repo);
     _deleteAllRead = DeleteAllReadUseCase(_repo);
-
     _subscribeWs();
-
     ref.onDispose(() {
       _wsSub?.cancel();
       _ws.dispose();
@@ -62,8 +57,9 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
 
     return const NotificationState();
   }
-
+  //////////////////////////////////////////////////////////////////////////////
   // ── WebSocket ──────────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   void _subscribeWs() {
     _wsSub = _ws.events.listen((event) {
@@ -102,8 +98,9 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
     });
     _ws.connect();
   }
-
+  //////////////////////////////////////////////////////////////////////////////
   // ── Load ───────────────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> loadMyNotifications() async {
     final current = state.valueOrNull ?? const NotificationState();
@@ -136,7 +133,9 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
     }
   }
 
+  //////////////////////////////////////////////////////////////////////////////
   // ── Filter ─────────────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   void setFilter(NotificationFilter f) {
     final current = state.valueOrNull;
@@ -145,7 +144,9 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
     loadMyNotifications();
   }
 
+  //////////////////////////////////////////////////////////////////////////////
   // ── Mark read ──────────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> markOneRead(int notificationId) async {
     final current = state.valueOrNull;
@@ -229,8 +230,9 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
       state = AsyncData(current.copyWith(notifications: prev));
     }
   }
-
+  //////////////////////////////////////////////////////////////////////////////
   // ── Delete ─────────────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> deleteOne(int notificationId) async {
     final current = state.valueOrNull;
@@ -283,8 +285,9 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
       state = AsyncData(current.copyWith(notifications: prev));
     }
   }
-
+  //////////////////////////////////////////////////////////////////////////////
   // ── Admin create ───────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> adminCreate({
     required int userId,
@@ -308,8 +311,9 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
       rethrow;
     }
   }
-
+  //////////////////////////////////////////////////////////////////////////////
   // ── Selection ──────────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   void toggleSelectionMode() {
     final current = state.valueOrNull;
@@ -359,8 +363,9 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
     if (current == null) return;
     state = AsyncData(current.copyWith(selectedIds: {}, isSelecting: false));
   }
-
+  //////////////////////////////////////////////////////////////////////////////
   // ── Helpers ────────────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   void _decrementUnread() {
     final current = state.valueOrNull;
@@ -396,8 +401,9 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
     );
   }
 }
-
+//////////////////////////////////////////////////////////////////////////////
 // ── Provider ───────────────────────────────────────────────────────────────
+//////////////////////////////////////////////////////////////////////////////
 
 final notificationNotifierProvider =
     AsyncNotifierProvider<NotificationNotifier, NotificationState>(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/core/themes/app_theme.dart';
+import 'package:frontendmobile/core/themes/theme_provider.dart';
 import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'config/routes/app_router.dart';
 
@@ -9,14 +10,15 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch currentUserProvider so the router rebuilds when auth state changes
-    // (login → home, logout → login)
     ref.watch(currentUserProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
+      themeAnimationDuration: const Duration(milliseconds: 300),
+      themeAnimationCurve: Curves.easeInOut,
       debugShowCheckedModeBanner: false,
       routerConfig: AppRouter.router,
     );

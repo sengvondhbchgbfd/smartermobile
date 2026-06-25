@@ -14,13 +14,14 @@ class StaffRoleModel extends StaffRoleEntity {
   });
 
   factory StaffRoleModel.fromJson(Map<String, dynamic> json) => StaffRoleModel(
-    id: json['staff_role_id'] as int?,
+    id: (json['role_id'] ?? json['staff_role_id']) as int?,
     companyId: json['company_id'] as int,
     roleName: json['role_name'] as String,
-    description: json['description'] as String,
-    // baseSalary: (json['base_salary'] as num).toDouble(),
-    baseSalary: double.parse(json['base_salary'].toString()),
-    isManager: json['is_manager'] as bool,
+    description: json['description'] as String? ?? '', // ✅ null-safe
+    baseSalary: json['base_salary'] != null
+        ? double.parse(json['base_salary'].toString())
+        : 0.0, // ✅ null-safe
+    isManager: json['is_manager'] as bool? ?? false, // ✅ null-safe
     createdAt: json['created_at'] != null
         ? DateTime.parse(json['created_at'] as String)
         : null,

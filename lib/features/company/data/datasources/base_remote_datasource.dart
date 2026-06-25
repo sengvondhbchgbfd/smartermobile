@@ -8,7 +8,7 @@ abstract class BaseRemoteDatasource {
   dynamic extractData(Response response) {
     final body = response.data;
     if (body == null) {
-      throw ServerEception(
+      throw ServerException(
         message: 'Empty server response',
         statusCode: response.statusCode ?? 500,
       );
@@ -28,7 +28,7 @@ abstract class BaseRemoteDatasource {
       final data = extractData(response);
       return parser(data);
     } on DioException catch (e) {
-      throw ServerEception(
+      throw ServerException(
         message: e.response?.data?['message'] ?? 'Server error',
         statusCode: e.response?.statusCode ?? 500,
       );

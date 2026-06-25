@@ -38,7 +38,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       // ✅ Step 2 — not initialized → go to onboarding
       ///////////////////////////////////////////////////////////
       if (!isInitialized) {
-        context.go(RouteNames.onboarding);
+        context.go(RouteNames.login);
         return;
       }
       /////////////////////////////////////////////////////////

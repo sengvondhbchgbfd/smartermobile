@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../../core/themes/app_pallets.dart';
 
 class HeaderWidget extends StatelessWidget {
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
   final String companyName;
   final int unreadCount;
   final String? logoUrl;
   final VoidCallback? onCompanyTap;
   final VoidCallback? onNotificationTap;
-
   const HeaderWidget({
     super.key,
     required this.companyName,
@@ -16,13 +18,17 @@ class HeaderWidget extends StatelessWidget {
     this.onCompanyTap,
     this.onNotificationTap,
   });
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
+        ////////////////////////////////////////////////////////////////////////
         // ── Company section (logo + name) ─────────────────────────────────
-
+        ////////////////////////////////////////////////////////////////////////
         GestureDetector(
           onTap: onCompanyTap,
           behavior: HitTestBehavior.opaque,
@@ -76,8 +82,9 @@ class HeaderWidget extends StatelessWidget {
         ),
 
         const Spacer(),
-
+        ////////////////////////////////////////////////////////////////////////
         // ── Notification bell ─────────────────────────────────────────────
+        ////////////////////////////////////////////////////////////////////////
         GestureDetector(
           onTap: onNotificationTap,
           behavior: HitTestBehavior.opaque,

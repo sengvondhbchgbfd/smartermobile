@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontendmobile/config/routes/route_names.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:go_router/go_router.dart';
 
 const List<(String, IconData, String)> _navItems = [
@@ -7,23 +8,14 @@ const List<(String, IconData, String)> _navItems = [
   (RouteNames.attendance, Icons.qr_code_scanner_rounded, 'Scan'),
   (RouteNames.chat, Icons.chat_rounded, 'Chat'),
   (RouteNames.users, Icons.people_alt_rounded, 'Users'),
-  (RouteNames.settings, Icons.settings_rounded, 'Settings'),
 ];
-
-////////////////////////////////////////////////////////////////////////////////
-///
-////////////////////////////////////////////////////////////////////////////////
 
 class AppShell extends StatefulWidget {
   final Widget child;
   const AppShell({super.key, required this.child});
-
   @override
   State<AppShell> createState() => _AppShellState();
 }
-////////////////////////////////////////////////////////////////////////////////
-///
-////////////////////////////////////////////////////////////////////////////////
 
 class _AppShellState extends State<AppShell>
     with SingleTickerProviderStateMixin {
@@ -32,29 +24,25 @@ class _AppShellState extends State<AppShell>
   final ScrollController scrollController = ScrollController();
   double _lastOffset = 0;
   bool _isVisible = true;
-
   static const double _kNavBarHeight = 62;
+
   @override
   void initState() {
     super.initState();
-
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 220),
+      duration: const Duration(milliseconds: 210),
     );
-
     _slideAnimation = Tween<Offset>(begin: Offset.zero, end: const Offset(0, 1))
         .animate(
           CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
         );
-
     scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     final offset = scrollController.offset;
     final delta = offset - _lastOffset;
-
     if (delta > 6 && _isVisible) {
       _isVisible = false;
       _animController.forward();
@@ -62,7 +50,6 @@ class _AppShellState extends State<AppShell>
       _isVisible = true;
       _animController.reverse();
     }
-
     _lastOffset = offset;
   }
 
@@ -78,16 +65,23 @@ class _AppShellState extends State<AppShell>
     for (int i = 0; i < _navItems.length; i++) {
       if (location.startsWith(_navItems[i].$1)) return i;
     }
-    return 0;
+    return 0; // default to dashboard
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surfaceColor = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
     final location = GoRouterState.of(context).uri.path;
     final currentIndex = _currentIndex(location);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: bgColor, // ← theme-aware
       extendBody: true,
       body: ShellScrollController(
         controller: scrollController,
@@ -98,26 +92,31 @@ class _AppShellState extends State<AppShell>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Fade gradient so content dissolves into the nav bar
+            // ── Fade gradient ─────────────────────────────────────────
             IgnorePointer(
               child: Container(
                 height: 24,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Color(0xFF121212)],
+                    colors: [
+                      Colors.transparent,
+                      bgColor, // ← theme-aware
+                    ],
                   ),
                 ),
               ),
             ),
+
+            // ── Nav bar ───────────────────────────────────────────────
             SizedBox(
               height: _kNavBarHeight,
               child: BottomNavigationBar(
                 currentIndex: currentIndex,
-                backgroundColor: const Color(0xFF1E1E2E),
-                selectedItemColor: const Color.fromRGBO(251, 109, 169, 1),
-                unselectedItemColor: const Color(0xFFA7A7A7),
+                backgroundColor: surfaceColor, // ← theme-aware
+                selectedItemColor: Pallets.gradient2, // ← use brand color
+                unselectedItemColor: textSecondary, // ← theme-aware
                 type: BottomNavigationBarType.fixed,
                 selectedFontSize: 11,
                 unselectedFontSize: 11,
@@ -147,7 +146,9 @@ class _AppShellState extends State<AppShell>
   }
 }
 
-// ── InheritedWidget — passes scroll controller to shell screens only ──────────
+////////////////////////////////////////////////////////////////////////////////
+// ── InheritedWidget ───────────────────────────────────────────────────────────
+////////////////////////////////////////////////////////////////////////////////
 
 class ShellScrollController extends InheritedWidget {
   final ScrollController controller;

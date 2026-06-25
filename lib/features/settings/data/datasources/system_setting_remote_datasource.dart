@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:frontendmobile/core/constants/ApiEndpoints.dart';
+import 'package:frontendmobile/core/errors/exceptions.dart';
 import 'package:frontendmobile/core/network/dio_client.dart';
 import '../models/system_setting_model.dart';
 
-// ---------------------------------------------------------------------------
-// Abstract
-// ---------------------------------------------------------------------------
-
+/////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////
 abstract class SystemSettingRemoteDataSource {
   Future<List<SystemSettingModel>> getAll();
   Future<SystemSettingModel> getById(int settingId);
@@ -29,28 +30,25 @@ abstract class SystemSettingRemoteDataSource {
   );
   Future<void> delete(int settingId);
 }
-
-// ---------------------------------------------------------------------------
-// Implementation — uses your DioClient (AuthInterceptor handles token)
-// ---------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////
+///
+///////////////////////////////////////////////////////////////////
 
 class SystemSettingRemoteDataSourceImpl
     implements SystemSettingRemoteDataSource {
   final DioClient _dioClient;
+  static const String _path = ApiEndpoints.systemSettings;
 
-  // endpoint prefix — matches your FastAPI router prefix="/system-settings"
-  static const _path = '/system-settings';
-
+  ///////////////////////////////////////////////////////////////////
+  // ✅ Constructor
+  ///////////////////////////////////////////////////////////////////
   SystemSettingRemoteDataSourceImpl(this._dioClient);
-
   Dio get _dio => _dioClient.dio;
 
   // ── helpers ───────────────────────────────────────────────────────────────
 
-  /// Unwrap Dio response and cast to T.
   T _data<T>(Response res) => res.data as T;
 
-  /// Map DioException → ApiException with your backend's detail message.
   Never _throw(DioException e) {
     final statusCode = e.response?.statusCode ?? 0;
     final detail = e.response?.data;
@@ -60,7 +58,7 @@ class SystemSettingRemoteDataSourceImpl
     throw ApiException(statusCode: statusCode, message: message);
   }
 
-  // ── GET all ──────────────────────────────────────────────────────────────
+  // ── GET all ───────────────────────────────────────────────────────────────
 
   @override
   Future<List<SystemSettingModel>> getAll() async {
@@ -190,18 +188,4 @@ class SystemSettingRemoteDataSourceImpl
       _throw(e);
     }
   }
-}
-
-// ---------------------------------------------------------------------------
-// Exception
-// ---------------------------------------------------------------------------
-
-class ApiException implements Exception {
-  final int statusCode;
-  final String message;
-
-  const ApiException({required this.statusCode, required this.message});
-
-  @override
-  String toString() => 'ApiException($statusCode): $message';
 }

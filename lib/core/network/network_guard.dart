@@ -13,7 +13,7 @@ mixin NetworkGuard {
     try {
       final result = await call();
       return Right(result);
-    } on ServerEception catch (e) {
+    } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));

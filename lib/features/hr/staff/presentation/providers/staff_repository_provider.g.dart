@@ -6,7 +6,7 @@ part of 'staff_repository_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$staffRepositoryHash() => r'b38049199de64724e85dab5f9ceb1e0753daf014';
+String _$staffRepositoryHash() => r'61f5ef7d656b01491625d5244d9890a9cbd6a757';
 
 /// See also [staffRepository].
 @ProviderFor(staffRepository)

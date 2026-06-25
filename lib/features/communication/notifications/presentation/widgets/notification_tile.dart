@@ -20,17 +20,31 @@ class NotificationTile extends StatelessWidget {
     required this.onDismissed,
   });
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+
   @override
   Widget build(BuildContext context) {
+    /////////////////////////////////////////
+    ///
+    /////////////////////////////////////////
     return Dismissible(
       key: Key('notif_${notification.notificationId}'),
       direction: DismissDirection.endToStart,
+
+      ////////////////////////////////////////
+      ///
+      ///////////////////////////////////////
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         color: Colors.redAccent,
         child: const Icon(Icons.delete_outline, color: Colors.white),
       ),
+      ////////////////////////////////////////
+      ///
+      ///////////////////////////////////////
       onDismissed: (_) => onDismissed(),
       child: InkWell(
         onTap: onTap,
@@ -43,10 +57,13 @@ class NotificationTile extends StatelessWidget {
               ? Colors.transparent
               : const Color(0xFF1E293B),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //////////////////////////////////////////////////////////////////
               // ── Checkbox or type icon ────────────────────────────────────
+              //////////////////////////////////////////////////////////////////
               if (isSelecting)
                 Padding(
                   padding: const EdgeInsets.only(right: 12, top: 2),
@@ -76,8 +93,9 @@ class NotificationTile extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 12, top: 2),
                   child: NotificationTypeBadge(type: notification.type.name),
                 ),
-
+              //////////////////////////////////////////////////////////////////
               // ── Content ──────────────────────────────────────────────────
+              //////////////////////////////////////////////////////////////////
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,6 +114,7 @@ class NotificationTile extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         if (!notification.isRead)
                           Container(
                             width: 8,
@@ -108,7 +127,9 @@ class NotificationTile extends StatelessWidget {
                           ),
                       ],
                     ),
+                    ////////////////////////////////
                     const SizedBox(height: 4),
+                    ///////////////////////////////
                     Text(
                       notification.message,
                       style: const TextStyle(
@@ -118,7 +139,10 @@ class NotificationTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    ///////////////////////////////
                     const SizedBox(height: 6),
+
+                    ///////////////////////////////
                     Text(
                       _formatTime(notification.createdAt),
                       style: const TextStyle(

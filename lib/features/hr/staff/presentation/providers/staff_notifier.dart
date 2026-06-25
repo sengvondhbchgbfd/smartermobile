@@ -39,51 +39,13 @@ class StaffNotifier extends _$StaffNotifier {
     return await _getAll();
   }
 
+  // ── REFRESH full list ─────────────────────────────────────────────────────
   Future<void> fetchAll() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _getAll());
   }
 
-  Future<void> fetchById(int id) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final staff = await _getById(id);
-      return [staff];
-    });
-  }
-
-  Future<void> fetchMyProfile() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final staff = await _getMyProfile();
-      return [staff];
-    });
-  }
-
-  Future<void> fetchManagers() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _getManagers());
-  }
-
-  Future<void> fetchByRole(int staffRoleId) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _getByRole(staffRoleId));
-  }
-
-  Future<void> fetchByDepartment(int departmentId) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _getByDepartment(departmentId));
-  }
-
-  Future<void> fetchByUserId(int userId) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final staff = await _getByUserId(userId);
-      return [staff];
-    });
-  }
-
-  // ── CREATE ──
+  // ── CREATE ────────────────────────────────────────────────────────────────
   Future<void> create(StaffEntity staff) async {
     final created = await _create(staff);
     final current = state.valueOrNull ?? [];
@@ -93,7 +55,7 @@ class StaffNotifier extends _$StaffNotifier {
     }
   }
 
-  // ── UPDATE ──
+  // ── UPDATE ────────────────────────────────────────────────────────────────
   Future<void> updates(
     int id,
     UpdateStaffRequest request, {
@@ -101,27 +63,25 @@ class StaffNotifier extends _$StaffNotifier {
   }) async {
     final updated = await _update(id, request, avatarFile: avatarFile);
     final current = state.valueOrNull ?? [];
-    state = AsyncData(
-      current.map((s) => s.id == id ? updated : s).toList(),
-    );
+    state = AsyncData(current.map((s) => s.id == id ? updated : s).toList());
     if (updated.userId != null) {
       ref.read(userNotifierProvider.notifier).patchStaff(updated);
     }
   }
 
-  // ── UPDATE AVATAR ──
+  // ── UPDATE AVATAR ─────────────────────────────────────────────────────────
   Future<void> updateAvatar(int id, File avatarFile) async {
     final updated = await _updateAvatar(id, avatarFile);
     final current = state.valueOrNull ?? [];
-    state = AsyncData(
-      current.map((s) => s.id == id ? updated : s).toList(),
-    );
+    state = AsyncData(current.map((s) => s.id == id ? updated : s).toList());
     if (updated.userId != null) {
       ref.read(userNotifierProvider.notifier).patchStaff(updated);
     }
   }
 
-  // ── DELETE ──
+
+
+  // ── DELETE ────────────────────────────────────────────────────────────────
   Future<void> delete(int id) async {
     final current = state.valueOrNull ?? [];
     final target = current.firstWhere(
@@ -134,4 +94,53 @@ class StaffNotifier extends _$StaffNotifier {
       ref.read(userNotifierProvider.notifier).removeStaff(target.userId!);
     }
   }
+
+  // ── Internal fetch helpers (do NOT mutate main state) ────────────────────
+  Future<StaffEntity> getById(int id) async {
+    final cached = state.valueOrNull?.where((s) => s.id == id).firstOrNull;
+    if (cached != null) return cached;
+    return await _getById(id);
+  }
+
+  Future<StaffEntity> getMyProfile() => _getMyProfile();
+
+  Future<StaffEntity?> getByUserId(int userId) async {
+    final cached = state.valueOrNull
+        ?.where((s) => s.userId == userId)
+        .firstOrNull;
+    if (cached != null) return cached;
+    return await _getByUserId(userId);
+  }
+
+  Future<List<StaffEntity>> getManagers() => _getManagers();
+  Future<List<StaffEntity>> getByRole(int roleId) => _getByRole(roleId);
+  Future<List<StaffEntity>> getByDepartment(int deptId) =>
+      _getByDepartment(deptId);
+}
+
+// ── Separate family providers — never touch the main list ─────────────────
+
+@riverpod
+Future<StaffEntity> staffDetail(StaffDetailRef ref, int id) async {
+  final repository = await ref.read(staffRepositoryProvider.future);
+  final useCase = GetStaffByIdUseCase(repository);
+  return await useCase(id);
+}
+
+@riverpod
+Future<List<StaffEntity>> staffManagers(StaffManagersRef ref) async {
+  return ref.read(staffNotifierProvider.notifier).getManagers();
+}
+
+@riverpod
+Future<List<StaffEntity>> staffByRole(StaffByRoleRef ref, int roleId) async {
+  return ref.read(staffNotifierProvider.notifier).getByRole(roleId);
+}
+
+@riverpod
+Future<List<StaffEntity>> staffByDepartment(
+  StaffByDepartmentRef ref,
+  int deptId,
+) async {
+  return ref.read(staffNotifierProvider.notifier).getByDepartment(deptId);
 }

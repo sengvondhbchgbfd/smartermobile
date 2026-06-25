@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/company/presentation/widgets/card/user_state_card.dart';
+import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
 import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/company_provider.dart';
@@ -106,6 +107,7 @@ class _CompanyScreenState extends ConsumerState<CompanyScreen> {
 
   Widget _buildBody(AsyncValue state) {
     final userAsync = ref.watch(userNotifierProvider);
+    ref.watch(staffNotifierProvider);
     return state.when(
       /////////////////////////////////////////////////////////////////
       ///  loading

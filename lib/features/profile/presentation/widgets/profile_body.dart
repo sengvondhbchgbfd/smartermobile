@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/config/routes/route_names.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
 import 'package:frontendmobile/features/profile/domain/entities/profile_entity.dart';
 import 'package:frontendmobile/features/profile/presentation/providers/profile_providers.dart';
 import 'package:frontendmobile/features/profile/presentation/widgets/avatar_cart.dart';
 import 'package:frontendmobile/features/profile/presentation/widgets/info_card.dart';
+import 'package:frontendmobile/features/profile/presentation/widgets/menu/account_menu.dart';
+import 'package:frontendmobile/features/profile/presentation/widgets/permission/empty_permission.dart';
 import 'package:frontendmobile/features/profile/presentation/widgets/permission_card.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfileBody extends ConsumerStatefulWidget {
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
   final ProfileEntity profile;
   final StaffEntity staff;
   const ProfileBody({super.key, required this.profile, required this.staff});
@@ -20,18 +20,29 @@ class ProfileBody extends ConsumerStatefulWidget {
 }
 
 class _ProfileBodyState extends ConsumerState<ProfileBody> {
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
   int _selectedTab = 0;
   static const _bannerHeight = 160.0;
   static const _avatarRadius = 48.0;
   static const _avatarOverlap = 32.0;
   static const _blurple = Color(0xFF5865F2);
   static const _tabMuted = Color(0xFF80848E);
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
+
+  void _showAccountMenu(BuildContext context) {
+    showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: const Color(0xFF1E1F22),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => const AccountMenu(),
+    ).then((result) {
+      if (!mounted) return;
+      if (context.mounted && result == true) {
+        context.push(RouteNames.settings);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -49,9 +60,6 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
                 width: double.infinity,
                 color: const Color(0xFF5B3A8E),
               ),
-              //////////////////////////////////////
-              ///
-              /////////////////////////////////////
               Positioned(
                 top: MediaQuery.of(context).padding.top + 8,
                 left: 8,
@@ -64,10 +72,6 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
-
-              //////////////////////////////////////
-              ///
-              /////////////////////////////////////
               Positioned(
                 top: _bannerHeight - _avatarOverlap,
                 left: 20,
@@ -77,16 +81,17 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
           //══════════════════════════════════════════
-          // Name + subtitle + Edit button
+          // Name + subtitle + buttons
           //══════════════════════════════════════════
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Name
                 Row(
                   children: [
                     Text(
@@ -105,10 +110,8 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
                     ),
                   ],
                 ),
-
-                ////////////////////////////////////////////////////////////////
                 const SizedBox(height: 2),
-                ////////////////////////////////////////////////////////////////
+                // Subtitle
                 Text(
                   '${widget.profile.isManager ? 'Manager' : 'Staff'}  •  ${widget.profile.username}',
                   style: const TextStyle(
@@ -116,41 +119,60 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
                     color: Color(0xFFB5BAC1),
                   ),
                 ),
-
-                ////////////////////////////////////////////////////////////////
                 const SizedBox(height: 16),
-                ////////////////////////////////////////////////////////////////
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      await context.push(
-                        '/profile/edit',
-                        extra: {
-                          'profile': widget.profile,
-                          'staff': widget.staff,
+                // Edit Profile + Menu button
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          await context.push(
+                            '/profile/edit',
+                            extra: {
+                              'profile': widget.profile,
+                              'staff': widget.staff,
+                            },
+                          );
+                          ref.read(profileNotifierProvider.notifier).refresh();
+                          ref.invalidate(profileNotifierProvider);
                         },
-                      );
-                      // ref.invalidate(profileNotifierProvider);
-                      ref.read(profileNotifierProvider.notifier).refresh();
-                    },
-
-                    icon: const Icon(Icons.edit_rounded, size: 16),
-                    label: const Text('Edit Profile'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _blurple,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                        icon: const Icon(Icons.edit_rounded, size: 16),
+                        label: const Text('Edit Profile'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _blurple,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2B2D31),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: IconButton(
+                        onPressed: () => _showAccountMenu(context),
+                        icon: const Icon(
+                          Icons.menu_rounded,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 20),
               ],
@@ -195,21 +217,14 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
               );
             }),
           ),
-
-          /////////////////////////////////////////////////////////////////
-          ///
-          /////////////////////////////////////////////////////////////////
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Divider(height: 1, color: Color(0xFF3F4147)),
           ),
-
-          ////////////////////////////////////////////////////////////////
           const SizedBox(height: 12),
-          ////////////////////////////////////////////////////////////////
 
           //══════════════════════════════════════════
-          // Tab content Info Card
+          // Tab content
           //══════════════════════════════════════════
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -221,7 +236,7 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
                       profile: widget.profile,
                     )
                   : widget.profile.permissions.isEmpty
-                  ? _EmptyPermissions(key: const ValueKey('empty'))
+                  ? EmptyPermissions(key: const ValueKey('empty'))
                   : PermissionsCard(
                       key: const ValueKey('perms'),
                       permissions: widget.profile.permissions,
@@ -229,33 +244,6 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
             ),
           ),
           const SizedBox(height: 32),
-        ],
-      ),
-    );
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// ── Empty permissions placeholder ────────────────────────────────────────────
-////////////////////////////////////////////////////////////////////////////////
-
-class _EmptyPermissions extends StatelessWidget {
-  const _EmptyPermissions({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.shield_outlined, size: 36, color: Color(0xFF4E5058)),
-          SizedBox(height: 10),
-          Text(
-            'No permissions assigned',
-            style: TextStyle(fontSize: 13, color: Color(0xFF80848E)),
-          ),
         ],
       ),
     );

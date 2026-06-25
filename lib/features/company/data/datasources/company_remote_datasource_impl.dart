@@ -78,7 +78,7 @@ class CompanyRemoteDataSourceImpl extends BaseRemoteDatasource
       parser: (data) {
         final url = isLogo ? data['logo_url'] : data['banner_url'];
         if (url == null || url is! String) {
-          throw ServerEception(
+          throw ServerException(
             message: 'Invalid upload response',
             statusCode: 500,
           );

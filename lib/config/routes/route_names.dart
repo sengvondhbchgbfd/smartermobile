@@ -4,6 +4,10 @@ class RouteNames {
   static const onboarding = "/onboarding";
   static const setupWizard = "/setup-wizard";
 
+  // ── Dashboard ────────────────────────
+
+  static const searchPage = "/searching";
+
   // ── Auth ─────────────────────────────
   static const login = "/login";
   static const register = "/register";
@@ -80,6 +84,8 @@ class RouteNames {
   static const products = "/products";
   static const productDetail = "/products/:id";
   static const categories = "/categories";
+  static const categoryDetail = "/categories/:id";
+  
 
   // ── Sales / Invoice ──────────────────
   static const invoices = "/invoices";
@@ -96,4 +102,7 @@ class RouteNames {
   static const chat = "/chat";
   static const auditLogs = "/audit-logs";
   static const systemSettings = "/system-settings";
+  static const systemSettingCreate = "/settings/create";
+  static const systemSettingEdit = "/settings/edit";
+  static const theme = "/settings/theme";
 }
