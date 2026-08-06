@@ -8,63 +8,68 @@ class UserListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t1 = isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight;
+    final t2 = isDark ? Pallets.textSecondaryDark : Pallets.textSecondaryLight;
+    final avatarBg = isDark ? Pallets.surfaceElevated : Pallets.borderLight;
+
+    final isActive = user.status == 'active';
+    final dotColor = isActive ? Pallets.success : Pallets.inactive;
+    final badgeBg = dotColor.withOpacity(0.12);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          // Avatar
+          // ── Avatar ──────────────────────────────────────────────
           CircleAvatar(
             radius: 22,
-            backgroundColor: Pallets.surfaceDark,
+            backgroundColor: avatarBg,
             backgroundImage: user.avatarUrl != null
                 ? NetworkImage(user.avatarUrl!)
                 : null,
             child: user.avatarUrl == null
                 ? Text(
                     user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                    style: TextStyle(
+                      color: t1,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
                     ),
                   )
                 : null,
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
 
-          // Name + role
+          // ── Name + role ──────────────────────────────────────────
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   user.name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: t1,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  user.roleName,
-                  style: TextStyle(
-                    color: Pallets.textSecondaryDark,
-                    fontSize: 12,
-                  ),
+                  user.roleName.isEmpty ? '—' : user.roleName,
+                  style: TextStyle(color: t2, fontSize: 12),
                 ),
               ],
             ),
           ),
 
-          // Status badge
+          // ── Status badge ─────────────────────────────────────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: user.status == 'active'
-                  ? Colors.greenAccent.withOpacity(0.12)
-                  : Colors.grey.withOpacity(0.12),
+              color: badgeBg,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: dotColor.withOpacity(0.25)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -74,20 +79,16 @@ class UserListTile extends StatelessWidget {
                   height: 5,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: user.status == 'active'
-                        ? Colors.greenAccent
-                        : Colors.grey,
+                    color: dotColor,
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 5),
                 Text(
                   user.status,
                   style: TextStyle(
-                    color: user.status == 'active'
-                        ? Colors.greenAccent
-                        : Colors.grey,
+                    color: dotColor,
                     fontSize: 11,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],

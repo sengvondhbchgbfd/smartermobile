@@ -5,16 +5,19 @@ import 'package:frontendmobile/features/company/data/datasources/base_remote_dat
 import 'package:frontendmobile/features/company/data/models/company_model.dart';
 import 'package:frontendmobile/features/company/data/models/register_response_model.dart';
 import 'package:frontendmobile/features/company/domain/usecases/register_company_usecase.dart';
+
 class CompanyRemoteDataSourceImpl extends BaseRemoteDatasource
     implements CompanyRemoteDatasource {
   final Dio dio;
   CompanyRemoteDataSourceImpl(this.dio);
+
   // ── Register Company + Admin ──────────────────────────────────────────
+
   @override
   Future<RegisterResponseModel> registerCompany(RegisterCompanyParams params) {
     return safeRequest(
       request: () => dio.post(
-        '/companies/',
+        '/companies/register',
         data: {
           'company_code': params.companyCode,
           'company_name': params.companyName,
@@ -23,16 +26,19 @@ class CompanyRemoteDataSourceImpl extends BaseRemoteDatasource
           'max_users': params.maxUsers,
           'plan_type': params.planType,
           'timezone': params.timezone,
+          'admin_username': params.adminUsername,
+          'admin_password': params.adminPassword,
+          'admin_full_name': params.adminFullName,
         },
       ),
       parser: (data) {
-        print('DEBUG RESPONSE: $data');
         return RegisterResponseModel.fromJson(data);
       },
     );
   }
 
   // ── Get Company ───────────────────────────────────────────────────────
+
   @override
   Future<CompanyModel> getCompany(int companyId) {
     return safeRequest(
@@ -69,8 +75,10 @@ class CompanyRemoteDataSourceImpl extends BaseRemoteDatasource
         final map = <String, dynamic>{
           fieldName: await MultipartFile.fromFile(filePath),
         };
-        if (oldLogoPublicId != null)map['old_logo_public_id'] = oldLogoPublicId;
-        if (oldBannerPublicId != null) map['old_banner_public_id'] = oldBannerPublicId;
+        if (oldLogoPublicId != null)
+          map['old_logo_public_id'] = oldLogoPublicId;
+        if (oldBannerPublicId != null)
+          map['old_banner_public_id'] = oldBannerPublicId;
 
         final formData = FormData.fromMap(map);
         return dio.patch('/companies/$companyId/media', data: formData);

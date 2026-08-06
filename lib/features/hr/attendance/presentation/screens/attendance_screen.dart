@@ -1,33 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/extensions/user_info_extensions.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
+import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/screens/staff_attendance_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'manager_attendance_screen.dart';
 
-class AttendanceScreen extends StatefulWidget {
+class AttendanceScreen extends ConsumerStatefulWidget {
   const AttendanceScreen({super.key});
   @override
-  State<AttendanceScreen> createState() => _AttendanceScreenState();
+  ConsumerState<AttendanceScreen> createState() => _AttendanceScreenState();
 }
 
-class _AttendanceScreenState extends State<AttendanceScreen>
+class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+  ////////////////////////////////////////////////////////////////////////
+  ///
+  ////////////////////////////////////////////////////////////////////////
+  TabController? _tabController;
+  void _ensureTabController() {
+    _tabController ??= TabController(length: 2, vsync: this);
   }
+  ////////////////////////////////////////////////////////////////////////
+  ///
+  ////////////////////////////////////////////////////////////////////////
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+
   @override
   Widget build(BuildContext context) {
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
     final textPrimary = isDark
@@ -40,9 +53,33 @@ class _AttendanceScreenState extends State<AttendanceScreen>
         ? Colors.white.withOpacity(0.07)
         : Colors.black.withOpacity(0.07);
     final iconColor = isDark ? Colors.white : Pallets.textPrimaryLight;
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+
+    final currentUser = ref.watch(currentUserProvider);
+    final isManagerOrAdmin = currentUser?.canViewTeamAttendance ?? false;
+
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+
+    if (isManagerOrAdmin) {
+      _ensureTabController();
+    } else {
+      _tabController?.dispose();
+      _tabController = null;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
 
     return Scaffold(
       backgroundColor: bgColor,
+
+      //////////////////////////////////////////////////////////////////////////
+      ///
+      //////////////////////////////////////////////////////////////////////////
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
@@ -70,28 +107,39 @@ class _AttendanceScreenState extends State<AttendanceScreen>
             fontWeight: FontWeight.w600,
           ),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Pallets.gradient2,
-          labelColor: Pallets.gradient2,
-          unselectedLabelColor: textSecondary,
-          indicatorSize: TabBarIndicatorSize.label,
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.person_outline_rounded),
-              text: 'My Attendance',
-            ),
-            Tab(
-              icon: Icon(Icons.admin_panel_settings_outlined),
-              text: 'Manager View',
-            ),
-          ],
-        ),
+        bottom: !isManagerOrAdmin
+            ? null
+            : TabBar(
+                controller: _tabController,
+                indicatorColor: Pallets.gradient2,
+                labelColor: Pallets.gradient2,
+                unselectedLabelColor: textSecondary,
+                indicatorSize: TabBarIndicatorSize.label,
+                tabs: const [
+                  Tab(
+                    icon: Icon(Icons.person_outline_rounded),
+                    text: 'My Attendance',
+                  ),
+                  Tab(
+                    icon: Icon(Icons.admin_panel_settings_outlined),
+                    text: 'Manager View',
+                  ),
+                ],
+              ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [StaffAttendanceScreen(), ManagerAttendanceScreen()],
-      ),
+
+      //////////////////////////////////////////////////////////////////////////
+      ///
+      //////////////////////////////////////////////////////////////////////////
+      body: isManagerOrAdmin
+          ? TabBarView(
+              controller: _tabController,
+              children: const [
+                StaffAttendanceScreen(),
+                ManagerAttendanceScreen(),
+              ],
+            )
+          : const StaffAttendanceScreen(),
     );
   }
 }

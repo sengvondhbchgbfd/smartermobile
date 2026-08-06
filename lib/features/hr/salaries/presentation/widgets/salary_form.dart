@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/core/components/auth_manager_tile.dart';
-import 'package:frontendmobile/core/components/section_label.dart';
 import 'package:frontendmobile/core/components/staff_dropdown.dart';
 import 'package:frontendmobile/core/components/warning_tile.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/hr/salaries/data/model/salaries_model.dart';
 import 'package:frontendmobile/features/hr/salaries/domain/entities/salaries_entity.dart';
 import 'package:frontendmobile/features/hr/salaries/presentation/provider/salary_notifier.dart';
-import 'package:frontendmobile/features/hr/salaries/presentation/widgets/salary_field.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
 import 'package:frontendmobile/shared/providers/core_providers.dart';
@@ -41,6 +39,7 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
   StaffEntity? _authStaff;
   bool _authStaffLoading = true;
   int? _authUserId;
+  bool _baseSalaryIsDefault = false;
 
   String _fmtDate(DateTime? dt) =>
       dt != null ? DateFormat('yyyy-MM-dd').format(dt) : '';
@@ -55,18 +54,16 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
     _baseSalary = TextEditingController(
       text: e?.baseSalary.toStringAsFixed(2) ?? '',
     );
-    _bonus = TextEditingController(
-      text: e?.bonus.toStringAsFixed(2) ?? '0.00',
-    );
+    _bonus = TextEditingController(text: e?.bonus.toStringAsFixed(2) ?? '0.00');
     _deductions = TextEditingController(
       text: e?.deductions.toStringAsFixed(2) ?? '0.00',
     );
 
     // ✅ initialize from DateTime fields directly
     _payPeriodStart = e?.payPeriodStart;
-    _payPeriodEnd   = e?.payPeriodEnd;
-    _paymentDate    = e?.paymentDate;
-    _paymentStatus  = e?.paymentStatus ?? 'pending';
+    _payPeriodEnd = e?.payPeriodEnd;
+    _paymentDate = e?.paymentDate;
+    _paymentStatus = e?.paymentStatus ?? 'pending';
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadAuthStaff());
   }
@@ -141,28 +138,30 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
       return;
     }
     if (_effectiveManagerId == null) {
-      _showError('Your staff profile was not found. Contact your administrator.');
+      _showError(
+        'Your staff profile was not found. Contact your administrator.',
+      );
       return;
     }
 
     setState(() => _loading = true);
 
-    final base       = double.parse(_baseSalary.text);
-    final bonus      = double.parse(_bonus.text);
+    final base = double.parse(_baseSalary.text);
+    final bonus = double.parse(_bonus.text);
     final deductions = double.parse(_deductions.text);
 
     final salary = SalaryModel(
-      salaryId:       widget.existing?.salaryId,
-      staffId:        _selectedStaff!.id!,
-      managedBy:      _effectiveManagerId,
-      baseSalary:     base,
-      bonus:          bonus,
-      deductions:     deductions,
-      netSalary:      base + bonus - deductions,
+      salaryId: widget.existing?.salaryId,
+      staffId: _selectedStaff!.id!,
+      managedBy: _effectiveManagerId,
+      baseSalary: base,
+      bonus: bonus,
+      deductions: deductions,
+      netSalary: base + bonus - deductions,
       payPeriodStart: _payPeriodStart!, // ✅ DateTime
-      payPeriodEnd:   _payPeriodEnd!,   // ✅ DateTime
-      paymentStatus:  _paymentStatus,
-      paymentDate:    _paymentDate,     // ✅ DateTime?
+      payPeriodEnd: _payPeriodEnd!, // ✅ DateTime
+      paymentStatus: _paymentStatus,
+      paymentDate: _paymentDate, // ✅ DateTime?
     );
 
     final notifier = ref.read(salaryNotifierProvider.notifier);
@@ -182,9 +181,9 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
     if (mounted) Navigator.pop(context);
   }
 
-  void _showError(String msg) => ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(msg), backgroundColor: Pallets.error),
-  );
+  void _showError(String msg) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Pallets.error));
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +192,6 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
     final isEdit = widget.existing != null;
     final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70);
     final fieldBg = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7);
-    final border = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA);
 
     final staffAsync = ref.watch(staffNotifierProvider);
 
@@ -206,7 +204,9 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
         InputDecoration fieldDeco(String label, {IconData? icon}) =>
             InputDecoration(
               labelText: label,
-              prefixIcon: icon != null ? Icon(icon, size: 18, color: subText) : null,
+              prefixIcon: icon != null
+                  ? Icon(icon, size: 18, color: subText)
+                  : null,
               filled: true,
               fillColor: fieldBg,
               isDense: true,
@@ -236,39 +236,35 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
           required DateTime? value,
           required void Function(DateTime) onPicked,
           IconData icon = Icons.calendar_today_outlined,
-        }) =>
-            GestureDetector(
-              onTap: () => _pickDate(
-                context,
-                current: value,
-                onPicked: (d) => setState(() => onPicked(d)),
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: fieldBg,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Icon(icon, size: 18, color: subText),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        value != null ? _displayDate(value) : label,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: value != null ? null : subText,
-                        ),
-                      ),
+        }) => GestureDetector(
+          onTap: () => _pickDate(
+            context,
+            current: value,
+            onPicked: (d) => setState(() => onPicked(d)),
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            decoration: BoxDecoration(
+              color: fieldBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: subText),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    value != null ? _displayDate(value) : label,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: value != null ? null : subText,
                     ),
-                    Icon(Icons.chevron_right, size: 18, color: subText),
-                  ],
+                  ),
                 ),
-              ),
-            );
+                Icon(Icons.chevron_right, size: 18, color: subText),
+              ],
+            ),
+          ),
+        );
 
         return Padding(
           padding: EdgeInsets.only(
@@ -325,11 +321,11 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                           ),
                         )
                       : _authStaff != null
-                          ? AuthManagerTile(staff: _authStaff!)
-                          : WarningTile(
-                              message:
-                                  'Your staff profile was not found. Contact your administrator.',
-                            ),
+                      ? AuthManagerTile(staff: _authStaff!)
+                      : WarningTile(
+                          message:
+                              'Your staff profile was not found. Contact your administrator.',
+                        ),
                   const SizedBox(height: 20),
 
                   // ── Employee ────────────────────────────
@@ -346,7 +342,20 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                     label: 'Select Employee',
                     staffList: staffList,
                     selected: _selectedStaff,
-                    onChanged: (s) => setState(() => _selectedStaff = s),
+                    onChanged: (s) {
+                      setState(() {
+                        _selectedStaff = s;
+
+                        if (widget.existing == null &&
+                            (_baseSalary.text.isEmpty ||
+                                _baseSalaryIsDefault) &&
+                            s?.staffRole?.baseSalary != null) {
+                          _baseSalary.text = s!.staffRole!.baseSalary
+                              .toStringAsFixed(2);
+                          _baseSalaryIsDefault = true;
+                        }
+                      });
+                    },
                   ),
                   const SizedBox(height: 20),
 
@@ -361,22 +370,58 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                   ),
                   const SizedBox(height: 8),
 
+                  // Replace the Base Salary TextFormField with this:
                   TextFormField(
                     controller: _baseSalary,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: fieldDeco('Base Salary', icon: Icons.attach_money_outlined),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: fieldDeco(
+                      'Base Salary',
+                      icon: Icons.attach_money_outlined,
+                    ),
+                    onChanged: (_) {
+                      if (_baseSalaryIsDefault) {
+                        setState(() => _baseSalaryIsDefault = false);
+                      }
+                    },
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Required';
                       if (double.tryParse(v) == null) return 'Invalid number';
                       return null;
                     },
                   ),
+                  if (_baseSalaryIsDefault && _selectedStaff?.staffRole != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, left: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, size: 13, color: subText),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              'Default from ${_selectedStaff!.staffRole!.roleName} role — edit if different',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: subText,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 10),
+
                   const SizedBox(height: 10),
 
                   TextFormField(
                     controller: _bonus,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: fieldDeco('Bonus', icon: Icons.add_circle_outline),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: fieldDeco(
+                      'Bonus',
+                      icon: Icons.add_circle_outline,
+                    ),
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Required';
                       if (double.tryParse(v) == null) return 'Invalid number';
@@ -387,8 +432,13 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
 
                   TextFormField(
                     controller: _deductions,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: fieldDeco('Deductions', icon: Icons.remove_circle_outline),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: fieldDeco(
+                      'Deductions',
+                      icon: Icons.remove_circle_outline,
+                    ),
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Required';
                       if (double.tryParse(v) == null) return 'Invalid number';
@@ -399,12 +449,16 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
 
                   // ── Net preview ─────────────────────────
                   AnimatedBuilder(
-                    animation: Listenable.merge([_baseSalary, _bonus, _deductions]),
+                    animation: Listenable.merge([
+                      _baseSalary,
+                      _bonus,
+                      _deductions,
+                    ]),
                     builder: (_, __) {
-                      final base  = double.tryParse(_baseSalary.text) ?? 0;
+                      final base = double.tryParse(_baseSalary.text) ?? 0;
                       final bonus = double.tryParse(_bonus.text) ?? 0;
-                      final ded   = double.tryParse(_deductions.text) ?? 0;
-                      final net   = base + bonus - ded;
+                      final ded = double.tryParse(_deductions.text) ?? 0;
+                      final net = base + bonus - ded;
                       return Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,
@@ -484,9 +538,15 @@ class _SalaryFormState extends ConsumerState<SalaryForm> {
                       icon: Icons.payment_outlined,
                     ),
                     items: const [
-                      DropdownMenuItem(value: 'pending',   child: Text('Pending')),
-                      DropdownMenuItem(value: 'paid',      child: Text('Paid')),
-                      DropdownMenuItem(value: 'cancelled', child: Text('Cancelled')), // ✅ added
+                      DropdownMenuItem(
+                        value: 'pending',
+                        child: Text('Pending'),
+                      ),
+                      DropdownMenuItem(value: 'paid', child: Text('Paid')),
+                      DropdownMenuItem(
+                        value: 'cancelled',
+                        child: Text('Cancelled'),
+                      ), // ✅ added
                     ],
                     onChanged: (v) => setState(() => _paymentStatus = v!),
                   ),

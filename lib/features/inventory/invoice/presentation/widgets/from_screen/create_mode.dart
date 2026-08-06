@@ -1,0 +1,1 @@
+enum  CreationMode {manual, quotation}

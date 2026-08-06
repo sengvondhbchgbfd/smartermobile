@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
 
 class StatsRow extends StatelessWidget {
@@ -8,8 +9,11 @@ class StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tile = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFEDEDEB);
-    final muted = isDark ? const Color(0xFF9A9A9C) : const Color(0xFF6B6B68);
+    final tile = isDark ? Pallets.surfaceElevated : Pallets.backgroundLight;
+    final muted = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final primary = isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight;
 
     return Row(
       children: [
@@ -17,6 +21,7 @@ class StatsRow extends StatelessWidget {
           child: _StatTile(
             tile: tile,
             muted: muted,
+            primary: primary,
             label: 'Base salary',
             value: staff.staffRole != null
                 ? '\$${staff.staffRole!.baseSalary.toStringAsFixed(0)}'
@@ -28,6 +33,7 @@ class StatsRow extends StatelessWidget {
           child: _StatTile(
             tile: tile,
             muted: muted,
+            primary: primary,
             label: 'Joined',
             value: staff.createdAt != null
                 ? '${_month(staff.createdAt!.month)} ${staff.createdAt!.year}'
@@ -58,11 +64,13 @@ class StatsRow extends StatelessWidget {
 class _StatTile extends StatelessWidget {
   final Color tile;
   final Color muted;
+  final Color primary;
   final String label;
   final String value;
   const _StatTile({
     required this.tile,
     required this.muted,
+    required this.primary,
     required this.label,
     required this.value,
   });
@@ -82,7 +90,11 @@ class _StatTile extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: primary,
+            ),
           ),
         ],
       ),

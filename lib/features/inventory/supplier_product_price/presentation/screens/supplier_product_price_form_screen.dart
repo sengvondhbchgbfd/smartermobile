@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 import '../../domain/entities/supplier_product_price_entity.dart';
 import '../providers/supplier_product_price_provider.dart';
 
 class SupplierProductPriceFormScreen extends ConsumerStatefulWidget {
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
   final SupplierProductPriceEntity? existing;
   final int? defaultSupplierId;
   final int? defaultVariantId;
   final Map<int, String> supplierNames;
   final Map<int, String> variantLabels;
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   const SupplierProductPriceFormScreen({
     super.key,
@@ -20,35 +28,50 @@ class SupplierProductPriceFormScreen extends ConsumerStatefulWidget {
     this.variantLabels = const {},
   });
 
-  bool get isEditing => existing != null;
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
+  bool get isEditing => existing != null;
   @override
   ConsumerState<SupplierProductPriceFormScreen> createState() =>
       _SupplierProductPriceFormScreenState();
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 }
 
 class _SupplierProductPriceFormScreenState
     extends ConsumerState<SupplierProductPriceFormScreen> {
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _unitPriceController;
   late final TextEditingController _noteController;
-
   int? _supplierId;
   int? _variantId;
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   @override
   void initState() {
     super.initState();
     final e = widget.existing;
     _supplierId = e?.supplierId ?? widget.defaultSupplierId;
-
     _variantId = e?.variantId ?? widget.defaultVariantId;
-
     _unitPriceController = TextEditingController(
       text: e?.unitPrice.toString() ?? '',
     );
     _noteController = TextEditingController(text: e?.note ?? '');
   }
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   @override
   void dispose() {
@@ -57,17 +80,30 @@ class _SupplierProductPriceFormScreenState
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_supplierId == null || _variantId == null) return;
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
+  Future<void> _submit() async {
+    ////////////////////////////////
+    ///
+    ///////////////////////////////
+    if (!_formKey.currentState!.validate()) return;
+    if (_supplierId == null || _variantId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a supplier and variant')),
+      );
+      return;
+    }
     final notifier = ref.read(supplierProductPriceNotifierProvider.notifier);
     final unitPrice = double.parse(_unitPriceController.text);
-    final note = _noteController.text.isEmpty ? null : _noteController.text;
-
+    final noteText = _noteController.text.trim();
+    final note = noteText.isEmpty ? null : noteText;
     final success = widget.isEditing
         ? await notifier.update(
             priceId: widget.existing!.priceId,
+            supplierId: _supplierId,
+            variantId: _variantId,
             unitPrice: unitPrice,
             note: note,
           )
@@ -77,27 +113,38 @@ class _SupplierProductPriceFormScreenState
             unitPrice: unitPrice,
             note: note,
           );
-
     if (success && mounted) Navigator.of(context).pop();
   }
 
+  ////////////////////////////////
+  ///
+  ///////////////////////////////
   @override
   Widget build(BuildContext context) {
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
     final state = ref.watch(supplierProductPriceNotifierProvider);
     final isBusy = widget.isEditing
         ? state.loadingIds.contains(widget.existing!.priceId)
         : state.isCreating;
-
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final searchBg = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFEFEFED);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
+
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final searchBg = isDark ? Pallets.surfaceElevated : Pallets.borderLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
 
     InputDecoration deco(String label, {IconData? icon}) => InputDecoration(
       labelText: label,
@@ -116,30 +163,17 @@ class _SupplierProductPriceFormScreenState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: colors.primary, width: 1.6),
+        borderSide: const BorderSide(color: Pallets.blurple, width: 1.6),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: colors.error, width: 1.2),
+        borderSide: const BorderSide(color: Pallets.error, width: 1.2),
       ),
     );
 
-    Widget readOnlyField({required IconData icon, required String label}) =>
-        Container(
-          decoration: BoxDecoration(
-            color: searchBg,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          child: Row(
-            children: [
-              Icon(icon, size: 19, color: subText),
-              const SizedBox(width: 10),
-              Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
-              Icon(Icons.lock_outline, size: 16, color: subText),
-            ],
-          ),
-        );
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
 
     Widget card({required Widget child}) => Container(
       decoration: BoxDecoration(
@@ -150,6 +184,10 @@ class _SupplierProductPriceFormScreenState
       padding: const EdgeInsets.all(16),
       child: child,
     );
+
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
 
     Widget sectionLabel(String text) => Padding(
       padding: const EdgeInsets.fromLTRB(4, 20, 4, 10),
@@ -172,6 +210,7 @@ class _SupplierProductPriceFormScreenState
           widget.isEditing ? 'Edit Price' : 'New Supplier Price',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
+            color: textPrimary,
           ),
         ),
       ),
@@ -183,71 +222,41 @@ class _SupplierProductPriceFormScreenState
             // ── Supplier ───────────────────────────────────────────────
             sectionLabel('Supplier'),
             card(
-              child: widget.isEditing
-                  ? readOnlyField(
-                      icon: Icons.store_outlined,
-                      label:
-                          widget.supplierNames[_supplierId] ??
-                          'Supplier #$_supplierId',
+              child: DropdownButtonFormField<int>(
+                value: _supplierId,
+                onChanged: (v) => setState(() => _supplierId = v),
+                decoration: deco('Select supplier', icon: Icons.store_outlined),
+                style: TextStyle(color: textPrimary, fontSize: 15),
+                isExpanded: true,
+                items: widget.supplierNames.entries
+                    .map(
+                      (e) =>
+                          DropdownMenuItem(value: e.key, child: Text(e.value)),
                     )
-                  : DropdownButtonFormField<int>(
-                      value: _supplierId,
-                      onChanged: (v) => setState(() => _supplierId = v),
-                      decoration: deco(
-                        'Select supplier',
-                        icon: Icons.store_outlined,
-                      ),
-                      isExpanded: true,
-                      items: widget.supplierNames.entries
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e.key,
-                              child: Text(e.value),
-                            ),
-                          )
-                          .toList(),
-                      validator: (v) => v == null ? 'Select a supplier' : null,
-                    ),
+                    .toList(),
+                validator: (v) => v == null ? 'Select a supplier' : null,
+              ),
             ),
 
             // ── Variant ────────────────────────────────────────────────
             sectionLabel('Product Variant'),
             card(
-              child: widget.isEditing
-                  ? readOnlyField(
-                      icon: Icons.tune_outlined,
-                      label: (widget.existing!.sku?.isNotEmpty ?? false)
-                          ? '${widget.existing!.productName} · ${widget.existing!.sku}'
-                          : widget.existing!.productName,
-                    )
-                  :
-                    ////////////////////////////////////////////////////////////
-                    ///
-                    ////////////////////////////////////////////////////////////
-                    DropdownButtonFormField<int>(
-                      value: _variantId,
-                      onChanged: (v) => setState(() => _variantId = v),
-                      decoration: deco(
-                        'Select variant',
-                        icon: Icons.tune_outlined,
+              child: DropdownButtonFormField<int>(
+                value: _variantId,
+                onChanged: (v) => setState(() => _variantId = v),
+                decoration: deco('Select variant', icon: Icons.tune_outlined),
+                style: TextStyle(color: textPrimary, fontSize: 15),
+                isExpanded: true,
+                items: widget.variantLabels.entries
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e.key,
+                        child: Text(e.value, overflow: TextOverflow.ellipsis),
                       ),
-                      isExpanded: true,
-                      items: widget.variantLabels.entries
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e.key,
-                              child: Text(
-                                e.value,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      validator: (v) => v == null ? 'Select a variant' : null,
-                    ),
-              ///////////////////////////////////////////////////////////
-              ///
-              //////////////////////////////////////////////////////////
+                    )
+                    .toList(),
+                validator: (v) => v == null ? 'Select a variant' : null,
+              ),
             ),
 
             // ── Price ──────────────────────────────────────────────────
@@ -255,6 +264,7 @@ class _SupplierProductPriceFormScreenState
             card(
               child: TextFormField(
                 controller: _unitPriceController,
+                style: TextStyle(color: textPrimary, fontSize: 15),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -273,6 +283,7 @@ class _SupplierProductPriceFormScreenState
             card(
               child: TextFormField(
                 controller: _noteController,
+                style: TextStyle(color: textPrimary, fontSize: 15),
                 maxLength: 255,
                 maxLines: 3,
                 decoration: deco('e.g. bulk price, minimum order 100 units'),
@@ -284,7 +295,7 @@ class _SupplierProductPriceFormScreenState
                 padding: const EdgeInsets.only(top: 12),
                 child: Text(
                   state.error!,
-                  style: TextStyle(color: colors.error, fontSize: 13),
+                  style: const TextStyle(color: Pallets.error, fontSize: 13),
                 ),
               ),
           ],
@@ -297,6 +308,8 @@ class _SupplierProductPriceFormScreenState
           child: FilledButton(
             onPressed: isBusy ? null : _submit,
             style: FilledButton.styleFrom(
+              backgroundColor: Pallets.blurple,
+              foregroundColor: Pallets.onAccent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -308,7 +321,7 @@ class _SupplierProductPriceFormScreenState
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: Pallets.onAccent,
                     ),
                   )
                 : Text(

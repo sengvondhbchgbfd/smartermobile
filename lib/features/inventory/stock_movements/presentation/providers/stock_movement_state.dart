@@ -15,9 +15,10 @@ class StockMovementState {
     List<StockMovementEntity>? movements,
     bool? isLoading,
     String? error,
+    bool clearError = false,
   }) => StockMovementState(
     movements: movements ?? this.movements,
     isLoading: isLoading ?? this.isLoading,
-    error: error,
+    error: clearError ? null : (error ?? this.error),
   );
 }

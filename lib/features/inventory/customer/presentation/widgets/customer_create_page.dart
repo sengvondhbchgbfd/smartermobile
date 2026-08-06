@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import '../../domain/entities/customer_entity.dart';
 
 class CustomerCreatePage extends StatefulWidget {
@@ -58,8 +59,15 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
     });
   }
 
+  // ✅ fixed: was silently doing nothing visible when validation failed
+  // (InputBorder.none hid the field-level errorText and the form never
+  // re-validated as the user typed). Now errors are styled with Pallets.error
+  // and the form auto-revalidates on user interaction.
   void _submit() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      setState(() {}); // trigger autovalidate repaint on first failed attempt
+      return;
+    }
     setState(() => _saving = true);
     Navigator.of(context).pop({
       'name': _nameCtrl.text.trim(),
@@ -76,37 +84,46 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
     final textSecondary = isDark
-        ? const Color(0xFFA0A0A5)
-        : const Color(0xFF6B6B6B);
-    const accent = Color(0xFF3B82F6);
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    const accent = Pallets.blurple;
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: Pallets.transparent,
         leading: IconButton(
           icon: Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFEFEFED),
+              color: isDark ? Pallets.surfaceElevated : Pallets.backgroundLight,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: textPrimary,
+            ),
           ),
           onPressed: _saving ? null : () => Navigator.of(context).pop(),
         ),
         title: Text(
           _isEdit ? 'Edit customer' : 'New customer',
-          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w500,
+            color: textPrimary,
+          ),
         ),
         actions: [
           Padding(
@@ -116,6 +133,7 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
               style: FilledButton.styleFrom(
                 backgroundColor: accent,
                 disabledBackgroundColor: accent.withOpacity(0.5),
+                foregroundColor: Pallets.onAccent,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 10,
@@ -125,12 +143,12 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
                 ),
               ),
               child: _saving
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: Pallets.onAccent,
                       ),
                     )
                   : const Text('Save', style: TextStyle(fontSize: 14)),
@@ -144,6 +162,7 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
       ),
       body: Form(
         key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           children: [
@@ -159,8 +178,8 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isDark
-                            ? const Color(0xFF3A3A3C)
-                            : const Color(0xFFEFEFED),
+                            ? Pallets.surfaceElevated
+                            : Pallets.backgroundLight,
                         border: Border.all(color: borderColor, width: 2),
                       ),
                       child: _avatar != null
@@ -196,10 +215,10 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
                           shape: BoxShape.circle,
                           border: Border.all(color: bg, width: 2),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.camera_alt_rounded,
                           size: 13,
-                          color: Colors.white,
+                          color: Pallets.onAccent,
                         ),
                       ),
                     ),
@@ -215,14 +234,14 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE24B4A),
+                            color: Pallets.error,
                             shape: BoxShape.circle,
                             border: Border.all(color: bg, width: 2),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close_rounded,
                             size: 11,
-                            color: Colors.white,
+                            color: Pallets.onError,
                           ),
                         ),
                       ),
@@ -263,6 +282,7 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Name is required'
                       : null,
+                  textPrimary: textPrimary,
                   textSecondary: textSecondary,
                   borderColor: borderColor,
                 ),
@@ -272,6 +292,7 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
                   controller: _phoneCtrl,
                   placeholder: 'Optional',
                   keyboardType: TextInputType.phone,
+                  textPrimary: textPrimary,
                   textSecondary: textSecondary,
                   borderColor: borderColor,
                   isLast: true,
@@ -289,6 +310,17 @@ class _CustomerCreatePageState extends State<CustomerCreatePage> {
                   controller: _emailCtrl,
                   placeholder: 'Optional',
                   keyboardType: TextInputType.emailAddress,
+                  // ✅ added: previously an invalid email address was silently
+                  // accepted since there was no validator for this field.
+                  validator: (v) {
+                    final value = v?.trim() ?? '';
+                    if (value.isEmpty) return null;
+                    final valid = RegExp(
+                      r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                    ).hasMatch(value);
+                    return valid ? null : 'Enter a valid email address';
+                  },
+                  textPrimary: textPrimary,
                   textSecondary: textSecondary,
                   borderColor: borderColor,
                   isLast: true,
@@ -343,6 +375,7 @@ class _FieldItem extends StatelessWidget {
   final String placeholder;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
+  final Color textPrimary;
   final Color textSecondary;
   final Color borderColor;
   final bool isLast;
@@ -355,6 +388,7 @@ class _FieldItem extends StatelessWidget {
     required this.placeholder,
     this.keyboardType,
     this.validator,
+    required this.textPrimary,
     required this.textSecondary,
     required this.borderColor,
     this.isLast = false,
@@ -382,11 +416,11 @@ class _FieldItem extends StatelessWidget {
                           style: TextStyle(fontSize: 12, color: textSecondary),
                         ),
                         if (required)
-                          const Text(
+                          Text(
                             ' *',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFFE24B4A),
+                              color: Pallets.error,
                             ),
                           ),
                       ],
@@ -396,15 +430,28 @@ class _FieldItem extends StatelessWidget {
                       controller: controller,
                       keyboardType: keyboardType,
                       validator: validator,
-                      style: const TextStyle(fontSize: 15),
+                      style: TextStyle(fontSize: 15, color: textPrimary),
+                      cursorColor: Pallets.blurple,
                       decoration: InputDecoration(
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
                         border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
                         hintText: placeholder,
                         hintStyle: TextStyle(
                           fontSize: 15,
                           color: textSecondary.withOpacity(0.5),
+                        ),
+                        // ✅ fixed: errorText was invisible before — no
+                        // errorStyle was set, so it inherited the default
+                        // (often unreadably faint) InputDecorationTheme color.
+                        errorStyle: TextStyle(
+                          fontSize: 11,
+                          height: 0.9,
+                          color: Pallets.error,
                         ),
                       ),
                     ),

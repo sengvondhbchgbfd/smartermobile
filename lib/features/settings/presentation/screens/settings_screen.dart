@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontendmobile/config/routes/route_names.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/settings/domain/models/setting_groups.dart';
 import 'package:frontendmobile/features/settings/presentation/widgets/setting_group_tile.dart';

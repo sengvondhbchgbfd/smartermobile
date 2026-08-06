@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/config/routes/route_names.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/dashboard/presentation/providers/search_provider.dart';
-import 'package:frontendmobile/features/dashboard/presentation/searching/bar/search_bar_widgets.dart';
 import 'package:frontendmobile/features/dashboard/presentation/searching/bar/search_page_app_bar.dart';
 import 'package:frontendmobile/features/dashboard/presentation/searching/search_home.dart';
 import 'package:frontendmobile/features/dashboard/presentation/searching/search_item.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 class InfoRow extends StatelessWidget {
   final IconData icon;
@@ -19,6 +20,9 @@ class InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -26,12 +30,14 @@ class InfoRow extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: faint),
           const SizedBox(width: 10),
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
+          Expanded(
+            child: Text(label, style: TextStyle(fontSize: 14, color: primary)),
+          ),
           if (trailingBadge != null)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
               decoration: BoxDecoration(
-                color: const Color(0xFFE6F1FB),
+                color: Pallets.infoTint,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -39,7 +45,7 @@ class InfoRow extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF185FA5),
+                  color: Pallets.blurple,
                 ),
               ),
             )
@@ -49,8 +55,8 @@ class InfoRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 color: highlight
-                    ? const Color(0xFF185FA5)
-                    : (value != null ? null : faint),
+                    ? Pallets.blurple
+                    : (value != null ? primary : faint),
               ),
             ),
         ],

@@ -4,13 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-/// Push this screen via:
-///   final File? photo = await Navigator.push<File>(
-///     context,
-///     MaterialPageRoute(builder: (_) => const InAppCameraScreen()),
-///   );
-///   if (photo != null) { /* use photo */ }
-
 class InAppCameraScreen extends StatefulWidget {
   const InAppCameraScreen({super.key});
 
@@ -41,7 +34,6 @@ class _InAppCameraScreenState extends State<InAppCameraScreen>
     super.dispose();
   }
 
-  // Pause/resume camera when app goes background/foreground
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final ctrl = _controller;
@@ -87,7 +79,10 @@ class _InAppCameraScreenState extends State<InAppCameraScreen>
     setState(() => _isTaking = true);
     try {
       final dir = await getTemporaryDirectory();
-      final path = p.join(dir.path, '${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final path = p.join(
+        dir.path,
+        '${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
       final xFile = await ctrl.takePicture();
       final file = File(xFile.path);
       await file.copy(path);
@@ -124,9 +119,7 @@ class _InAppCameraScreenState extends State<InAppCameraScreen>
   }
 
   Widget _buildLoading() {
-    return const Center(
-      child: CircularProgressIndicator(color: Colors.white),
-    );
+    return const Center(child: CircularProgressIndicator(color: Colors.white));
   }
 
   Widget _buildCamera() {
@@ -135,9 +128,7 @@ class _InAppCameraScreenState extends State<InAppCameraScreen>
       fit: StackFit.expand,
       children: [
         // ── Camera preview (fills screen, clipped to aspect ratio) ──
-        Center(
-          child: CameraPreview(ctrl),
-        ),
+        Center(child: CameraPreview(ctrl)),
 
         // ── Top bar: close + flash ──
         Positioned(
@@ -251,10 +242,7 @@ class _CircleButton extends StatelessWidget {
           color: active
               ? Colors.amber.withOpacity(0.85)
               : Colors.black.withOpacity(0.45),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
         ),
         child: Icon(
           icon,

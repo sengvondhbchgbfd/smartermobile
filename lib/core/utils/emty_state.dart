@@ -6,6 +6,7 @@ class EmptyState extends StatelessWidget {
   final String message;
   final String actionLabel;
   final VoidCallback onAction;
+  
 
   const EmptyState({
     required this.icon,

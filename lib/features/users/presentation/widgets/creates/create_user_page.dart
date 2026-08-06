@@ -85,57 +85,54 @@ class _CreateUserPageState extends ConsumerState<CreateUserPage> {
     }
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surface = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
     final state = ref.watch(userNotifierProvider).valueOrNull;
+
     return Scaffold(
-      backgroundColor: Pallets.backgroundDark,
+      backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: Pallets.backgroundDark,
+        backgroundColor: surface,
         elevation: 0,
         leading: const UserFormBackButton(),
-        title: const Text(
+        title: Text(
           'Create User',
           style: TextStyle(
-            color: Colors.white,
+            color: textPrimary,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
         ),
       ),
-
-      //////////////////////////////////////////////////////////////////////////
-      ///
-      //////////////////////////////////////////////////////////////////////////
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const UserFormLabel('ACCOUNT INFO'),
-            ////////////////////////////////////////////////////////////////////
             const SizedBox(height: 12),
-            ////////////////////////////////////////////////////////////////////
             UserFormField(
               controller: _username,
               label: 'Username',
               icon: Icons.person_outline_rounded,
             ),
-            ////////////////////////////////////////////////////////////////////
             const SizedBox(height: 12),
-            ////////////////////////////////////////////////////////////////////
             UserFormField(
               controller: _fullname,
               label: 'Full Name',
               icon: Icons.badge_outlined,
             ),
-            ////////////////////////////////////////////////////////////////////
             const SizedBox(height: 12),
-            ////////////////////////////////////////////////////////////////////
             UserFormField(
               controller: _password,
               label: 'Password',
@@ -146,15 +143,13 @@ class _CreateUserPageState extends ConsumerState<CreateUserPage> {
                   _obscure
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
-                  color: Pallets.textSecondaryDark,
+                  color: textSecondary,
                   size: 20,
                 ),
                 onPressed: () => setState(() => _obscure = !_obscure),
               ),
             ),
-            ////////////////////////////////////////////////////////////////////
             const SizedBox(height: 24),
-            ////////////////////////////////////////////////////////////////////
             const UserFormLabel('ASSIGNMENT'),
             const SizedBox(height: 12),
             UserFormDropdown<int>(
@@ -169,9 +164,7 @@ class _CreateUserPageState extends ConsumerState<CreateUserPage> {
                   .toList(),
               onChanged: (val) => setState(() => _selectedRoleId = val),
             ),
-            ////////////////////////////////////////////////////////////////////
             const SizedBox(height: 12),
-            ////////////////////////////////////////////////////////////////////
             UserFormDropdown<int?>(
               hint: 'Department (optional)',
               icon: Icons.business_outlined,
@@ -190,7 +183,6 @@ class _CreateUserPageState extends ConsumerState<CreateUserPage> {
               ],
               onChanged: (val) => setState(() => _selectedDepartmentId = val),
             ),
-
             const SizedBox(height: 32),
             UserFormButton(
               label: 'Create User',

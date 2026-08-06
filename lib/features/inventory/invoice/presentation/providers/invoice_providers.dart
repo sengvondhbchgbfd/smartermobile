@@ -74,6 +74,16 @@ Future<DeleteInvoiceUseCase> deleteInvoiceUC(Ref ref) async {
   return DeleteInvoiceUseCase(repo);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
+@riverpod
+Future<CreateFromQuotation> createFromQuotationUC(Ref ref) async {
+  final repo = await ref.watch(invoiceRepositoryProvider.future);
+  return CreateFromQuotation(repo);
+}
+
 // ── Notifier ────────────────────────────────────────────────────────────────
 
 @riverpod
@@ -83,6 +93,9 @@ class InvoiceNotifier extends _$InvoiceNotifier {
 
   Future<GetAllInvoicesUseCase> get _getAllUC =>
       ref.read(getAllInvoicesUCProvider.future);
+  Future<GetInvoiceByIdUseCase> get _getByIdUC =>
+      ref.read(getInvoiceByIdUCProvider.future);
+
   Future<CreateInvoiceUseCase> get _createUC =>
       ref.read(createInvoiceUCProvider.future);
   Future<UpdateInvoiceUseCase> get _updateUC =>
@@ -106,6 +119,26 @@ class InvoiceNotifier extends _$InvoiceNotifier {
       state = state.copyWith(isLoading: false, error: e.message);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<InvoiceEntity?> refreshInvoiceById(int invoiceId) async {
+    try {
+      final uc = await _getByIdUC;
+      final fresh = await uc(invoiceId);
+      state = state.copyWith(
+        invoices: [
+          fresh,
+          ...state.invoices.where((i) => i.invoiceId != invoiceId),
+        ],
+      );
+      return fresh;
+    } on ApiException catch (e) {
+      state = state.copyWith(error: e.message);
+      return null;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      return null;
     }
   }
 

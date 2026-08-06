@@ -84,7 +84,13 @@ class SupplierProductPriceNotifier extends _$SupplierProductPriceNotifier {
       ref.read(getAllSupplierProductPricesUCProvider.future);
   Future<CreateSupplierProductPriceUseCase> get _createUC =>
       ref.read(createSupplierProductPriceUCProvider.future);
+
+
+      
   Future<UpdateSupplierProductPriceUseCase> get _updateUC =>
+
+
+
       ref.read(updateSupplierProductPriceUCProvider.future);
   Future<DeleteSupplierProductPriceUseCase> get _deleteUC =>
       ref.read(deleteSupplierProductPriceUCProvider.future);
@@ -139,6 +145,8 @@ class SupplierProductPriceNotifier extends _$SupplierProductPriceNotifier {
 
   Future<bool> update({
     required int priceId,
+    int? supplierId,
+    int? variantId,
     double? unitPrice,
     String? note,
   }) async {
@@ -147,6 +155,8 @@ class SupplierProductPriceNotifier extends _$SupplierProductPriceNotifier {
       final uc = await _updateUC;
       final updated = await uc(
         priceId: priceId,
+        supplierId: supplierId,
+        variantId: variantId,
         unitPrice: unitPrice,
         note: note,
       );

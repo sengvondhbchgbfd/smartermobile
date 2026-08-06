@@ -28,7 +28,7 @@ class StaffAttendanceState {
     List<AttendanceEntity>? records,
     Map<String, dynamic>? monthlyStats,
     bool? isLoading,
-    Object? error = _keep, // ✅ sentinel — null means "clear error"
+    Object? error = _keep,
   }) {
     return StaffAttendanceState(
       records: records ?? this.records,

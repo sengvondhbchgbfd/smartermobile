@@ -26,12 +26,9 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
     _createCompany = RegisterCompanyUseCase(repo);
     return const CompanyState();
   }
+
   /////////////////////////////////////////////////////////////////////////////
   //
-  ////////////////////////////////////////////////////////////////////////////
-
-  ////////////////////////////////////////////////////////////////////////////
-  // CreateCompany
   ////////////////////////////////////////////////////////////////////////////
   Future<bool> registerCompany({
     required String companyCode,
@@ -40,6 +37,9 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
     required String email,
     required int maxUsers,
     required String timezone,
+    required String adminUsername,
+    required String adminPassword,
+    required String adminFullName,
     String planType = 'free',
   }) async {
     final current = state.valueOrNull ?? const CompanyState();
@@ -54,6 +54,9 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
         maxUsers: maxUsers,
         timezone: timezone,
         planType: planType,
+        adminUsername: adminUsername,
+        adminPassword: adminPassword,
+        adminFullName: adminFullName,
       ),
     );
 
@@ -71,14 +74,13 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
       },
     );
   }
-  ////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////
   // ── Fetch (full screen loading) ──────────────────────────────────────────
   ////////////////////////////////////////////////////////////////////////////
 
   Future<void> fetchCompany(int companyId) async {
     final current = state.valueOrNull ?? const CompanyState();
     state = AsyncData(current.copyWith(isUpdating: true));
-
     final result = await _getCompany(companyId);
     state = result.fold(
       (failure) => AsyncData(
@@ -117,9 +119,9 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
   Future<bool> uploadLogo({
     required int companyId,
     required String filePath,
-    bool isLogo = true, // ✅ flag
+    bool isLogo = true,
     String? oldLogoPublicId,
-    String? oldBannerPublicId, // ✅ add
+    String? oldBannerPublicId,
   }) async {
     final current = state.valueOrNull ?? const CompanyState();
     state = AsyncData(current.copyWith(isUpdating: true, error: null));
@@ -128,7 +130,7 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
       UploadLogoParams(
         companyId: companyId,
         filePath: filePath,
-        isLogo: isLogo, // ✅ pass flag
+        isLogo: isLogo,
         oldLogoPublicId: oldLogoPublicId,
         oldBannerPublicId: oldBannerPublicId,
       ),

@@ -7,9 +7,14 @@ import 'package:frontendmobile/core/constants/ApiEndpoints.dart';
 class AuthInterceptor extends Interceptor {
   final Dio dio;
   final SecureStorageService storage;
+  final void Function()? onSessionExpired;
   Completer<bool>? _refreshCompleter;
 
-  AuthInterceptor({required this.dio, required this.storage});
+  AuthInterceptor({
+    required this.dio,
+    required this.storage,
+    this.onSessionExpired,
+  });
 
   // ── Attach token to every request ──────────────────────────────────────────
   @override
@@ -24,6 +29,12 @@ class AuthInterceptor extends Interceptor {
     handler.next(options);
   }
 
+  // ── Helper: clear auth + notify Riverpod layer ──────────────────────────────
+  Future<void> _forceLogout() async {
+    await storage.clearAuth();
+    onSessionExpired?.call();
+  }
+
   // ── Handle errors ───────────────────────────────────────────────────────────
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
@@ -36,7 +47,7 @@ class AuthInterceptor extends Interceptor {
     // Don't retry the refresh endpoint itself — infinite loop prevention
     ////////////////////////////////////////////////////////////////////////////
     if (request.path == ApiEndpoints.refresh) {
-      await storage.clearAuth();
+      await _forceLogout();
       return handler.next(err);
     }
 
@@ -45,7 +56,7 @@ class AuthInterceptor extends Interceptor {
     ////////////////////////////////////////////////////////////////////////////
 
     if (request.extra['retried'] == true) {
-      await storage.clearAuth();
+      await _forceLogout();
       return handler.next(err);
     }
 
@@ -53,7 +64,7 @@ class AuthInterceptor extends Interceptor {
       final success = await _refreshToken();
 
       if (!success) {
-        await storage.clearAuth();
+        await _forceLogout();
         return handler.next(err);
       }
 
@@ -65,7 +76,7 @@ class AuthInterceptor extends Interceptor {
       final response = await dio.fetch(retryRequest);
       return handler.resolve(response);
     } catch (e) {
-      await storage.clearAuth();
+      await _forceLogout();
       return handler.next(err);
     }
   }

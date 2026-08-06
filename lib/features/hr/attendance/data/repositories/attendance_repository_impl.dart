@@ -37,6 +37,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   Future<Map<String, dynamic>> checkIn({
     required String scanToken,
     required String officeQrToken,
+
     required String latitude,
     required String longitude,
     required String companyId,

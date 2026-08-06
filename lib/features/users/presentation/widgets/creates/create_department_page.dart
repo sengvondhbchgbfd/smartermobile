@@ -62,18 +62,24 @@ class _CreateDepartmentPageState extends ConsumerState<CreateDepartmentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surface = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final textPrimary =
+        isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight;
+
     final state = ref.watch(userNotifierProvider).valueOrNull;
 
     return Scaffold(
-      backgroundColor: Pallets.backgroundDark,
+      backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: Pallets.backgroundDark,
+        backgroundColor: surface,
         elevation: 0,
         leading: const UserFormBackButton(),
-        title: const Text(
+        title: Text(
           'Create Department',
           style: TextStyle(
-            color: Colors.white,
+            color: textPrimary,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -93,9 +99,7 @@ class _CreateDepartmentPageState extends ConsumerState<CreateDepartmentPage> {
             ),
             const SizedBox(height: 24),
             const UserFormLabel('MANAGER (OPTIONAL)'),
-            ////////////////////////////////////////////////////////////////////
             const SizedBox(height: 12),
-            ////////////////////////////////////////////////////////////////////
             UserFormDropdown<int?>(
               hint: 'Select Manager',
               icon: Icons.person_outline_rounded,
@@ -108,10 +112,7 @@ class _CreateDepartmentPageState extends ConsumerState<CreateDepartmentPage> {
               ],
               onChanged: (val) => setState(() => _selectedManagerId = val),
             ),
-
-            /////////////////////////////////////////////////////////////////
             const SizedBox(height: 32),
-            ////////////////////////////////////////////////////////////////
             UserFormButton(
               label: 'Create Department',
               loading: _loading,

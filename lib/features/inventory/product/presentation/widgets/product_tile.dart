@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/widgets/placeholder_thumb.dart';
-import 'package:frontendmobile/features/inventory/product/presentation/widgets/themes/product_color.dart';
 import '../../domain/entities/product_entity.dart';
 
 class ProductTile extends StatelessWidget {
@@ -22,13 +22,17 @@ class ProductTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final cardBg = ProductColor.card(context);
-    final borderColor = ProductColor.border(context);
-    final subText = ProductColor.sub(context);
-    final searchBg = ProductColor.searchBg(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    // ✅ from first variant — nullable since product may have no variants yet
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final searchBg = isDark ? Pallets.surfaceElevated : Pallets.backgroundLight;
+    final primary = Pallets.blurple;
+    final error = Pallets.error;
+
     final price = product.price;
     final stockQty = product.stockQuantity;
     final lowStock = (stockQty ?? 0) <= 5;
@@ -79,14 +83,13 @@ class ProductTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
 
-                  // ✅ price from first variant or fallback
                   Text(
                     price != null
                         ? '\$${price.toStringAsFixed(2)}'
                         : 'No variants yet',
                     style: TextStyle(
                       fontSize: 14,
-                      color: price != null ? subText : colors.error,
+                      color: price != null ? subText : error,
                       fontStyle: price != null
                           ? FontStyle.normal
                           : FontStyle.italic,
@@ -97,10 +100,8 @@ class ProductTile extends StatelessWidget {
                   Row(
                     children: [
                       if (hasVariants) ...[
-                        // ✅ stock badge from first variant
                         StockBadge(qty: stockQty ?? 0, low: lowStock),
                         const SizedBox(width: 6),
-                        // variant count badge
                         if (product.variants.length > 1)
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -108,7 +109,7 @@ class ProductTile extends StatelessWidget {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: colors.secondaryContainer,
+                              color: primary.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -116,19 +117,18 @@ class ProductTile extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: colors.onSecondaryContainer,
+                                color: primary,
                               ),
                             ),
                           ),
                       ] else
-                        // ✅ no variants — show hint badge
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 7,
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: colors.errorContainer,
+                            color: error.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -136,7 +136,7 @@ class ProductTile extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: colors.onErrorContainer,
+                              color: error,
                             ),
                           ),
                         ),
@@ -149,23 +149,26 @@ class ProductTile extends StatelessWidget {
 
             // Actions
             if (isWorking)
-              const SizedBox(
+              SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: primary,
+                ),
               )
             else
               Column(
                 children: [
                   ActionBtn(
                     icon: Icons.edit_outlined,
-                    color: colors.primary,
+                    color: primary,
                     onTap: onEdit,
                   ),
                   const SizedBox(height: 4),
                   ActionBtn(
                     icon: Icons.delete_outline,
-                    color: colors.error,
+                    color: error,
                     onTap: onDelete,
                   ),
                 ],

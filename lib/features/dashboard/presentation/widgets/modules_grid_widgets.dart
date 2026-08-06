@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:frontendmobile/config/routes/route_names.dart';
+import 'package:frontendmobile/core/extensions/user_info_extensions.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
+import 'package:frontendmobile/features/auth/data/models/auth_user_model.dart';
 import 'package:frontendmobile/features/dashboard/data/models/models.dart';
 import 'package:go_router/go_router.dart';
 
-final List<DashboardModule> modules = const [
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
+final List<DashboardModule> allModules = const [
   DashboardModule(
     title: 'User Control',
     subtitle: 'Roles & Permissions',
@@ -55,6 +61,13 @@ final List<DashboardModule> modules = const [
     route: RouteNames.invoices,
   ),
   DashboardModule(
+    title: 'Quotations',
+    subtitle: 'Quotes & Estimates',
+    icon: Icons.request_quote_rounded,
+    color: Colors.pink,
+    route: RouteNames.quotations,
+  ),
+  DashboardModule(
     title: 'Customers',
     subtitle: 'CRM',
     icon: Icons.groups_rounded,
@@ -75,7 +88,6 @@ final List<DashboardModule> modules = const [
     color: Colors.amber,
     route: RouteNames.salaries,
   ),
-
   DashboardModule(
     title: 'Leave',
     subtitle: 'Time Off Requests',
@@ -85,17 +97,37 @@ final List<DashboardModule> modules = const [
   ),
 ];
 
-Widget buildModules(double screenWidth) {
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
+List<DashboardModule> visibleModules(UserInfo? currentUser) {
+  final canManageUsers = currentUser?.canManageUsers ?? false;
+  final canManageStaff = currentUser?.canManageStaff ?? false;
+
+  return allModules.where((m) {
+    if (m.route == RouteNames.staffRoles) return canManageUsers;
+    if (m.route == RouteNames.staff) return canManageStaff;
+    return true;
+  }).toList();
+}
+
+Widget buildModules(
+  BuildContext context,
+  double screenWidth,
+  List<DashboardModule> modules,
+) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   final cellWidth = (screenWidth - screenWidth * 0.09 - 14) / 2;
   final cellHeight = cellWidth * 0.85;
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text(
+      Text(
         'System Modules',
         style: TextStyle(
-          color: Colors.white,
+          color: isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight,
           fontWeight: FontWeight.bold,
           fontSize: 17,
         ),
@@ -114,7 +146,6 @@ Widget buildModules(double screenWidth) {
         itemBuilder: (context, index) {
           final module = modules[index];
           final route = module.route;
-
           return InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: () {
@@ -128,7 +159,7 @@ Widget buildModules(double screenWidth) {
                 );
                 return;
               }
-              const _tabRoutes = {
+              const tabRoutes = {
                 RouteNames.dashboard,
                 RouteNames.attendance,
                 RouteNames.chat,
@@ -136,7 +167,7 @@ Widget buildModules(double screenWidth) {
                 RouteNames.settings,
               };
               Future.microtask(() {
-                if (_tabRoutes.contains(route)) {
+                if (tabRoutes.contains(route)) {
                   context.go(route);
                 } else {
                   context.push(route);
@@ -146,9 +177,20 @@ Widget buildModules(double screenWidth) {
             child: Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Pallets.surfaceDark,
+                color: isDark ? Pallets.surfaceCard : Pallets.surfaceLight,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Pallets.borderDark),
+                border: Border.all(
+                  color: isDark ? Pallets.borderDark : Pallets.borderLight,
+                ),
+                boxShadow: isDark
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +199,7 @@ Widget buildModules(double screenWidth) {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: module.color.withOpacity(0.15),
+                      color: module.color.withOpacity(isDark ? 0.15 : 0.10),
                       borderRadius: BorderRadius.circular(13),
                     ),
                     child: Icon(module.icon, color: module.color, size: 22),
@@ -167,8 +209,10 @@ Widget buildModules(double screenWidth) {
                     children: [
                       Text(
                         module.title,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: isDark
+                              ? Pallets.textPrimaryDark
+                              : Pallets.textPrimaryLight,
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                         ),
@@ -177,8 +221,10 @@ Widget buildModules(double screenWidth) {
                       const SizedBox(height: 3),
                       Text(
                         module.subtitle,
-                        style: const TextStyle(
-                          color: Pallets.textSecondaryDark,
+                        style: TextStyle(
+                          color: isDark
+                              ? Pallets.textSecondaryDark
+                              : Pallets.textSecondaryLight,
                           fontSize: 11,
                         ),
                         overflow: TextOverflow.ellipsis,

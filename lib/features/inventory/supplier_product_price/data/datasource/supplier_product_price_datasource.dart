@@ -5,12 +5,17 @@ import 'package:frontendmobile/core/network/dio_client.dart';
 import 'package:frontendmobile/features/inventory/supplier_product_price/data/model/supplier_product_price_model.dart';
 
 abstract class SupplierProductPriceRemoteDataSource {
+  ///////////////////////////////
+  ///
+  //////////////////////////////
   Future<List<SupplierProductPriceModel>> getAll({
     int? supplierId,
     int? variantId,
   });
   Future<SupplierProductPriceModel> getById(int priceId);
-
+  ///////////////////////////////
+  ///
+  //////////////////////////////
   Future<SupplierProductPriceModel> create({
     required int supplierId,
     required int variantId,
@@ -18,8 +23,14 @@ abstract class SupplierProductPriceRemoteDataSource {
     String? note,
   });
 
+  ///////////////////////////////
+  ///
+  //////////////////////////////
+
   Future<SupplierProductPriceModel> update({
     required int priceId,
+    int? supplierId,
+    int? variantId,
     double? unitPrice,
     String? note,
   });
@@ -27,12 +38,21 @@ abstract class SupplierProductPriceRemoteDataSource {
   Future<void> delete(int priceId);
 }
 
+///////////////////////////////
+///
+//////////////////////////////
+
 class SupplierProductPriceRemoteDataSourceImpl
     implements SupplierProductPriceRemoteDataSource {
+  ///////////////////////////////
+  ///
+  //////////////////////////////
   final DioClient _dioClient;
   SupplierProductPriceRemoteDataSourceImpl(this._dioClient);
   Dio get _dio => _dioClient.dio;
-
+  ///////////////////////////////
+  ///  GET ERROR AS GLOBAL
+  //////////////////////////////
   Never _throw(DioException e) {
     final detail = e.response?.data;
     final message = detail is Map
@@ -44,7 +64,10 @@ class SupplierProductPriceRemoteDataSourceImpl
     );
   }
 
-  // 👈 new: single place that wraps EVERY failure mode, not just network ones
+  ///////////////////////////////
+  ///
+  //////////////////////////////
+  // single place that wraps EVERY failure mode, not just network ones
   Future<T> _safeCall<T>(Future<T> Function() request) async {
     try {
       return await request();
@@ -57,6 +80,10 @@ class SupplierProductPriceRemoteDataSourceImpl
       );
     }
   }
+
+  ///////////////////////////////
+  ///
+  //////////////////////////////
 
   @override
   Future<List<SupplierProductPriceModel>> getAll({
@@ -77,6 +104,10 @@ class SupplierProductPriceRemoteDataSourceImpl
     });
   }
 
+  ///////////////////////////////
+  ///
+  //////////////////////////////
+
   @override
   Future<SupplierProductPriceModel> getById(int priceId) {
     return _safeCall(() async {
@@ -84,6 +115,10 @@ class SupplierProductPriceRemoteDataSourceImpl
       return SupplierProductPriceModel.fromJson(res.data);
     });
   }
+
+  ///////////////////////////////
+  ///
+  //////////////////////////////
 
   @override
   Future<SupplierProductPriceModel> create({
@@ -106,9 +141,15 @@ class SupplierProductPriceRemoteDataSourceImpl
     });
   }
 
+  ///////////////////////////////
+  ///
+  //////////////////////////////
+
   @override
   Future<SupplierProductPriceModel> update({
     required int priceId,
+    int? supplierId,
+    int? variantId,
     double? unitPrice,
     String? note,
   }) {
@@ -116,6 +157,8 @@ class SupplierProductPriceRemoteDataSourceImpl
       final res = await _dio.patch(
         ApiEndpoints.supplierPriceById(priceId),
         data: {
+          if (supplierId != null) 'supplier_id': supplierId,
+          if (variantId != null) 'variant_id': variantId,
           if (unitPrice != null) 'unit_price': unitPrice,
           if (note != null) 'note': note,
         },
@@ -123,6 +166,10 @@ class SupplierProductPriceRemoteDataSourceImpl
       return SupplierProductPriceModel.fromJson(res.data);
     });
   }
+
+  ///////////////////////////////
+  ///
+  //////////////////////////////
 
   @override
   Future<void> delete(int priceId) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/inventory/categories/domain/entities/category_entity.dart';
 
 class HeroImage extends StatelessWidget {
@@ -26,10 +27,10 @@ class HeroImage extends StatelessWidget {
               ? child
               : Container(
                   height: 220,
-                  color: isDark
-                      ? const Color(0xFF2C2C2E)
-                      : const Color(0xFFEFEFED),
-                  child: const Center(child: CircularProgressIndicator()),
+                  color: isDark ? Pallets.surfaceCard : Pallets.surfaceLight,
+                  child: Center(
+                    child: CircularProgressIndicator(color: Pallets.blurple),
+                  ),
                 ),
           errorBuilder: (_, __, ___) => _placeholder(isDark, subText),
         ),
@@ -41,7 +42,7 @@ class HeroImage extends StatelessWidget {
   Widget _placeholder(bool isDark, Color subText) => Container(
     width: double.infinity,
     height: 220,
-    color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFEFEFED),
+    color: isDark ? Pallets.surfaceCard : Pallets.surfaceLight,
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/core/widgets/alertmessage/app_snacker.dart';
 import 'package:frontendmobile/core/widgets/skeleton/category_detail_skeleton.dart';
 import 'package:frontendmobile/features/inventory/categories/domain/entities/category_entity.dart';
@@ -12,26 +13,20 @@ class CategoryDetailScreen extends ConsumerWidget {
   final int categoryId;
   const CategoryDetailScreen({required this.categoryId, super.key});
 
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
     final state = ref.watch(categoryNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
+
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
 
     final category = state.categories
         .where((c) => c.categoryId == categoryId)
@@ -40,29 +35,45 @@ class CategoryDetailScreen extends ConsumerWidget {
     if (state.isLoading && category == null) {
       return Scaffold(
         backgroundColor: bg,
-        appBar: _buildAppBar(context, cardBg, borderColor, null, ref),
+        appBar: _buildAppBar(
+          context,
+          cardBg,
+          borderColor,
+          textPrimary,
+          null,
+          ref,
+        ),
         body: const CategoryDetailSkeleton(),
       );
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
-
     if (category == null) {
       return Scaffold(
         backgroundColor: bg,
-        appBar: _buildAppBar(context, cardBg, borderColor, null, ref),
-        body: const Center(child: Text('Category not found.')),
+        appBar: _buildAppBar(
+          context,
+          cardBg,
+          borderColor,
+          textPrimary,
+          null,
+          ref,
+        ),
+        body: Center(
+          child: Text('Category not found.', style: TextStyle(color: subText)),
+        ),
       );
     }
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
 
     return Scaffold(
       backgroundColor: bg,
-      appBar: _buildAppBar(context, cardBg, borderColor, category, ref),
+      appBar: _buildAppBar(
+        context,
+        cardBg,
+        borderColor,
+        textPrimary,
+        category,
+        ref,
+      ),
       body: CategoryDetailBody(
         category: category,
         bg: bg,
@@ -74,27 +85,25 @@ class CategoryDetailScreen extends ConsumerWidget {
     );
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
-
   PreferredSizeWidget _buildAppBar(
     BuildContext context,
     Color cardBg,
     Color borderColor,
+    Color textPrimary,
     CategoryEntity? category,
     WidgetRef ref,
   ) {
     return AppBar(
-      //////////////////////////////////////////////////////////////////////////
-      ///
-      //////////////////////////////////////////////////////////////////////////
       backgroundColor: cardBg,
       elevation: 0,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: Pallets.transparent,
       title: Text(
         category?.categoryName ?? 'Category Detail',
-        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+          color: textPrimary,
+        ),
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0.5),
@@ -104,14 +113,18 @@ class CategoryDetailScreen extends ConsumerWidget {
           ? null
           : [
               IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 20),
+                icon: Icon(
+                  Icons.edit_outlined,
+                  size: 20,
+                  color: Pallets.blurple,
+                ),
                 onPressed: () => _openEdit(context, ref, category),
               ),
               IconButton(
                 icon: const Icon(
                   Icons.delete_outline,
                   size: 20,
-                  color: Color(0xFFA32D2D),
+                  color: Pallets.error,
                 ),
                 onPressed: () => _confirmDelete(context, ref, category),
               ),
@@ -119,9 +132,6 @@ class CategoryDetailScreen extends ConsumerWidget {
             ],
     );
   }
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> _openEdit(
     BuildContext context,
@@ -148,10 +158,6 @@ class CategoryDetailScreen extends ConsumerWidget {
       type: ok ? SnackType.success : SnackType.error,
     );
   }
-
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> _confirmDelete(
     BuildContext context,
@@ -181,8 +187,4 @@ class CategoryDetailScreen extends ConsumerWidget {
       type: ok ? SnackType.success : SnackType.error,
     );
   }
-
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
 }

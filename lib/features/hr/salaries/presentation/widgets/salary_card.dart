@@ -31,9 +31,10 @@ class SalaryCard extends ConsumerWidget {
     final isPaid = salary.isPaid;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70);
-    final border = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA);
-
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final border = isDark ? Pallets.borderDark : Pallets.borderLight;
     // ✅ safe null-aware net salary
     final netSalary = salary.netSalary ?? 0.0;
 
@@ -109,7 +110,13 @@ class SalaryCard extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // ── Breakdown ────────────────────────────────────
-          _AmountRow(label: 'Base', value: salary.baseSalary, subText: subText),
+          _AmountRow(
+            label: 'Bonus',
+            value: salary.bonus,
+            color: Pallets.success,
+            prefix: '+',
+            subText: subText,
+          ),
           const SizedBox(height: 4),
           _AmountRow(
             label: 'Bonus',
@@ -122,7 +129,7 @@ class SalaryCard extends ConsumerWidget {
           _AmountRow(
             label: 'Deductions',
             value: salary.deductions,
-            color: Colors.red,
+            color: Pallets.error,
             prefix: '-',
             subText: subText,
           ),

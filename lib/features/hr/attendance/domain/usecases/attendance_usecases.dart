@@ -53,6 +53,8 @@ class CheckInUseCase {
 class CheckOutUseCase {
   final AttendanceRepository _repo;
   const CheckOutUseCase(this._repo);
+
+  // Same nullability as CheckInUseCase — see comment above.
   Future<Map<String, dynamic>> call({
     required String scanToken,
     required String officeQrToken,

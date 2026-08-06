@@ -147,7 +147,7 @@ final deleteSupplierProductPriceUCProvider =
 typedef DeleteSupplierProductPriceUCRef =
     AutoDisposeFutureProviderRef<DeleteSupplierProductPriceUseCase>;
 String _$supplierProductPriceNotifierHash() =>
-    r'e621f7535efb53d6670e07d9f32aa191884f2623';
+    r'8b2c70defff2dfe6ce229c53943d20ac960da0f1';
 
 /// See also [SupplierProductPriceNotifier].
 @ProviderFor(SupplierProductPriceNotifier)

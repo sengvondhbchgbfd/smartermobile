@@ -14,15 +14,16 @@ class Step0CompanyScreen extends ConsumerStatefulWidget {
 }
 
 class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
-  /////////////////////////////////////////////////////////////////////
-  ///
-  /////////////////////////////////////////////////////////////////////
-
   final _formKey = GlobalKey<FormState>();
   final _companyNameCtrl = TextEditingController();
   final _companyCodeCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _maxUsersCtrl = TextEditingController();
+
+  // ── Owner account fields ──────────────────────────────────────
+  final _adminUsernameCtrl = TextEditingController();
+  final _adminPasswordCtrl = TextEditingController();
+  final _adminFullNameCtrl = TextEditingController();
 
   String _planType = 'free';
   String? _selectedCurrency;
@@ -35,9 +36,6 @@ class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
     'Asia/Ho_Chi_Minh',
     'Asia/Singapore',
   ];
-  /////////////////////////////////////////////////////////////////////
-  ///
-  /////////////////////////////////////////////////////////////////////
 
   @override
   void dispose() {
@@ -45,12 +43,11 @@ class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
     _companyCodeCtrl.dispose();
     _emailCtrl.dispose();
     _maxUsersCtrl.dispose();
+    _adminUsernameCtrl.dispose();
+    _adminPasswordCtrl.dispose();
+    _adminFullNameCtrl.dispose();
     super.dispose();
   }
-
-  /////////////////////////////////////////////////////////////////////
-  ///
-  /////////////////////////////////////////////////////////////////////
 
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
@@ -66,14 +63,13 @@ class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
           maxUsers: int.parse(_maxUsersCtrl.text.trim()),
           timezone: _selectedTimezone!,
           planType: _planType,
+          adminUsername: _adminUsernameCtrl.text.trim(),
+          adminPassword: _adminPasswordCtrl.text,
+          adminFullName: _adminFullNameCtrl.text.trim(),
         );
     if (!mounted) return;
     if (success) {}
   }
-
-  /////////////////////////////////////////////////////////////////////
-  ///
-  /////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
@@ -99,34 +95,21 @@ class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
                         decoration: BoxDecoration(
                           color: Pallets.error.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: Pallets.error.withOpacity(0.4),
-                          ),
+                          border: Border.all(color: Pallets.error.withOpacity(0.4)),
                         ),
-                        child: Text(
-                          error,
-                          style: const TextStyle(
-                            color: Pallets.error,
-                            fontSize: 13,
-                          ),
-                        ),
+                        child: Text(error, style: const TextStyle(color: Pallets.error, fontSize: 13)),
                       ),
                       const SizedBox(height: 12),
                     ],
 
-                    ///////////////////////////////////////////////////////////
-                    ///
-                    ///////////////////////////////////////////////////////////
                     CustomTextField(
                       controller: _companyNameCtrl,
                       label: 'Company Name',
                       prefixIcon: Icons.apartment,
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 12),
 
-                    ///////////////////////////////////////////////////////////
-                    ///
-                    ///////////////////////////////////////////////////////////
                     CustomTextField(
                       controller: _companyCodeCtrl,
                       label: 'Company code',
@@ -134,9 +117,6 @@ class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    ///////////////////////////////////////////////////////////
-                    ///
-                    ///////////////////////////////////////////////////////////
                     CustomTextField(
                       controller: _emailCtrl,
                       label: 'Email',
@@ -145,9 +125,6 @@ class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    ///////////////////////////////////////////////////////////
-                    ///
-                    ///////////////////////////////////////////////////////////
                     CustomTextField(
                       controller: _maxUsersCtrl,
                       label: "maxUsers",
@@ -156,38 +133,59 @@ class _Step0CompanyScreenState extends ConsumerState<Step0CompanyScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    ///////////////////////////////////////////////////////////
-                    ///
-                    ///////////////////////////////////////////////////////////
                     CustomDropdown<String>(
                       label: 'Currency',
                       prefixIcon: Icons.attach_money,
                       value: _selectedCurrency,
-                      items: _currencies
-                          .map(
-                            (c) => DropdownMenuItem(value: c, child: Text(c)),
-                          )
-                          .toList(),
+                      items: _currencies.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                       onChanged: (v) => setState(() => _selectedCurrency = v),
                       validator: (v) => v == null ? 'Select currency' : null,
                     ),
-
                     const SizedBox(height: 12),
 
-                    ///////////////////////////////////////////////////////////
-                    ///
-                    ///////////////////////////////////////////////////////////
                     CustomDropdown<String>(
                       label: 'Timezone',
                       prefixIcon: Icons.schedule_outlined,
                       value: _selectedTimezone,
-                      items: _timezones
-                          .map(
-                            (t) => DropdownMenuItem(value: t, child: Text(t)),
-                          )
-                          .toList(),
+                      items: _timezones.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                       onChanged: (v) => setState(() => _selectedTimezone = v),
                       validator: (v) => v == null ? 'Select timezone' : null,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // ── Owner account section ───────────────────────
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    CustomTextField(
+                      controller: _adminFullNameCtrl,
+                      label: 'Your Full Name',
+                      prefixIcon: Icons.person_outline,
+                      validator: (v) => v!.isEmpty ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 12),
+
+                    CustomTextField(
+                      controller: _adminUsernameCtrl,
+                      label: 'Username',
+                      prefixIcon: Icons.alternate_email,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Required';
+                        if (v.trim().length < 3) return 'Min 3 characters';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    CustomTextField(
+                      controller: _adminPasswordCtrl,
+                      label: 'Password',
+                      prefixIcon: Icons.lock_outline,
+                      obscureText: true,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Required';
+                        if (v.length < 8) return 'Min 8 characters';
+                        return null;
+                      },
                     ),
                   ],
                 ),

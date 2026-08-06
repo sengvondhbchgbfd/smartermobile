@@ -57,16 +57,23 @@ class _CreateRolePageState extends ConsumerState<CreateRolePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surface = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+
     return Scaffold(
-      backgroundColor: Pallets.backgroundDark,
+      backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: Pallets.backgroundDark,
+        backgroundColor: surface,
         elevation: 0,
         leading: const UserFormBackButton(),
-        title: const Text(
+        title: Text(
           'Create Role',
           style: TextStyle(
-            color: Colors.white,
+            color: textPrimary,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),

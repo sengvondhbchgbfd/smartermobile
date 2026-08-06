@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/screens/product_form_screen.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/widgets/detail_widgets/circle_icon_button.dart';
 import 'package:frontendmobile/features/inventory/product_variant/presentation/screens/variant_list_screen.dart';
@@ -87,7 +88,6 @@ class ProductDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     int imageId,
   ) async {
-    final theme = Theme.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -101,7 +101,7 @@ class ProductDetailScreen extends ConsumerWidget {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: theme.colorScheme.error,
+              backgroundColor: Pallets.error,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -136,27 +136,29 @@ class ProductDetailScreen extends ConsumerWidget {
         .firstOrNull;
 
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final bg = isDark ? const Color(0xFF111111) : const Color(0xFFF5F4F2);
-    final cardBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFE8E6E1);
-    final subText = isDark ? const Color(0xFF888888) : const Color(0xFF888888);
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
 
     if (product == null) {
       return Scaffold(
         backgroundColor: bg,
         appBar: AppBar(
-          title: const Text('Product'),
+          title: Text('Product', style: TextStyle(color: textPrimary)),
           backgroundColor: bg,
           elevation: 0,
         ),
         body: Center(
           child: state.isLoading
-              ? const CircularProgressIndicator()
+              ? CircularProgressIndicator(color: Pallets.blurple)
               : Text('Product not found.', style: TextStyle(color: subText)),
         ),
       );
@@ -175,7 +177,7 @@ class ProductDetailScreen extends ConsumerWidget {
             stretch: true,
             expandedHeight: 300,
             backgroundColor: cardBg,
-            surfaceTintColor: Colors.transparent,
+            surfaceTintColor: Pallets.transparent,
             elevation: 0,
             title: Text(
               product.name,
@@ -183,6 +185,7 @@ class ProductDetailScreen extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: textPrimary,
               ),
             ),
             leading: Padding(
@@ -194,13 +197,16 @@ class ProductDetailScreen extends ConsumerWidget {
             ),
             actions: [
               if (isWorking)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Center(
                     child: SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Pallets.blurple,
+                      ),
                     ),
                   ),
                 )
@@ -263,6 +269,7 @@ class ProductDetailScreen extends ConsumerWidget {
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         letterSpacing: -0.3,
+                        color: textPrimary,
                       ),
                     ),
 
@@ -283,8 +290,6 @@ class ProductDetailScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-
-
                       icon: const Icon(Icons.tune_outlined, size: 15),
                       label: const Text('Manage variants'),
                       style: OutlinedButton.styleFrom(
@@ -293,7 +298,7 @@ class ProductDetailScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         side: BorderSide(color: borderColor),
-                        foregroundColor: colors.primary,
+                        foregroundColor: Pallets.blurple,
                         textStyle: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -301,8 +306,6 @@ class ProductDetailScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-
-                    
 
                     // variant cards
                     if (product.variants.isNotEmpty)
@@ -314,7 +317,6 @@ class ProductDetailScreen extends ConsumerWidget {
                           subText: subText,
                           isDark: isDark,
                           theme: theme,
-                          colors: colors,
                         ),
                       )
                     else
@@ -387,9 +389,9 @@ class _HeroGalleryState extends State<_HeroGallery> {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = widget.isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFE8E6E1);
+    final subText = widget.isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
 
     return Stack(
       fit: StackFit.expand,
@@ -404,18 +406,14 @@ class _HeroGalleryState extends State<_HeroGallery> {
                     Icon(
                       Icons.image_outlined,
                       size: 48,
-                      color: widget.isDark
-                          ? const Color(0xFF444444)
-                          : const Color(0xFFCCCCCC),
+                      color: subText.withOpacity(0.7),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'No images yet',
                       style: TextStyle(
                         fontSize: 13,
-                        color: widget.isDark
-                            ? const Color(0xFF555555)
-                            : const Color(0xFFBBBBBB),
+                        color: subText.withOpacity(0.7),
                       ),
                     ),
                   ],
@@ -494,8 +492,14 @@ class _HeroGalleryState extends State<_HeroGallery> {
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.delete_outline),
-                                title: const Text('Delete'),
+                                leading: Icon(
+                                  Icons.delete_outline,
+                                  color: Pallets.error,
+                                ),
+                                title: Text(
+                                  'Delete',
+                                  style: TextStyle(color: Pallets.error),
+                                ),
                                 onTap: () {
                                   Navigator.pop(context);
                                   widget.onDelete(img.imageId);
@@ -592,8 +596,6 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-// ── Variant card ──────────────────────────────────────────────────────────────
-
 class _VariantCard extends StatelessWidget {
   final dynamic variant;
   final Color cardBg;
@@ -601,7 +603,6 @@ class _VariantCard extends StatelessWidget {
   final Color subText;
   final bool isDark;
   final ThemeData theme;
-  final ColorScheme colors;
 
   const _VariantCard({
     required this.variant,
@@ -610,10 +611,8 @@ class _VariantCard extends StatelessWidget {
     required this.subText,
     required this.isDark,
     required this.theme,
-    required this.colors,
   });
 
-  // Chip colors — cycle through purple / teal / coral
   static const _chipPalettes = [
     (bg: Color(0xFFEEEDFE), text: Color(0xFF3C3489)), // purple
     (bg: Color(0xFFE1F5EE), text: Color(0xFF0F6E56)), // teal
@@ -644,7 +643,6 @@ class _VariantCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // SKU
           if (variant.sku != null) ...[
             Row(
               children: [
@@ -658,8 +656,6 @@ class _VariantCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
           ],
-
-          // spec chips
           if (variant.specs.isNotEmpty) ...[
             Wrap(
               spacing: 5,
@@ -695,8 +691,6 @@ class _VariantCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
           ],
-
-          // price + stock
           Row(
             children: [
               Expanded(

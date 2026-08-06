@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:frontendmobile/core/constants/ApiEndpoints.dart';
+import 'package:frontendmobile/core/errors/api_error_handler.dart';
 import 'package:frontendmobile/core/errors/exceptions.dart';
 import 'package:frontendmobile/core/network/dio_client.dart';
 import 'package:frontendmobile/features/inventory/invoice/data/models/invoice_item_model.dart';
@@ -9,6 +11,7 @@ import '../../domain/repositories/invoice_repository.dart'
 abstract class InvoiceRemoteDataSource {
   Future<List<InvoiceModel>> getAll({int? customerId});
   Future<InvoiceModel> getById(int invoiceId);
+
   Future<InvoiceModel> create({
     int? customerId,
     int? staffId,
@@ -18,6 +21,18 @@ abstract class InvoiceRemoteDataSource {
     required String paymentType,
     required List<InvoiceItemInput> items,
   });
+  ////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////
+  Future<InvoiceModel> createFromQuotation({
+    required int quotationId,
+    required String paymentType,
+  });
+
+  ////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////
+
   Future<InvoiceModel> update({
     required int invoiceId,
     double? totalAmount,
@@ -118,6 +133,30 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
       _throw(e);
     }
   }
+
+  //////////////////////////////////////////
+  ///
+  //////////////////////////////////////////
+
+  @override
+  Future<InvoiceModel> createFromQuotation({
+    required int quotationId,
+    required String paymentType,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '${ApiEndpoints.invoices}/from-quotation',
+        data: {'quotation_id': quotationId, 'payment_type': paymentType},
+      );
+      return InvoiceModel.fromJson(response.data);
+    } on DioException catch (e) {
+      _throw(e);
+    }
+  }
+
+  //////////////////////////////////////////
+  ///
+  //////////////////////////////////////////
 
   @override
   Future<InvoiceModel> update({

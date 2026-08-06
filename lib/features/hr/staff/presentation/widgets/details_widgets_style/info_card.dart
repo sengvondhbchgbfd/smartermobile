@@ -6,7 +6,6 @@ class InfoCard extends StatelessWidget {
   final Color muted;
   final String title;
   final List<Widget> rows;
-
   const InfoCard({
     super.key,
     required this.surface,
@@ -15,7 +14,6 @@ class InfoCard extends StatelessWidget {
     required this.title,
     required this.rows,
   });
-
   @override
   Widget build(BuildContext context) {
     return Container(

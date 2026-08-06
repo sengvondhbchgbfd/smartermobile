@@ -6,6 +6,15 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -14,20 +23,20 @@ class EmptyState extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Pallets.surfaceDark,
+              color: surface,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(
               Icons.notifications_off_outlined,
-              color: Pallets.textSecondaryDark,
+              color: textSecondary,
               size: 36,
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'No notifications',
             style: TextStyle(
-              color: Colors.white,
+              color: textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -35,7 +44,7 @@ class EmptyState extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             "You're all caught up!",
-            style: TextStyle(color: Pallets.textSecondaryDark, fontSize: 13),
+            style: TextStyle(color: textSecondary, fontSize: 13),
           ),
         ],
       ),

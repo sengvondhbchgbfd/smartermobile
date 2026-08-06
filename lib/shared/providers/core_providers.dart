@@ -6,6 +6,7 @@ import 'package:frontendmobile/core/cache/cache_service.dart';
 import 'package:frontendmobile/core/network/dio_client.dart';
 import 'package:frontendmobile/core/network/network_info.dart';
 import 'package:frontendmobile/core/storage/secure_storage_service.dart';
+import 'package:frontendmobile/features/auth/data/models/auth_user_model.dart';
 import 'package:frontendmobile/shared/providers/sharedPreferencesProvider.dart';
 
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
@@ -45,4 +46,11 @@ final dioClientProvider = FutureProvider<DioClient>((ref) async {
 final dioProvider = FutureProvider<Dio>((ref) async {
   final client = await ref.watch(dioClientProvider.future);
   return client.dio;
+});
+
+final currentUserInfoProvider = FutureProvider.autoDispose<UserInfo?>((
+  ref,
+) async {
+  final storage = ref.read(secureStorageProvider);
+  return storage.getUserInfo();
 });

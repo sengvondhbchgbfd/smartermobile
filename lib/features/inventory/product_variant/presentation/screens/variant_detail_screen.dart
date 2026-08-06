@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/core/widgets/alertmessage/app_snacker.dart';
 import 'package:frontendmobile/features/inventory/product/domain/entities/product_entity.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/widgets/card.dart';
@@ -102,7 +103,6 @@ class VariantDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     int imageId,
   ) async {
-    final theme = Theme.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -116,7 +116,7 @@ class VariantDetailScreen extends ConsumerWidget {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: theme.colorScheme.error,
+              backgroundColor: Pallets.error,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -153,22 +153,27 @@ class VariantDetailScreen extends ConsumerWidget {
         .firstOrNull;
 
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
 
     if (variant == null) {
       return Scaffold(
         backgroundColor: bg,
-        appBar: AppBar(title: const Text('Variant'), backgroundColor: bg),
+        appBar: AppBar(
+          title: Text('Variant', style: TextStyle(color: textPrimary)),
+          backgroundColor: bg,
+        ),
         body: Center(
           child: state.isLoading
-              ? const CircularProgressIndicator()
+              ? CircularProgressIndicator(color: Pallets.blurple)
               : Text('Variant not found.', style: TextStyle(color: subText)),
         ),
       );
@@ -186,12 +191,13 @@ class VariantDetailScreen extends ConsumerWidget {
             stretch: true,
             expandedHeight: 300,
             backgroundColor: cardBg,
-            surfaceTintColor: Colors.transparent,
+            surfaceTintColor: Pallets.transparent,
             elevation: 0,
             title: Text(
               variant.sku ?? 'Variant #$variantId',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: textPrimary),
             ),
             leading: CircleIconButton(
               icon: Icons.arrow_back,
@@ -199,15 +205,15 @@ class VariantDetailScreen extends ConsumerWidget {
             ),
             actions: [
               if (isWorking)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Center(
                     child: SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: Pallets.blurple,
                       ),
                     ),
                   ),
@@ -269,6 +275,7 @@ class VariantDetailScreen extends ConsumerWidget {
                       text: 'Pricing & stock',
                       subText: subText,
                     ),
+
                     DetailCard(
                       cardBg: cardBg,
                       borderColor: borderColor,
@@ -286,7 +293,7 @@ class VariantDetailScreen extends ConsumerWidget {
                                 '\$${variant.price.toStringAsFixed(2)}',
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: colors.primary,
+                                  color: Pallets.blurple,
                                 ),
                               ),
                             ],
@@ -306,8 +313,8 @@ class VariantDetailScreen extends ConsumerWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color: lowStock
-                                      ? colors.errorContainer
-                                      : colors.primaryContainer,
+                                      ? Pallets.error.withOpacity(0.12)
+                                      : Pallets.blurple.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -315,9 +322,26 @@ class VariantDetailScreen extends ConsumerWidget {
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: lowStock
-                                        ? colors.onErrorContainer
-                                        : colors.onPrimaryContainer,
+                                        ? Pallets.error
+                                        : Pallets.blurple,
                                   ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(height: 24, color: borderColor),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Total value',
+                                style: TextStyle(color: subText, fontSize: 14),
+                              ),
+                              Text(
+                                '\$${(variant.price * variant.stockQuantity).toStringAsFixed(2)}',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: textPrimary,
                                 ),
                               ),
                             ],
@@ -333,6 +357,7 @@ class VariantDetailScreen extends ConsumerWidget {
                         text: 'SKU',
                         subText: subText,
                       ),
+
                       DetailCard(
                         cardBg: cardBg,
                         borderColor: borderColor,
@@ -349,6 +374,7 @@ class VariantDetailScreen extends ConsumerWidget {
                               variant.sku!,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
+                                color: textPrimary,
                               ),
                             ),
                           ],
@@ -363,6 +389,7 @@ class VariantDetailScreen extends ConsumerWidget {
                         text: 'Specifications',
                         subText: subText,
                       ),
+
                       DetailCard(
                         cardBg: cardBg,
                         borderColor: borderColor,
@@ -378,7 +405,7 @@ class VariantDetailScreen extends ConsumerWidget {
                                     vertical: 6,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: colors.primaryContainer,
+                                    color: Pallets.blurple.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -386,7 +413,7 @@ class VariantDetailScreen extends ConsumerWidget {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
-                                      color: colors.onPrimaryContainer,
+                                      color: Pallets.blurple,
                                     ),
                                   ),
                                 ),
@@ -396,12 +423,13 @@ class VariantDetailScreen extends ConsumerWidget {
                       ),
                     ],
 
-                    // ── Stock Movements ───────────────────────────────────────────
+                    // ── Stock Movements ───────────────────────────────────
                     SectionHeader(
                       icon: Icons.swap_vert_outlined,
                       text: 'Stock movements',
                       subText: subText,
                     ),
+
                     DetailCard(
                       cardBg: cardBg,
                       borderColor: borderColor,
@@ -409,7 +437,10 @@ class VariantDetailScreen extends ConsumerWidget {
                       child: ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: Icon(Icons.history_outlined, color: subText),
-                        title: const Text('View movement history'),
+                        title: Text(
+                          'View movement history',
+                          style: TextStyle(color: textPrimary),
+                        ),
                         subtitle: Text(
                           'Track stock in/out for this variant',
                           style: TextStyle(color: subText, fontSize: 12),
@@ -420,9 +451,10 @@ class VariantDetailScreen extends ConsumerWidget {
                         ),
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) =>
-                                StockMovementsScreen(variantId: variantId),
-                                
+                            builder: (_) => StockMovementsScreen(
+                              productId: productId,
+                              variantId: variantId,
+                            ),
                           ),
                         ),
                       ),

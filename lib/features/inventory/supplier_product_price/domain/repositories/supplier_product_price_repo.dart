@@ -17,6 +17,8 @@ abstract class SupplierProductPriceRepository {
 
   Future<SupplierProductPriceEntity> update({
     required int priceId,
+    int? supplierId,
+    int? variantId,
     double? unitPrice,
     String? note,
   });

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/core/utils/confirm_delete_dialog.dart';
 import 'package:frontendmobile/core/widgets/alertmessage/app_snacker.dart';
 import 'package:frontendmobile/features/inventory/product/domain/entities/product_entity.dart';
@@ -112,27 +113,33 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
     final state = ref.watch(productVariantNotifierProvider);
     final notifier = ref.read(productVariantNotifierProvider.notifier);
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: cardBg,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: Pallets.transparent,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               widget.productName,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: textPrimary,
+              ),
             ),
             Text('Variants', style: TextStyle(fontSize: 12, color: subText)),
           ],
@@ -143,7 +150,7 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_outlined, color: colors.primary),
+            icon: Icon(Icons.refresh_outlined, color: Pallets.blurple),
             onPressed: state.isLoading
                 ? null
                 : () => notifier.loadAll(widget.productId),
@@ -152,8 +159,8 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: state.isCreating ? null : _openCreate,
-        backgroundColor: colors.primary,
-        foregroundColor: colors.onPrimary,
+        backgroundColor: Pallets.blurple,
+        foregroundColor: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         icon: const Icon(Icons.add),
@@ -163,7 +170,7 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
         ),
       ),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: Pallets.blurple))
           : state.variants.isEmpty
           ? Center(
               child: Column(
@@ -184,6 +191,8 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
               ),
             )
           : RefreshIndicator(
+              color: Pallets.blurple,
+              backgroundColor: cardBg,
               onRefresh: () => notifier.loadAll(widget.productId),
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
@@ -227,8 +236,8 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
                                     )
                                   : Container(
                                       color: isDark
-                                          ? const Color(0xFF3A3A3C)
-                                          : const Color(0xFFEFEFED),
+                                          ? Pallets.surfaceElevated
+                                          : Pallets.backgroundLight,
                                       child: Icon(
                                         Icons.tune_outlined,
                                         color: subText,
@@ -263,7 +272,8 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
                                               vertical: 2,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: colors.primaryContainer,
+                                              color: Pallets.blurple
+                                                  .withOpacity(0.12),
                                               borderRadius:
                                                   BorderRadius.circular(6),
                                             ),
@@ -271,8 +281,7 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
                                               '${e.key}: ${e.value}',
                                               style: TextStyle(
                                                 fontSize: 11,
-                                                color:
-                                                    colors.onPrimaryContainer,
+                                                color: Pallets.blurple,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
@@ -288,7 +297,7 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
                                       '\$${v.price.toStringAsFixed(2)}',
                                       style: TextStyle(
                                         fontWeight: FontWeight.w700,
-                                        color: colors.primary,
+                                        color: Pallets.blurple,
                                         fontSize: 15,
                                       ),
                                     ),
@@ -300,8 +309,8 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: lowStock
-                                            ? colors.errorContainer
-                                            : colors.primaryContainer,
+                                            ? Pallets.error.withOpacity(0.12)
+                                            : Pallets.blurple.withOpacity(0.12),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -310,8 +319,8 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,
                                           color: lowStock
-                                              ? colors.onErrorContainer
-                                              : colors.onPrimaryContainer,
+                                              ? Pallets.error
+                                              : Pallets.blurple,
                                         ),
                                       ),
                                     ),
@@ -323,10 +332,13 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
 
                           // Actions
                           if (isWorking)
-                            const SizedBox(
+                            SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Pallets.blurple,
+                              ),
                             )
                           else
                             Column(
@@ -335,7 +347,7 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
                                   onTap: () => _openEdit(v),
                                   child: Icon(
                                     Icons.edit_outlined,
-                                    color: colors.primary,
+                                    color: Pallets.blurple,
                                     size: 20,
                                   ),
                                 ),
@@ -344,7 +356,7 @@ class _VariantListScreenState extends ConsumerState<VariantListScreen> {
                                   onTap: () => _confirmDelete(v),
                                   child: Icon(
                                     Icons.delete_outline,
-                                    color: colors.error,
+                                    color: Pallets.error,
                                     size: 20,
                                   ),
                                 ),

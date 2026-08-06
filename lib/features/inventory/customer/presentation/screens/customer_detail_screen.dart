@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/core/widgets/alertmessage/app_snacker.dart';
 import 'package:frontendmobile/core/widgets/shimmer/app_list_shimmer.dart';
 import 'package:frontendmobile/features/inventory/customer/presentation/widgets/customer_detail/custom_info_row.dart'
@@ -79,18 +80,19 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
   @override
   Widget build(BuildContext context) {
     ////////////////////////////////////////////////////////////////////////////
-    ///
+    /// Theme-aware palette wiring
     ////////////////////////////////////////////////////////////////////////////
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
     final textSecondary = isDark
-        ? const Color(0xFFA0A0A5)
-        : const Color(0xFF6B6B6B);
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
 
     final customer = ref
         .watch(customerNotifierProvider)
@@ -101,6 +103,8 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
           orElse: () => null,
         );
 
+    ///////////////////////////////////////
+
     final invoiceState = ref.watch(invoiceNotifierProvider);
 
     if (customer == null) {
@@ -108,7 +112,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
         backgroundColor: bg,
         appBar: AppBar(
           backgroundColor: cardBg,
-          title: const Text('Customer detail'),
+          title: Text('Customer detail', style: TextStyle(color: textPrimary)),
         ),
         // ✅ not-found message, not a loading shimmer
         body: Center(
@@ -121,9 +125,10 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
     }
 
     final initials = _initials(customer.name);
-    final avatarBg = _avatarBg(customer.name);
-    final avatarFg = _avatarFg(customer.name);
+    final avatarBg = _avatarBg(customer.name, isDark);
+    final avatarFg = _avatarFg(customer.name, isDark);
     final fmt = DateFormat('MMM d, yyyy');
+    final currencyFmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final invoices = invoiceState.invoices;
 
     ////////////////////////////////////////////////////////////////////////////
@@ -139,7 +144,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
       appBar: AppBar(
         backgroundColor: cardBg,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: Pallets.transparent,
         ////////////////////////////////////////////////////////////////////////
         ///
         ////////////////////////////////////////////////////////////////////////
@@ -148,10 +153,14 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFEFEFED),
+              color: isDark ? Pallets.surfaceElevated : Pallets.backgroundLight,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: textPrimary,
+            ),
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -161,7 +170,11 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
         ////////////////////////////////////////////////////////////////////////
         title: Text(
           customer.name,
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w500,
+            color: textPrimary,
+          ),
         ),
 
         ////////////////////////////////////////////////////////////////////////
@@ -175,8 +188,8 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
               icon: const Icon(Icons.edit_outlined, size: 15),
               label: const Text('Edit', style: TextStyle(fontSize: 13)),
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF3B82F6),
-                backgroundColor: const Color(0xFFE6F1FB),
+                foregroundColor: Pallets.blurple,
+                backgroundColor: Pallets.infoTint,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 6,
@@ -193,7 +206,11 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
         ////////////////////////////////////////////////////////////////////////
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0.5),
-          child: Divider(height: 0.5, thickness: 0.5, color: borderColor),
+          child: Divider(
+            height: 0.5,
+            thickness: 0.5,
+            color: isDark ? Pallets.dividerDark : Pallets.dividerLight,
+          ),
         ),
       ),
 
@@ -214,7 +231,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: customer.avatarUrl != null
-                        ? Colors.transparent
+                        ? Pallets.transparent
                         : avatarBg,
                   ),
                   child: customer.avatarUrl != null
@@ -222,6 +239,38 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                           child: Image.network(
                             customer.avatarUrl!,
                             fit: BoxFit.cover,
+                            // ✅ graceful fallback if the image fails to load
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: avatarBg,
+                                child: Center(
+                                  child: Text(
+                                    initials,
+                                    style: TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.w500,
+                                      color: avatarFg,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return Container(
+                                color: avatarBg,
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: avatarFg,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         )
                       : Center(
@@ -238,20 +287,20 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 const SizedBox(height: 12),
                 Text(
                   customer.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.w500,
+                    color: textPrimary,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Customer #${customer.customerId}',
-                  style: TextStyle(fontSize: 13, color: textSecondary),
                 ),
               ],
             ),
           ),
-          Divider(height: 0.5, thickness: 0.5, color: borderColor),
+          Divider(
+            height: 0.5,
+            thickness: 0.5,
+            color: isDark ? Pallets.dividerDark : Pallets.dividerLight,
+          ),
 
           // ── Stats ──────────────────────────────────────────────────────────
           Padding(
@@ -261,7 +310,8 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 Expanded(
                   child: StatCard(
                     label: 'Total purchase',
-                    value: '\$${customer.totalPurchase.toStringAsFixed(0)}',
+                    // ✅ fixed: proper currency formatting w/ thousands separator + cents
+                    value: currencyFmt.format(customer.totalPurchase),
                     cardBg: cardBg,
                     borderColor: borderColor,
                   ),
@@ -364,28 +414,42 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
     );
   }
 
+  // ✅ fixed: no longer throws on an empty name
   String _initials(String name) {
-    final parts = name.trim().split(' ');
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return '?';
+    final parts = trimmed.split(' ').where((p) => p.isNotEmpty).toList();
     if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+    return trimmed.substring(0, trimmed.length >= 2 ? 2 : 1).toUpperCase();
   }
 
-  Color _avatarBg(String name) {
-    final colors = [
-      const Color(0xFFE6F1FB),
-      const Color(0xFFE1F5EE),
-      const Color(0xFFEEEDFE),
-      const Color(0xFFFAECE7),
+  // ── Avatar colors now derived from Pallets instead of hardcoded hex ──────
+  Color _avatarBg(String name, bool isDark) {
+    if (name.isEmpty)
+      return isDark ? Pallets.surfaceElevated : Pallets.infoTint;
+    final darkColors = [
+      Pallets.infoTint,
+      Pallets.successTint,
+      Pallets.surfaceElevated,
+      Pallets.warningTint,
     ];
+    final lightColors = [
+      Pallets.infoTint,
+      Pallets.successTint,
+      Pallets.surfaceLight,
+      Pallets.warningTint,
+    ];
+    final colors = isDark ? darkColors : lightColors;
     return colors[name.codeUnitAt(0) % colors.length];
   }
 
-  Color _avatarFg(String name) {
+  Color _avatarFg(String name, bool isDark) {
+    if (name.isEmpty) return Pallets.textMuted;
     final colors = [
-      const Color(0xFF0C447C),
-      const Color(0xFF085041),
-      const Color(0xFF3C3489),
-      const Color(0xFF712B13),
+      Pallets.blurple,
+      Pallets.success,
+      Pallets.blurpleDim,
+      Pallets.warning,
     ];
     return colors[name.codeUnitAt(0) % colors.length];
   }

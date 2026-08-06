@@ -404,7 +404,7 @@ class _StaffByDepartmentProviderElement
   int get deptId => (origin as StaffByDepartmentProvider).deptId;
 }
 
-String _$staffNotifierHash() => r'507fb909c596d5ac759411eca61e6f1c0c3989d8';
+String _$staffNotifierHash() => r'adae3b2428c19ebc556e595e992abc1bc0b94b8c';
 
 /// See also [StaffNotifier].
 @ProviderFor(StaffNotifier)

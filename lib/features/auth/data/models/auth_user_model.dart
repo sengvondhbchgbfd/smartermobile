@@ -25,7 +25,6 @@ class UserModel {
 ////////////////////////////////////////////////////////////////////////////////
 /// User Info Model
 ////////////////////////////////////////////////////////////////////////////////
-
 class UserInfo {
   final int userId;
   final int companyId;
@@ -35,7 +34,7 @@ class UserInfo {
   final int? departmentId;
 
   final List<String> permissions;
-  final int staffId;
+  final int? staffId; // ← changed from `int` to `int?`
   final String status;
   final bool isManager;
 
@@ -47,7 +46,7 @@ class UserInfo {
     required this.role,
     this.departmentId,
     required this.permissions,
-    required this.staffId,
+    this.staffId, // ← changed from `required this.staffId` to optional
     required this.status,
     required this.isManager,
   });
@@ -61,7 +60,9 @@ class UserInfo {
     departmentId: json['department_id'],
     permissions:
         (json['permissions'] as List?)?.map((e) => e.toString()).toList() ?? [],
-    staffId: json['staff_id'] ?? 0,
+    staffId:
+        json['staff_id']
+            as int?, // ← no longer defaults to 0; stays null if absent/null
     status: json['status'] ?? '',
     isManager: json['is_manager'] ?? false,
   );

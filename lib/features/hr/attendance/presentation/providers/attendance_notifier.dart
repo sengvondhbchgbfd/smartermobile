@@ -5,12 +5,12 @@ import 'attendance_providers.dart';
 import 'attendance_state.dart';
 
 part 'attendance_notifier.g.dart';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Staff Notifier
 // ─────────────────────────────────────────────────────────────────────────────
 @riverpod
 class StaffAttendance extends _$StaffAttendance {
-  // Fix #2: removed broken _initialized guard — build() is pure
   @override
   Future<StaffAttendanceState> build() async {
     return const StaffAttendanceState();
@@ -66,9 +66,10 @@ class StaffAttendance extends _$StaffAttendance {
 // ─────────────────────────────────────────────────────────────────────────────
 @riverpod
 class ScanAttendance extends _$ScanAttendance {
-  // Fix #3: removed ref.watch() for use cases — resolved lazily per method
   @override
   Future<ScanAttendanceState> build() async {
+    ref.keepAlive();
+
     return const ScanAttendanceState();
   }
 
@@ -83,7 +84,8 @@ class ScanAttendance extends _$ScanAttendance {
       final s = state.value ?? const ScanAttendanceState();
       final data = e.response?.data;
       Map<String, dynamic>? detail;
-      if (data is Map<String, dynamic> && data['detail'] is Map<String, dynamic>) {
+      if (data is Map<String, dynamic> &&
+          data['detail'] is Map<String, dynamic>) {
         detail = data['detail'] as Map<String, dynamic>;
       }
       state = AsyncData(
@@ -226,7 +228,9 @@ class AttendanceSettings extends _$AttendanceSettings {
   Future<void> fetchSettings() async {
     if (!_shouldRefetch()) return;
     await _run(() async {
-      final useCase = await ref.read(getAttendanceSettingsUseCaseProvider.future);
+      final useCase = await ref.read(
+        getAttendanceSettingsUseCaseProvider.future,
+      );
       final result = await useCase();
       _lastFetchTime = DateTime.now();
       state = state.copyWith(settings: result, isLoading: false);
@@ -243,7 +247,9 @@ class AttendanceSettings extends _$AttendanceSettings {
     String? officeCloseTime,
     String? timezone,
   }) => _run(() async {
-    final useCase = await ref.read(updateAttendanceSettingsUseCaseProvider.future);
+    final useCase = await ref.read(
+      updateAttendanceSettingsUseCaseProvider.future,
+    );
     final result = await useCase(
       officeLatitude: officeLatitude,
       officeLongitude: officeLongitude,

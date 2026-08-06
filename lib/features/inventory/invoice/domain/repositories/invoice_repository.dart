@@ -41,6 +41,11 @@ abstract class InvoiceRepository {
     required List<InvoiceItemInput> items,
   });
 
+ Future<InvoiceEntity> createFromQuotation({
+    required int quotationId,
+    required String paymentType,
+  });
+
   Future<InvoiceEntity> update({
     required int invoiceId,
     double? totalAmount,

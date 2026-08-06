@@ -10,6 +10,7 @@ class NotificationEntity {
   final bool isRead;
   final int? referenceId;
   final String? referenceType;
+  final String? referenceStatus;
   final DateTime createdAt;
 
   const NotificationEntity({
@@ -22,6 +23,7 @@ class NotificationEntity {
     required this.isRead,
     this.referenceId,
     this.referenceType,
+    this.referenceStatus, 
     required this.createdAt,
   });
 
@@ -35,6 +37,7 @@ class NotificationEntity {
     bool? isRead,
     int? referenceId,
     String? referenceType,
+     String? referenceStatus,
     DateTime? createdAt,
   }) {
     return NotificationEntity(
@@ -47,6 +50,7 @@ class NotificationEntity {
       isRead: isRead ?? this.isRead,
       referenceId: referenceId ?? this.referenceId,
       referenceType: referenceType ?? this.referenceType,
+      referenceStatus: referenceStatus ?? this.referenceStatus,
       createdAt: createdAt ?? this.createdAt,
     );
   }

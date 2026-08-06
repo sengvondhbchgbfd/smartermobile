@@ -175,7 +175,29 @@ final deleteInvoiceUCProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DeleteInvoiceUCRef = AutoDisposeFutureProviderRef<DeleteInvoiceUseCase>;
-String _$invoiceNotifierHash() => r'4d26176b8063bc1d33951a574edb65a15fee8708';
+String _$createFromQuotationUCHash() =>
+    r'7d6f46682c2301b738bf535e97baff37a5b011a5'; ////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+///
+/// Copied from [createFromQuotationUC].
+@ProviderFor(createFromQuotationUC)
+final createFromQuotationUCProvider =
+    AutoDisposeFutureProvider<CreateFromQuotation>.internal(
+      createFromQuotationUC,
+      name: r'createFromQuotationUCProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$createFromQuotationUCHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CreateFromQuotationUCRef =
+    AutoDisposeFutureProviderRef<CreateFromQuotation>;
+String _$invoiceNotifierHash() => r'f8d311f49d81c975614cae08f478f60bf76a28da';
 
 /// See also [InvoiceNotifier].
 @ProviderFor(InvoiceNotifier)

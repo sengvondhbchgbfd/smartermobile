@@ -1,337 +1,451 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/extensions/user_info_extensions.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
+import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/features/company/presentation/widgets/card/user_state_card.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
-import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/company_provider.dart';
 import '../widgets/company_info_card.dart';
-import '../widgets/company_register_form.dart';
+
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
 
 class CompanyScreen extends ConsumerStatefulWidget {
   final int companyId;
   const CompanyScreen({super.key, required this.companyId});
-
   @override
   ConsumerState<CompanyScreen> createState() => _CompanyScreenState();
 }
 
-class _CompanyScreenState extends ConsumerState<CompanyScreen> {
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
+class _CompanyScreenState extends ConsumerState<CompanyScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _fadeCtrl;
+  late final Animation<double> _fadeAnim;
+
   @override
   void initState() {
     super.initState();
+    _fadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
+    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+
     Future.microtask(() {
       ref.read(companyProvider.notifier).fetchCompany(widget.companyId);
     });
   }
 
-  ////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   ///
-  ///////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(companyProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surface = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final border = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final currentUser = ref.watch(currentUserProvider);
+    final canManageCompany = currentUser?.canManageCompany ?? false;
     return Scaffold(
-      backgroundColor: Pallets.backgroundDark,
+      backgroundColor: bg,
+
+      ////////////////////////////////
+      ///
+      ////////////////////////////////
       appBar: AppBar(
-        backgroundColor: Pallets.surfaceDark,
+        backgroundColor: surface,
         elevation: 0,
-        centerTitle: false,
-        ////////////////////////////////////////////////////////////////////////
-        ///  back button
-        ////////////////////////////////////////////////////////////////////////
-        leading: const BackButton(),
-        title: const Text(
-          'Company',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-        ////////////////////////////////////////////////////////////////////////
-        /// get data
-        ////////////////////////////////////////////////////////////////////////
-        actions: [
-          state.maybeWhen(
-            data: (data) => data.company != null
-                ? Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: IconButton(
-                      icon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Pallets.gradient2.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: Pallets.gradient2.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.edit_outlined,
-                          color: Pallets.gradient2,
-                          size: 18,
-                        ),
-                      ),
-
-                      onPressed: () => context.push(
-                        '/companies/${widget.companyId}/edit',
-                        extra: data.company!,
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-            orElse: () => const SizedBox.shrink(),
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight,
+            size: 18,
           ),
-        ],
-
-        ////////////////////////////////////////////////////////////////////////
-        ///  Register Button
-        ////////////////////////////////////////////////////////////////////////
-      ),
-      body: _buildBody(state),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Pallets.gradient2,
-        onPressed: _showRegisterSheet,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Register',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
+        title: Text(
+          'Company',
+          style: TextStyle(
+            color: isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight,
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            letterSpacing: -0.3,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: border),
+        ),
+
+        actions: [
+          if (canManageCompany)
+            state.maybeWhen(
+              data: (data) => data.company != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _EditButton(
+                        onTap: () => context.push(
+                          '/companies/${widget.companyId}/edit',
+                          extra: data.company!,
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+              orElse: () => const SizedBox.shrink(),
+            ),
+        ],
+      ),
+
+      ////////////////////////////////////
+      ///
+      ///////////////////////////////////
+      body: _buildBody(state),
+      floatingActionButton: _RegisterFab(
+        onTap: () => context.push('/companies/register'),
       ),
     );
   }
 
-  ////////////////////////////////////////////////////////////////////////
-  ///  Body
-  ////////////////////////////////////////////////////////////////////////
-
   Widget _buildBody(AsyncValue state) {
-    final userAsync = ref.watch(userNotifierProvider);
+    final staffAsync = ref.watch(staffNotifierProvider);
+
     ref.watch(staffNotifierProvider);
+
     return state.when(
-      /////////////////////////////////////////////////////////////////
-      ///  loading
-      ////////////////////////////////////////////////////////////////
-      loading: () => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: Pallets.gradient2),
-            const SizedBox(height: 16),
-            Text(
-              'Loading...',
-              style: TextStyle(color: Pallets.textSecondaryDark),
-            ),
-          ],
-        ),
+      loading: () => const _LoadingState(),
+      error: (error, _) => _ErrorState(
+        message: error.toString(),
+        onRetry: () =>
+            ref.read(companyProvider.notifier).fetchCompany(widget.companyId),
       ),
-
-      ///////////////////////////////////////////////////////////////
-      ///  error
-      //////////////////////////////////////////////////////////////
-      error: (error, _) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: Colors.redAccent.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(
-                  Icons.error_outline,
-                  color: Colors.redAccent,
-                  size: 36,
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Something went wrong',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                style: TextStyle(
-                  color: Pallets.textSecondaryDark,
-                  fontSize: 13,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () => ref
-                    .read(companyProvider.notifier)
-                    .fetchCompany(widget.companyId),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Pallets.gradient2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                icon: const Icon(
-                  Icons.refresh_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
-                label: const Text(
-                  'Retry',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-
-      ////////////////////////////////////////////////////////////////////
-      ///  Data
-      ///////////////////////////////////////////////////////////////////
       data: (companyState) {
         final company = companyState.company;
-        if (company == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: Pallets.surfaceDark,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Pallets.borderDark),
-                  ),
-                  child: Icon(
-                    Icons.business_outlined,
-                    color: Pallets.textSecondaryDark,
-                    size: 36,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'No company found',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Register a new company to get started',
-                  style: TextStyle(
-                    color: Pallets.textSecondaryDark,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
+        if (company == null) return const _EmptyState();
 
-        ///////////////////////////////////////////////////////////////////////
-        ///
-        //////////////////////////////////////////////////////////////////////
-        final users = userAsync.maybeWhen(
-          data: (userState) => userState.users
+        final users = staffAsync.maybeWhen(
+          data: (staffList) => staffList
               .map(
-                (u) => StaffPreview(
-                  userId: u.id,
-                  name: u.staff?.name ?? u.fullName,
-                  roleName: u.staff?.staffRole?.roleName ?? u.roleName ?? '',
-                  avatarUrl: u.staff?.avatarUrl ?? u.avatarUrl,
-                  status: u.status,
+                (s) => StaffPreview(
+                  userId: s.userId ?? s.id ?? 0,
+                  name: s.name,
+                  roleName: s.staffRole?.roleName ?? '',
+                  avatarUrl: s.avatarUrl,
                 ),
               )
               .toList(),
           orElse: () => <StaffPreview>[],
         );
 
-        //  final currentUserId = userAsync.maybeWhen(
-        //   data: (s) => s.users.isNotEmpty ? s.users.first.id : null,
-        //   orElse: () => null,
-        // );
-
-        // final users = userAsync.maybeWhen(
-        //   data: (userState) => userState.users
-        //       .where((u) => u.id != currentUserId)
-        //       .map(
-        //         (u) => StaffPreview(
-        //           userId: u.id,
-        //           name: u.staff?.name ?? u.fullName,
-        //           roleName: u.staff?.staffRole?.roleName ?? u.roleName ?? '',
-        //           avatarUrl: u.staff?.avatarUrl ?? u.avatarUrl,
-        //           status: u.status,
-        //         ),
-        //       )
-        //       .toList(),
-        //   orElse: () => <StaffPreview>[],
-        // );
-
-        /////////////////////////////////////////////////////////////////////
-        ///
-        ////////////////////////////////////////////////////////////////////
-
+        _fadeCtrl.forward();
         return RefreshIndicator(
-          color: Pallets.gradient2,
-          backgroundColor: Pallets.surfaceDark,
+          color: Pallets.blurple,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Pallets.surfaceCard
+              : Pallets.surfaceLight,
           onRefresh: () =>
               ref.read(companyProvider.notifier).fetchCompany(widget.companyId),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            child: CompanyInfoCard(company: company, users: users),
+          child: FadeTransition(
+            opacity: _fadeAnim,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              child: CompanyInfoCard(company: company, users: users),
+            ),
           ),
         );
       },
     );
   }
+}
 
-  ////////////////////////////////////////////////////////////////////////
-  /// Show Register
-  ////////////////////////////////////////////////////////////////////////
+// ─────────────────────────────────────────────────────────────────────────────
+// Edit button
+// ─────────────────────────────────────────────────────────────────────────────
+class _EditButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _EditButton({required this.onTap});
 
-  void _showRegisterSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Pallets.surfaceDark,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Pallets.blurple.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Pallets.blurple.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.edit_outlined, color: Pallets.blurple, size: 14),
+            const SizedBox(width: 5),
+            Text(
+              'Edit',
+              style: TextStyle(
+                color: Pallets.blurple,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
-      builder: (_) => CompanyRegisterForm(
-        onSubmit:
-            ({
-              required String companyCode,
-              required String companyName,
-              required String currency,
-              required String email,
-              required int maxUsers,
-              required String timezone,
-              String planType = 'free',
-            }) async {
-              Navigator.pop(context);
-              await ref
-                  .read(companyProvider.notifier)
-                  .registerCompany(
-                    companyCode: companyCode,
-                    companyName: companyName,
-                    currency: currency,
-                    email: email,
-                    maxUsers: maxUsers,
-                    timezone: timezone,
-                    planType: planType,
-                  );
-            },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Register FAB
+// ─────────────────────────────────────────────────────────────────────────────
+class _RegisterFab extends StatelessWidget {
+  final VoidCallback onTap;
+  const _RegisterFab({required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          gradient: Pallets.brandGradient,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Pallets.blurple.withOpacity(0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.add_rounded, color: Pallets.onAccent, size: 18),
+            SizedBox(width: 6),
+            Text(
+              'Register',
+              style: TextStyle(
+                color: Pallets.onAccent,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Loading state
+// ─────────────────────────────────────────────────────────────────────────────
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: CircularProgressIndicator(
+              color: Pallets.blurple,
+              strokeWidth: 2.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Loading company…',
+            style: TextStyle(
+              color: isDark
+                  ? Pallets.textSecondaryDark
+                  : Pallets.textSecondaryLight,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Error state
+// ─────────────────────────────────────────────────────────────────────────────
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: Pallets.errorTint,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Pallets.error.withOpacity(0.25)),
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                color: Pallets.error,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Something went wrong',
+              style: TextStyle(
+                color: isDark
+                    ? Pallets.textPrimaryDark
+                    : Pallets.textPrimaryLight,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              style: TextStyle(
+                color: isDark
+                    ? Pallets.textSecondaryDark
+                    : Pallets.textSecondaryLight,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: onRetry,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Pallets.blurple.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Pallets.blurple.withOpacity(0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.refresh_rounded,
+                      color: Pallets.blurple,
+                      size: 16,
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'Try again',
+                      style: TextStyle(
+                        color: Pallets.blurple,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Empty state
+// ─────────────────────────────────────────────────────────────────────────────
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: isDark ? Pallets.surfaceCard : Pallets.backgroundLight,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: isDark ? Pallets.borderDark : Pallets.borderLight,
+              ),
+            ),
+            child: Icon(
+              Icons.business_outlined,
+              color: isDark
+                  ? Pallets.textSecondaryDark
+                  : Pallets.textSecondaryLight,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No company found',
+            style: TextStyle(
+              color: isDark
+                  ? Pallets.textPrimaryDark
+                  : Pallets.textPrimaryLight,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Register a new company to get started',
+            style: TextStyle(
+              color: isDark
+                  ? Pallets.textSecondaryDark
+                  : Pallets.textSecondaryLight,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }

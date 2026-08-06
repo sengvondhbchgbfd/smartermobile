@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class DateFormatter {
   DateFormatter._();
   static String fmt(DateTime d) =>
@@ -23,6 +25,15 @@ class DateFormatter {
     'Nov',
     'Dec',
   ][m - 1];
+
+  /////////////////////
+  ///
+  ////////////////////
+  static final NumberFormat currency = NumberFormat.currency(symbol: '\$');
+
+  static final DateFormat date = DateFormat('dd MMM yyyy');
+
+  static final DateFormat dateTime = DateFormat('dd MMM yyyy, hh:mm a');
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,12 +59,40 @@ String fmtKhmerTime(String? raw) {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
+// Optimized version
 String fmtKhmerDateTime(DateTime? dt) {
   if (dt == null) return '--:--';
-  return fmtKhmerTime(
-    '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:00',
-  );
+  final hour = dt.hour;
+  final minute = dt.minute;
+  final period = hour < 12 ? 'AM' : 'PM';
+  final hour12 = hour % 12 == 0 ? 12 : hour % 12;
+  final minuteStr = minute.toString().padLeft(2, '0');
+  return '$hour12:$minuteStr $period';
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+String _p(int v) => v.toString().padLeft(2, '0');
+String formatDateTime(DateTime dt) {
+  final utcDt = dt.isUtc ? dt : dt.toUtc();
+  final now = DateTime.now().toUtc();
+  final diff = now.difference(utcDt);
+  if (diff.inMinutes < 1) return 'Just now';
+  if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
+  if (diff.inHours < 24) return '${diff.inHours} hr ago';
+  if (diff.inDays == 1) return 'Yesterday';
+  final localDt = utcDt.toLocal();
+  return '${_p(localDt.day)}/${_p(localDt.month)}/${localDt.year}  ${_p(localDt.hour)}:${_p(localDt.minute)}';
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
 
 String? calcDuration(String? checkIn, String? checkOut) {
   if (checkIn == null || checkOut == null) return null;
@@ -70,4 +109,17 @@ String? calcDuration(String? checkIn, String? checkOut) {
   } catch (_) {
     return null;
   }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+///  DATE LEAVE FORMATTER
+//////////////////////////////////////////////////////////////////////////////
+
+String leaveDateFmt(DateTime? dt) {
+  if (dt == null) return '—';
+  return DateFormat('EEE, dd MMM yyyy').format(dt);
+}
+
+int leaveDays(DateTime start, DateTime end) {
+  return end.difference(start).inDays + 1;
 }

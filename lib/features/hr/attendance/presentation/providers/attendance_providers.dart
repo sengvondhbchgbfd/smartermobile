@@ -38,6 +38,19 @@ Future<ScanAuthenticateUseCase> scanAuthenticateUseCase(Ref ref) async {
   return ScanAuthenticateUseCase(repo);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 @riverpod
 Future<CheckInUseCase> checkInUseCase(Ref ref) async {
   final repo = await ref.watch(attendanceRepositoryProvider.future);

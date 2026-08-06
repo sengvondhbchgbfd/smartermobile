@@ -27,14 +27,19 @@ class NotificationRepositoryImpl implements NotificationRepository {
     required String type,
     int? referenceId,
     String? referenceType,
-  }) => _remote.createNotification({
-    'user_id': userId,
-    'title': title,
-    'message': message,
-    'type': type,
-    'reference_id': referenceId,
-    'reference_type': referenceType,
-  });
+  }) {
+    final body = <String, dynamic>{
+      'user_id': userId,
+      'title': title,
+      'message': message,
+      'type': type,
+    };
+
+    if (referenceId != null) body['reference_id'] = referenceId;
+    if (referenceType != null) body['reference_type'] = referenceType;
+
+    return _remote.createNotification(body);
+  }
 
   @override
   Future<NotificationEntity> markOneRead(int notificationId) =>

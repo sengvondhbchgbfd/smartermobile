@@ -2,14 +2,26 @@ import 'package:frontendmobile/features/inventory/invoice/domain/entities/invoic
 
 double _toDouble(dynamic v) => double.tryParse(v?.toString() ?? '0') ?? 0.0;
 
+
+////////////////////////////////////////////////////////////////////////////////
 // ── InvoiceItemModel ─────────────────────────────────────────
+////////////////////////////////////////////////////////////////////////////////
+
 class InvoiceItemModel extends InvoiceItemEntity {
   const InvoiceItemModel({
     required super.itemId,
     required super.invoiceId,
     required super.companyId,
-    required super.productId,
-    required super.variantId,
+    super.productId,
+    super.variantId,
+    super.itemName,
+    super.size,
+    super.pages,
+    super.printSide,
+    super.colorSpec,
+    super.paperCover,
+    super.paperInside,
+    super.finishing,
     required super.quantity,
     required super.unitPrice,
     super.totalPrice,
@@ -20,8 +32,16 @@ class InvoiceItemModel extends InvoiceItemEntity {
       itemId: j['item_id'] as int,
       invoiceId: j['invoice_id'] as int,
       companyId: j['company_id'] as int,
-      productId: j['product_id'] as int,
-      variantId: j['variant_id'] as int,
+      productId: j['product_id'] as int?,
+      variantId: j['variant_id'] as int?,
+      itemName: j['item_name'] as String?,
+      size: j['size'] as String?,
+      pages: j['pages'] as int?,
+      printSide: j['print_side'] as String?,
+      colorSpec: j['color_spec'] as String?,
+      paperCover: j['paper_cover'] as String?,
+      paperInside: j['paper_inside'] as String?,
+      finishing: j['finishing'] as String?,
       quantity: j['quantity'] as int,
       unitPrice: _toDouble(j['unit_price']),
       totalPrice: j['total_price'] != null ? _toDouble(j['total_price']) : null,
@@ -29,7 +49,10 @@ class InvoiceItemModel extends InvoiceItemEntity {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 // ── InvoiceAttachmentModel ───────────────────────────────────
+////////////////////////////////////////////////////////////////////////////////
+
 class InvoiceAttachmentModel extends InvoiceAttachmentEntity {
   const InvoiceAttachmentModel({
     required super.attachmentId,
@@ -56,7 +79,11 @@ class InvoiceAttachmentModel extends InvoiceAttachmentEntity {
   }
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
 // ── InvoiceModel ─────────────────────────────────────────────
+////////////////////////////////////////////////////////////////////////////////
+
 class InvoiceModel extends InvoiceEntity {
   const InvoiceModel({
     required super.invoiceId,

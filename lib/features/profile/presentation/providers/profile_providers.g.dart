@@ -60,7 +60,7 @@ final getProfileUseCaseProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef GetProfileUseCaseRef = AutoDisposeFutureProviderRef<GetProfileUseCase>;
-String _$profileNotifierHash() => r'ef9de76d19bca439b1eea526b6ade36089716aae';
+String _$profileNotifierHash() => r'854005041aa5fb84cb3d61c3ddff9f24a8474e26';
 
 /// See also [ProfileNotifier].
 @ProviderFor(ProfileNotifier)

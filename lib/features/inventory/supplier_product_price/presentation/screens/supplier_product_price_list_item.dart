@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import '../../domain/entities/supplier_product_price_entity.dart';
 
 class SupplierProductPriceListItem extends StatelessWidget {
   final SupplierProductPriceEntity price;
-  final String supplierName; // ✅
+  final String supplierName;
   final bool isBusy;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
@@ -17,19 +18,89 @@ class SupplierProductPriceListItem extends StatelessWidget {
     this.onDelete,
   });
 
-  @override
-  Widget build(BuildContext context) {
+  ////////////////////////////////////////////////////////////////////////////
+  /// Confirmation dialog shown before actually deleting a price.
+  ////////////////////////////////////////////////////////////////////////////
+  Future<void> _confirmDelete(BuildContext context) async {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
     final variantLabel = (price.sku != null && price.sku!.isNotEmpty)
         ? '${price.productName} · ${price.sku}'
         : price.productName;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: cardBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Delete price?',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: textPrimary,
+          ),
+        ),
+        content: Text(
+          'This will remove the price for "$supplierName · $variantLabel". '
+          'This action cannot be undone.',
+          style: TextStyle(color: subText, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: subText, fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Pallets.error),
+            child: const Text(
+              'Delete',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      onDelete?.call();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final iconBg = isDark ? Pallets.surfaceElevated : Pallets.infoTint;
+    final variantLabel = (price.sku != null && price.sku!.isNotEmpty)
+        ? '${price.productName} · ${price.sku}'
+        : price.productName;
+
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -46,12 +117,12 @@ class SupplierProductPriceListItem extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: colors.primaryContainer,
+                color: iconBg,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.price_change_outlined,
-                color: colors.onPrimaryContainer,
+                color: Pallets.blurple,
                 size: 22,
               ),
             ),
@@ -63,16 +134,17 @@ class SupplierProductPriceListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    supplierName, // ✅ name not ID
+                    supplierName,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
+                      color: textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    variantLabel, // ✅ label not ID
+                    variantLabel,
                     style: TextStyle(fontSize: 13, color: subText),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -99,7 +171,7 @@ class SupplierProductPriceListItem extends StatelessWidget {
                   '\$${price.unitPrice.toStringAsFixed(2)}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: colors.primary,
+                    color: Pallets.blurple,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -107,14 +179,17 @@ class SupplierProductPriceListItem extends StatelessWidget {
                   const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Pallets.blurple,
+                    ),
                   )
                 else if (onDelete != null)
                   GestureDetector(
-                    onTap: onDelete,
-                    child: Icon(
+                    onTap: () => _confirmDelete(context),
+                    child: const Icon(
                       Icons.delete_outline,
-                      color: colors.error,
+                      color: Pallets.error,
                       size: 20,
                     ),
                   ),

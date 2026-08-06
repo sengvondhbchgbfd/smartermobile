@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontendmobile/core/themes/supplier_color.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/inventory/supplier/domain/entities/supplier.dart';
 import 'package:image_picker/image_picker.dart';
 import '../providers/supplier_provider.dart';
@@ -19,7 +19,7 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
   late final TextEditingController _nameCtrl;
   late final TextEditingController _contactPersonCtrl;
   late final TextEditingController _phoneCtrl;
-  late final TextEditingController _phone2Ctrl; // ✅ add
+  late final TextEditingController _phone2Ctrl;
   late final TextEditingController _emailCtrl;
   late final TextEditingController _addressCtrl;
   File? _avatar;
@@ -34,7 +34,7 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
       text: widget.existing?.contactPerson,
     );
     _phoneCtrl = TextEditingController(text: widget.existing?.phone);
-    _phone2Ctrl = TextEditingController(text: widget.existing?.phone2); // ✅
+    _phone2Ctrl = TextEditingController(text: widget.existing?.phone2);
     _emailCtrl = TextEditingController(text: widget.existing?.email);
     _addressCtrl = TextEditingController(text: widget.existing?.address);
   }
@@ -44,7 +44,7 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
     _nameCtrl.dispose();
     _contactPersonCtrl.dispose();
     _phoneCtrl.dispose();
-    _phone2Ctrl.dispose(); // ✅
+    _phone2Ctrl.dispose();
     _emailCtrl.dispose();
     _addressCtrl.dispose();
     super.dispose();
@@ -63,13 +63,13 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
 
     final notifier = ref.read(supplierNotifierProvider.notifier);
 
-    String? _nullIfEmpty(String s) => s.trim().isEmpty ? null : s.trim();
+    String? nullIfEmpty(String s) => s.trim().isEmpty ? null : s.trim();
 
-    final contactPerson = _nullIfEmpty(_contactPersonCtrl.text);
-    final phone = _nullIfEmpty(_phoneCtrl.text);
-    final phone2 = _nullIfEmpty(_phone2Ctrl.text); // ✅
-    final email = _nullIfEmpty(_emailCtrl.text);
-    final address = _nullIfEmpty(_addressCtrl.text);
+    final contactPerson = nullIfEmpty(_contactPersonCtrl.text);
+    final phone = nullIfEmpty(_phoneCtrl.text);
+    final phone2 = nullIfEmpty(_phone2Ctrl.text);
+    final email = nullIfEmpty(_emailCtrl.text);
+    final address = nullIfEmpty(_addressCtrl.text);
 
     final bool success;
     if (_isEdit) {
@@ -78,7 +78,7 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
         name: _nameCtrl.text.trim(),
         contactPerson: contactPerson,
         phone: phone,
-        phone2: phone2, // ✅
+        phone2: phone2,
         email: email,
         address: address,
         avatar: _avatar,
@@ -88,7 +88,7 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
         name: _nameCtrl.text.trim(),
         contactPerson: contactPerson,
         phone: phone,
-        phone2: phone2, // ✅
+        phone2: phone2,
         email: email,
         address: address,
         avatar: _avatar,
@@ -107,71 +107,81 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
       final err =
           ref.read(supplierNotifierProvider).error ?? 'An error occurred';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(err),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+        SnackBar(content: Text(err), backgroundColor: Pallets.error),
       );
     }
   }
 
-  InputDecoration _decoration(SupplierColors c, String label) =>
-      InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: c.textSecondary),
-        filled: true,
-        fillColor: c.surfaceMuted,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.accent, width: 1.4),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.danger),
-        ),
-      );
+  InputDecoration _decoration({required bool isDark, required String label}) {
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final surfaceMuted = isDark ? Pallets.surfaceElevated : Pallets.borderLight;
+    final border = isDark ? Pallets.borderDark : Pallets.borderLight;
+
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: textSecondary),
+      filled: true,
+      fillColor: surfaceMuted,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Pallets.blurple, width: 1.4),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Pallets.error),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final c = SupplierColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final background = isDark
+        ? Pallets.backgroundDark
+        : Pallets.backgroundLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final accentMuted = isDark ? Pallets.infoTint : Pallets.borderLight;
+
     final state = ref.watch(supplierNotifierProvider);
     final isProcessing =
         state.isCreating ||
         (_isEdit && state.loadingIds.contains(widget.existing!.supplierId));
 
     return Scaffold(
-      backgroundColor: c.background,
+      backgroundColor: background,
       appBar: AppBar(
-        backgroundColor: c.background,
+        backgroundColor: background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         title: Text(
           _isEdit ? 'Edit supplier' : 'New supplier',
-          style: TextStyle(color: c.textPrimary, fontWeight: FontWeight.w600),
+          style: TextStyle(color: textPrimary, fontWeight: FontWeight.w600),
         ),
         actions: [
           if (isProcessing)
-            Center(
+            const Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 16),
                 child: SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: c.accent,
+                    color: Pallets.blurple,
                   ),
                 ),
               ),
@@ -179,9 +189,12 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
           else
             TextButton(
               onPressed: _save,
-              child: Text(
+              child: const Text(
                 'Save',
-                style: TextStyle(color: c.accent, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: Pallets.blurple,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
         ],
@@ -200,7 +213,7 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                     children: [
                       CircleAvatar(
                         radius: 48,
-                        backgroundColor: c.accentMuted,
+                        backgroundColor: accentMuted,
                         backgroundImage: _avatar != null
                             ? FileImage(_avatar!)
                             : (widget.existing?.avatarUrl != null
@@ -210,10 +223,10 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                         child:
                             (_avatar == null &&
                                 widget.existing?.avatarUrl == null)
-                            ? Icon(
+                            ? const Icon(
                                 Icons.camera_alt_outlined,
                                 size: 28,
-                                color: c.accent,
+                                color: Pallets.blurple,
                               )
                             : null,
                       ),
@@ -225,10 +238,14 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                           height: 30,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: c.accent,
-                            border: Border.all(color: c.background, width: 2),
+                            color: Pallets.blurple,
+                            border: Border.all(color: background, width: 2),
                           ),
-                          child: Icon(Icons.edit, size: 14, color: c.onAccent),
+                          child: const Icon(
+                            Icons.edit,
+                            size: 14,
+                            color: Pallets.onAccent,
+                          ),
                         ),
                       ),
                     ],
@@ -242,8 +259,8 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
               TextFormField(
                 controller: _nameCtrl,
                 enabled: !isProcessing,
-                style: TextStyle(color: c.textPrimary),
-                decoration: _decoration(c, 'Name'),
+                style: TextStyle(color: textPrimary),
+                decoration: _decoration(isDark: isDark, label: 'Name'),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Name is required' : null,
               ),
@@ -253,8 +270,11 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
               TextFormField(
                 controller: _contactPersonCtrl,
                 enabled: !isProcessing,
-                style: TextStyle(color: c.textPrimary),
-                decoration: _decoration(c, 'Contact person (optional)'),
+                style: TextStyle(color: textPrimary),
+                decoration: _decoration(
+                  isDark: isDark,
+                  label: 'Contact person (optional)',
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -262,18 +282,24 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
               TextFormField(
                 controller: _phoneCtrl,
                 enabled: !isProcessing,
-                style: TextStyle(color: c.textPrimary),
-                decoration: _decoration(c, 'Phone (optional)'),
+                style: TextStyle(color: textPrimary),
+                decoration: _decoration(
+                  isDark: isDark,
+                  label: 'Phone (optional)',
+                ),
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
 
               // ── Phone 2 ────────────────────────────────────────────────
               TextFormField(
-                controller: _phone2Ctrl, // ✅
+                controller: _phone2Ctrl,
                 enabled: !isProcessing,
-                style: TextStyle(color: c.textPrimary),
-                decoration: _decoration(c, 'Phone 2 (optional)'),
+                style: TextStyle(color: textPrimary),
+                decoration: _decoration(
+                  isDark: isDark,
+                  label: 'Phone 2 (optional)',
+                ),
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
@@ -282,8 +308,11 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
               TextFormField(
                 controller: _emailCtrl,
                 enabled: !isProcessing,
-                style: TextStyle(color: c.textPrimary),
-                decoration: _decoration(c, 'Email (optional)'),
+                style: TextStyle(color: textPrimary),
+                decoration: _decoration(
+                  isDark: isDark,
+                  label: 'Email (optional)',
+                ),
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
@@ -292,8 +321,11 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
               TextFormField(
                 controller: _addressCtrl,
                 enabled: !isProcessing,
-                style: TextStyle(color: c.textPrimary),
-                decoration: _decoration(c, 'Address (optional)'),
+                style: TextStyle(color: textPrimary),
+                decoration: _decoration(
+                  isDark: isDark,
+                  label: 'Address (optional)',
+                ),
                 maxLines: 3,
               ),
             ],

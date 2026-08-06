@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AttendanceMonthHeader
@@ -65,6 +66,7 @@ class AttendanceMonthHeader extends StatefulWidget {
     this.subtitle,
     this.trailing,
   }) : _isManager = true;
+
   @override
   State<AttendanceMonthHeader> createState() => _AttendanceMonthHeaderState();
 }
@@ -86,8 +88,6 @@ class _AttendanceMonthHeaderState extends State<AttendanceMonthHeader> {
     super.dispose();
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
   String get _monthLabel =>
       DateFormat('MMMM yyyy').format(DateTime(widget.year, widget.month));
 
@@ -96,198 +96,187 @@ class _AttendanceMonthHeaderState extends State<AttendanceMonthHeader> {
     return widget.month == now.month && widget.year == now.year;
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.surface,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // ── Row 1: month navigation ──────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                _NavArrow(
-                  icon: Icons.chevron_left_rounded,
-                  onTap: widget.onPrevious,
-                ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final iconColor = isDark ? Pallets.textSecondaryDark : Pallets.textMuted;
 
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // ── Row 1: month navigation ──────────────────────────────────────
+        Row(
+          children: [
+            _NavArrow(
+              icon: Icons.chevron_left_rounded,
+              color: iconColor,
+              onTap: widget.onPrevious,
+            ),
+
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.subtitle != null) ...[
+                    Text(
+                      widget.subtitle!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: textSecondary,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                  ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (widget.subtitle != null) ...[
+                      Text(
+                        _monthLabel,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: textPrimary,
+                        ),
+                      ),
+                      if (_isCurrentMonth) ...[
+                        const SizedBox(width: 8),
                         Text(
-                          widget.subtitle!,
+                          'This month',
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey.shade500,
-                            letterSpacing: 0.4,
+                            fontWeight: FontWeight.w600,
+                            color: Pallets.gradient2,
                           ),
                         ),
-                        const SizedBox(height: 2),
                       ],
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _monthLabel,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (_isCurrentMonth) ...[
-                            const SizedBox(width: 6),
-                            _Pill(label: 'This month', color: Colors.blue),
-                          ],
-                        ],
-                      ),
                     ],
                   ),
-                ),
-
-                _NavArrow(
-                  icon: Icons.chevron_right_rounded,
-                  onTap: widget.onNext,
-                ),
-
-                // Manager: search + filter icon buttons
-                if (widget._isManager) ...[
-                  _IconBtn(
-                    icon: widget.showSearch
-                        ? Icons.search_off_rounded
-                        : Icons.search_rounded,
-                    active: widget.showSearch,
-                    tooltip: 'Search',
-                    onTap: widget.onToggleSearch,
-                  ),
-                  _IconBtn(
-                    icon: Icons.calendar_today_outlined,
-                    active: false,
-                    tooltip: 'Pick date',
-                    onTap: widget.onPickDate,
-                  ),
-                  _IconBtn(
-                    icon: Icons.date_range_outlined,
-                    active: false,
-                    tooltip: 'Date range',
-                    onTap: widget.onPickDateRange,
-                  ),
                 ],
-
-                // Staff: optional trailing
-                if (!widget._isManager && widget.trailing != null) ...[
-                  const SizedBox(width: 4),
-                  widget.trailing!,
-                ],
-              ],
+              ),
             ),
-          ),
 
-          // ── Row 2: active filter chip (manager only) ─────────────────────
-          if (widget._isManager &&
-              widget.hasFilter &&
-              widget.filterLabel != null)
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+            _NavArrow(
+              icon: Icons.chevron_right_rounded,
+              color: iconColor,
+              onTap: widget.onNext,
+            ),
+
+            if (widget._isManager) ...[
+              _IconBtn(
+                icon: widget.showSearch
+                    ? Icons.search_off_rounded
+                    : Icons.search_rounded,
+                active: widget.showSearch,
+                iconColor: iconColor,
+                tooltip: 'Search',
+                onTap: widget.onToggleSearch,
+              ),
+              _IconBtn(
+                icon: Icons.calendar_today_outlined,
+                active: false,
+                iconColor: iconColor,
+                tooltip: 'Pick date',
+                onTap: widget.onPickDate,
+              ),
+              _IconBtn(
+                icon: Icons.date_range_outlined,
+                active: false,
+                iconColor: iconColor,
+                tooltip: 'Date range',
+                onTap: widget.onPickDateRange,
+              ),
+            ],
+
+            if (!widget._isManager && widget.trailing != null) ...[
+              const SizedBox(width: 4),
+              widget.trailing!,
+            ],
+          ],
+        ),
+
+        // ── Row 2: active filter (plain text, no chip) ────────────────────
+        if (widget._isManager && widget.hasFilter && widget.filterLabel != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: GestureDetector(
+              onTap: widget.onClearFilter,
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.filter_alt_outlined,
                     size: 14,
-                    color: Colors.blue.shade600,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Filtered:',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                    color: Pallets.gradient2,
                   ),
                   const SizedBox(width: 6),
-                  Chip(
-                    label: Text(
-                      widget.filterLabel!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  Text(
+                    widget.filterLabel!,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Pallets.gradient2,
+                      fontWeight: FontWeight.w500,
                     ),
-                    backgroundColor: Colors.blue.shade50,
-                    side: BorderSide(color: Colors.blue.shade200),
-                    deleteIcon: Icon(
-                      Icons.close,
-                      size: 14,
-                      color: Colors.blue.shade600,
-                    ),
-                    onDeleted: widget.onClearFilter,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 0,
-                    ),
-                    visualDensity: VisualDensity.compact,
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.close_rounded,
+                    size: 14,
+                    color: Pallets.gradient2.withOpacity(0.7),
                   ),
                 ],
               ),
             ),
+          ),
 
-          // ── Row 3: search field (manager only, when open) ─────────────────
-          if (widget._isManager && widget.showSearch)
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
-              child: TextField(
-                controller: _searchController,
-                autofocus: true,
-                onChanged: widget.onSearch,
-                decoration: InputDecoration(
-                  hintText: 'Search by name or ID…',
-                  hintStyle: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade400,
+        // ── Row 3: search field (manager only, when open) — underline style
+        if (widget._isManager && widget.showSearch)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: TextField(
+              controller: _searchController,
+              autofocus: true,
+              onChanged: widget.onSearch,
+              style: TextStyle(fontSize: 14, color: textPrimary),
+              decoration: InputDecoration(
+                hintText: 'Search by name or ID…',
+                hintStyle: TextStyle(fontSize: 13, color: textSecondary),
+                prefixIcon: Icon(Icons.search, size: 18, color: iconColor),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.close, size: 16, color: iconColor),
+                        onPressed: () {
+                          _searchController.clear();
+                          widget.onSearch?.call('');
+                        },
+                      )
+                    : null,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                border: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: isDark ? Pallets.dividerDark : Pallets.dividerLight,
                   ),
-                  prefixIcon: const Icon(Icons.search, size: 18),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.close, size: 16),
-                          onPressed: () {
-                            _searchController.clear();
-                            widget.onSearch?.call('');
-                          },
-                        )
-                      : null,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Colors.blue.shade400,
-                      width: 1.5,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
                 ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: isDark ? Pallets.dividerDark : Pallets.dividerLight,
+                  ),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Pallets.gradient2, width: 1.5),
+                ),
+                filled: false,
               ),
             ),
-
-          Divider(height: 1, color: Colors.grey.shade200),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
@@ -298,9 +287,14 @@ class _AttendanceMonthHeaderState extends State<AttendanceMonthHeader> {
 
 class _NavArrow extends StatelessWidget {
   final IconData icon;
+  final Color color;
   final VoidCallback onTap;
 
-  const _NavArrow({required this.icon, required this.onTap});
+  const _NavArrow({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +303,7 @@ class _NavArrow extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       child: Padding(
         padding: const EdgeInsets.all(6),
-        child: Icon(icon, size: 22, color: Colors.grey.shade600),
+        child: Icon(icon, size: 22, color: color),
       ),
     );
   }
@@ -318,12 +312,14 @@ class _NavArrow extends StatelessWidget {
 class _IconBtn extends StatelessWidget {
   final IconData icon;
   final bool active;
+  final Color iconColor;
   final String tooltip;
   final VoidCallback? onTap;
 
   const _IconBtn({
     required this.icon,
     required this.active,
+    required this.iconColor,
     required this.tooltip,
     this.onTap,
   });
@@ -340,34 +336,8 @@ class _IconBtn extends StatelessWidget {
           child: Icon(
             icon,
             size: 20,
-            color: active ? Colors.blue.shade600 : Colors.grey.shade600,
+            color: active ? Pallets.gradient2 : iconColor,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  final String label;
-  final MaterialColor color;
-
-  const _Pill({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.shade50,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 10,
-          color: color.shade700,
-          fontWeight: FontWeight.w500,
         ),
       ),
     );

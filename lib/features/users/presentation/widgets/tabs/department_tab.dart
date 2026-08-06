@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/config/routes/router_app_shell_controls/shell_scroll_controller.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
 import 'package:frontendmobile/features/users/presentation/provider/users_state.dart';
@@ -11,20 +12,27 @@ class DepartmentTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final border = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final dialogBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+
     if (data.departments.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.business_outlined,
-              size: 48,
-              color: Pallets.textSecondaryDark,
-            ),
+            Icon(Icons.business_outlined, size: 48, color: textSecondary),
             const SizedBox(height: 12),
             Text(
               'No departments found',
-              style: TextStyle(color: Pallets.textSecondaryDark, fontSize: 14),
+              style: TextStyle(color: textSecondary, fontSize: 14),
             ),
           ],
         ),
@@ -32,12 +40,11 @@ class DepartmentTab extends ConsumerWidget {
     }
 
     return ListView.builder(
+      controller: ShellScrollController.of(context),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: data.departments.length,
       itemBuilder: (_, i) {
         final dept = data.departments[i];
-
-        // find manager name if available
         final manager = dept.managerId != null
             ? data.users.where((u) => u.id == dept.managerId).firstOrNull
             : null;
@@ -54,9 +61,9 @@ class DepartmentTab extends ConsumerWidget {
           child: Container(
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: cardBg,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
+              border: Border.all(color: border),
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
@@ -67,19 +74,19 @@ class DepartmentTab extends ConsumerWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: Pallets.gradient2.withOpacity(0.15),
+                  color: Pallets.infoTint,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.business_outlined,
-                  color: Pallets.gradient2,
+                  color: Pallets.blurple,
                   size: 20,
                 ),
               ),
               title: Text(
                 dept.departmentName,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -88,18 +95,22 @@ class DepartmentTab extends ConsumerWidget {
                 manager != null
                     ? 'Manager: ${manager.fullName}'
                     : 'No manager assigned',
-                style: TextStyle(
-                  color: Pallets.textSecondaryDark,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: textSecondary, fontSize: 12),
               ),
               trailing: IconButton(
                 icon: const Icon(
                   Icons.delete_outline_rounded,
-                  color: Colors.redAccent,
+                  color: Pallets.error,
                   size: 20,
                 ),
-                onPressed: () => _confirmDelete(context, ref, dept),
+                onPressed: () => _confirmDelete(
+                  context,
+                  ref,
+                  dept,
+                  dialogBg,
+                  textPrimary,
+                  textSecondary,
+                ),
               ),
             ),
           ),
@@ -108,31 +119,35 @@ class DepartmentTab extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, dept) {
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    dept,
+    Color dialogBg,
+    Color textPrimary,
+    Color textSecondary,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E2C),
+        backgroundColor: dialogBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Delete Department',
-          style: TextStyle(color: Colors.white, fontSize: 16),
+          style: TextStyle(color: textPrimary, fontSize: 16),
         ),
         content: Text(
           'Are you sure you want to delete "${dept.departmentName}"?',
-          style: TextStyle(color: Pallets.textSecondaryDark, fontSize: 13),
+          style: TextStyle(color: textSecondary, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => ctx.pop(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Pallets.textSecondaryDark),
-            ),
+            child: Text('Cancel', style: TextStyle(color: textSecondary)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
+              backgroundColor: Pallets.error,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),

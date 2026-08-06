@@ -5,13 +5,13 @@ class StaffEntity {
   final int? companyId;
   final int? userId;
   final int? staffRoleId;
-  final String name; // ✅ only name is truly required
-  final String? gender; // ✅ optional
-  final String? dateOfBirth; // ✅ optional
-  final String? address; // ✅ optional
-  final String? email; // ✅ optional
-  final String? phone; // ✅ optional
-  final int? age; // ✅ add age
+  final String name;
+  final String? gender;
+  final String? dateOfBirth;
+  final String? address;
+  final String? email;
+  final String? phone;
+  final int? age;
   final DateTime? createdAt;
   final String? avatarUrl;
   final String? avatarPublicId;

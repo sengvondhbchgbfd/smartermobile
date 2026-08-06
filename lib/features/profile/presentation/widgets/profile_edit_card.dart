@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/profile/presentation/widgets/edited/avatar_picker.dart';
 import 'package:frontendmobile/features/profile/presentation/widgets/edited/date_tile.dart';
 import 'package:frontendmobile/features/profile/presentation/widgets/edited/edit_field.dart';
@@ -15,6 +16,10 @@ import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_no
 import 'package:frontendmobile/features/profile/domain/entities/profile_entity.dart';
 import 'package:go_router/go_router.dart';
 
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
 class EditProfilePage extends ConsumerStatefulWidget {
   final ProfileEntity profile;
   final StaffEntity staff;
@@ -24,6 +29,7 @@ class EditProfilePage extends ConsumerStatefulWidget {
     required this.profile,
     required this.staff,
   });
+
   @override
   ConsumerState<EditProfilePage> createState() => _EditProfilePageState();
 }
@@ -33,37 +39,21 @@ class EditProfilePage extends ConsumerStatefulWidget {
 ////////////////////////////////////////////////////////////////////////////////
 
 class _EditProfilePageState extends ConsumerState<EditProfilePage> {
-  //////////////////////////////////////////////////////////////////////////////
-  // ── Controllers ──────────────────────────────────────────────
-  //////////////////////////////////////////////////////////////////////////////
   late final TextEditingController _name;
   late final TextEditingController _phone;
   late final TextEditingController _address;
   late final TextEditingController _email;
 
-  //////////////////////////////////////////////////////////////////////////////
-  // ── Dropdown state ───────────────────────────────────────────
-  //////////////////////////////////////////////////////////////////////////////
-
   String? _selectedGender;
   DateTime? _selectedDob;
-  //////////////////////////////////////////////////////////////////////////////
-  // ── Avatar ───────────────────────────────────────────────────
-  //////////////////////////////////////////////////////////////////////////////
-
   File? _avatarFile;
   bool _loading = false;
 
   static const _genders = ['male', 'female', 'other'];
-  //////////////////////////////////////////////////////////////////////////////
-  // ── Discord-inspired colors ───────────────────────────────────
-  //////////////////////////////////////////////////////////////////////////////
 
-  static const _bg = Color(0xFF1E1F22);
-  static const _surface = Color(0xFF2B2D31);
-  static const _blurple = Color(0xFF5865F2);
-  static const _textPrimary = Colors.white;
-  static const _textMuted = Color(0xFFB5BAC1);
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   @override
   void initState() {
@@ -73,11 +63,11 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     _address = TextEditingController(text: widget.staff.address ?? '');
     _email = TextEditingController(text: widget.staff.email ?? '');
     _selectedGender = widget.staff.gender;
-
     if (widget.staff.dateOfBirth != null) {
       _selectedDob = DateTime.tryParse(widget.staff.dateOfBirth!);
     }
   }
+
   //////////////////////////////////////////////////////////////////////////////
   ///
   //////////////////////////////////////////////////////////////////////////////
@@ -90,8 +80,9 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     _email.dispose();
     super.dispose();
   }
+
   //////////////////////////////////////////////////////////////////////////////
-  // ── Pick avatar ───────────────────────────────────────────────
+  ///
   //////////////////////////////////////////////////////////////////////////////
 
   Future<void> _pickAvatar() async {
@@ -104,23 +95,24 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       setState(() => _avatarFile = File(picked.path));
     }
   }
+
   //////////////////////////////////////////////////////////////////////////////
-  // ── Pick date ─────────────────────────────────────────────────
+  ///
   //////////////////////////////////////////////////////////////////////////////
 
-  Future<void> _pickDate() async {
+  Future<void> _pickDate(bool isDark) async {
     final now = DateTime.now();
+    final surface = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDob ?? DateTime(now.year - 25),
       firstDate: DateTime(1950),
       lastDate: DateTime(now.year - 16),
       builder: (ctx, child) => Theme(
-        data: ThemeData.dark().copyWith(
-          colorScheme: const ColorScheme.dark(
-            primary: _blurple,
-            surface: _surface,
-          ),
+        data: (isDark ? ThemeData.dark() : ThemeData.light()).copyWith(
+          colorScheme: isDark
+              ? ColorScheme.dark(primary: Pallets.gradient2, surface: surface)
+              : ColorScheme.light(primary: Pallets.gradient2, surface: surface),
         ),
         child: child!,
       ),
@@ -129,23 +121,25 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       setState(() => _selectedDob = picked);
     }
   }
+
   //////////////////////////////////////////////////////////////////////////////
-  // ── Submit ────────────────────────────────────────────────────
+  ///
   //////////////////////////////////////////////////////////////////////////////
 
-  Future<void> _submit() async {
+  Future<void> _submit(Color surface) async {
     if (_name.text.trim().isEmpty) {
-      _showSnack('Name is required');
+      _showSnack('Name is required', surface);
       return;
     }
-
     if (widget.staff.id == null) {
-      _showSnack('Staff ID not found');
+      _showSnack('Staff ID not found', surface);
       return;
     }
-
     setState(() => _loading = true);
     try {
+      ////////////////////////////////////////
+      ///
+      ///////////////////////////////////////
       final request = UpdateStaffRequest(
         name: _name.text.trim(),
         phone: _phone.text.trim().isEmpty ? null : _phone.text.trim(),
@@ -153,57 +147,82 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         email: _email.text.trim().isEmpty ? null : _email.text.trim(),
         gender: _selectedGender,
         dateOfBirth: _selectedDob != null
-            ? '${_selectedDob!.year}-${_selectedDob!.month.toString().padLeft(2, '0')}-${_selectedDob!.day.toString().padLeft(2, '0')}'
+            ? '${_selectedDob!.year}-'
+                  '${_selectedDob!.month.toString().padLeft(2, '0')}-'
+                  '${_selectedDob!.day.toString().padLeft(2, '0')}'
             : null,
       );
 
+      ////////////////////////////////////////
+      ///
+      ///////////////////////////////////////
       await ref
           .read(staffNotifierProvider.notifier)
           .updates(widget.staff.id!, request, avatarFile: _avatarFile);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) _showSnack(e.toString());
+      if (mounted) _showSnack(e.toString(), surface);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+    ////////////////////////////////////////
+    ///
+    ///////////////////////////////////////
   }
+
   //////////////////////////////////////////////////////////////////////////////
   ///
   //////////////////////////////////////////////////////////////////////////////
-
-  void _showSnack(String msg) {
+  void _showSnack(String msg, Color surface) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: _surface,
+        backgroundColor: surface,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
+
   //////////////////////////////////////////////////////////////////////////////
-  // ── Build ─────────────────────────────────────────────────────
+  ///
   //////////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surface = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: _bg,
+        backgroundColor: bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 18,
-            color: _textMuted,
+            color: textSecondary,
           ),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
+        title: Text(
           'Edit Profile',
           style: TextStyle(
-            color: _textPrimary,
+            color: textPrimary,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -212,20 +231,20 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: _loading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: _blurple,
+                      color: Pallets.gradient2,
                     ),
                   )
                 : TextButton(
-                    onPressed: _submit,
+                    onPressed: () => _submit(surface),
                     child: const Text(
                       'Save',
                       style: TextStyle(
-                        color: _blurple,
+                        color: Pallets.gradient2,
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
                       ),
@@ -234,15 +253,11 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
           ),
         ],
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ////////////////////////////////////////////////////////////////////
-            // ── Avatar picker ──────────────────────────────────
-            ////////////////////////////////////////////////////////////////////
             AvatarPicker(
               avatarUrl: widget.staff.avatarUrl,
               avatarFile: _avatarFile,
@@ -252,7 +267,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             const SizedBox(height: 24),
 
             ////////////////////////////////////////////////////////////////////
-            // ── Read-only section ──────────────────────────────
+            // ── Read-only ─────────────────────────────────────────────────
             ////////////////////////////////////////////////////////////////////
             SectionLabel('ACCOUNT'),
             const SizedBox(height: 8),
@@ -282,7 +297,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
             const SizedBox(height: 24),
 
             ////////////////////////////////////////////////////////////////////
-            // ── Editable section ───────────────────────────────
+            // ── Editable ─────────────────────────────────────────────────
             ////////////////////////////////////////////////////////////////////
             SectionLabel('PERSONAL INFO'),
             const SizedBox(height: 8),
@@ -310,30 +325,27 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               controller: _address,
               label: 'Address',
               icon: Icons.location_on_outlined,
-
               maxLines: 2,
             ),
             const SizedBox(height: 10),
-
-            // Gender dropdown
             GenderDropdown(
               value: _selectedGender,
               genders: _genders,
               onChanged: (val) => setState(() => _selectedGender = val),
             ),
             const SizedBox(height: 10),
-            DateTile(dob: _selectedDob, onTap: _pickDate),
+            DateTile(dob: _selectedDob, onTap: () => _pickDate(isDark)),
             const SizedBox(height: 32),
 
             ////////////////////////////////////////////////////////////////////
-            // ── Save button ────────────────────────────────────
+            // ── Save button ───────────────────────────────────────────────
             ////////////////////////////////////////////////////////////////////
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _loading ? null : _submit,
+                onPressed: _loading ? null : () => _submit(surface),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _blurple,
+                  backgroundColor: Pallets.gradient2,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16),

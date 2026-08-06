@@ -76,6 +76,7 @@ class ApiEndpoints {
 
   // ── Inventory: Stock Movements ───────────
   static const String stockMovements = '/stock-movements/';
+  static const String stockMovementReports = '/stock-movements/reports';
 
   // ── Invoices ────────────────────────────
   static const String invoices = '/invoices/';
@@ -84,7 +85,7 @@ class ApiEndpoints {
   static const String auditLogs = '/audit-logs/';
 
   // ── Notifications ───────────────────────
-  static const String notifications = '/notifications';
+  static const String notifications = '/notifications/';
   static const String notificationsMy = '/notifications/my';
   static const String notificationsMySummary = '/notifications/my/summary';
   static const String notificationsMyReadAll = '/notifications/my/read-all';
@@ -97,7 +98,9 @@ class ApiEndpoints {
   static const String chatDirect = '/chat/direct';
 
   // ── System Settings ─────────────────────
+
   static const String systemSettings = '/system-settings';
+  static const String quotations = '/quotations';
 
   // ─────────────────────────────────────────────────────────────────────────
   // Dynamic helpers
@@ -122,7 +125,9 @@ class ApiEndpoints {
 
   // Users & Staff
   static String usersByCompany(int id) => '/users/$id';
+
   static String staffRoleById(int id) => '/staff-roles/$id';
+
   static String staffById(int id) => '/staff/$id';
   static String staffAvatar(int id) => '/staff/$id/avatar';
   static String staffByRole(int id) => '/staff/role/$id';

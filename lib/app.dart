@@ -12,6 +12,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(currentUserProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
       themeMode: themeMode,
@@ -20,7 +21,7 @@ class MyApp extends ConsumerWidget {
       themeAnimationDuration: const Duration(milliseconds: 300),
       themeAnimationCurve: Curves.easeInOut,
       debugShowCheckedModeBanner: false,
-      routerConfig: AppRouter.router,
+      routerConfig: router,
     );
   }
 }

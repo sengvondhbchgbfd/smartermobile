@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/dashboard/presentation/searching/leaderboard/dynamic_leaderboard.dart';
 import 'package:frontendmobile/features/dashboard/presentation/searching/search_item.dart';
+
 class SearchHome extends StatelessWidget {
   final TabController tabController;
   final List<(String, bool)> tabs;
@@ -10,6 +11,7 @@ class SearchHome extends StatelessWidget {
   final Color textSecondary;
   final Color border;
   final ValueChanged<SearchItem> onItemTap;
+
   const SearchHome({
     super.key,
     required this.tabController,
@@ -22,6 +24,8 @@ class SearchHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -73,14 +77,18 @@ class SearchHome extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.orange,
+                              color: isDark
+                                  ? Pallets.warning
+                                  : Pallets.warning.withOpacity(0.85),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Hot',
                               style: TextStyle(
                                 fontSize: 9,
-                                color: Colors.white,
+                                color: isDark
+                                    ? Pallets.onWarning
+                                    : Pallets.onWarning,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),

@@ -1,7 +1,7 @@
 class ProfileEntity {
   final int userId;
   final int companyId;
-  final int staffId;
+  final int? staffId;
   final String username;
   final String fullName;
   final String role;

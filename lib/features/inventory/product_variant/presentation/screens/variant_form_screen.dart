@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/inventory/product/domain/entities/product_entity.dart';
 
 class VariantFormScreen extends StatefulWidget {
@@ -15,7 +16,6 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
   late final TextEditingController _priceCtrl;
   late final TextEditingController _stockCtrl;
 
-  // specs: list of key/value pairs
   final List<_SpecEntry> _specs = [];
   bool _isSubmitting = false;
 
@@ -90,15 +90,17 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final searchBg = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFEFEFED);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final searchBg = isDark ? Pallets.surfaceElevated : Pallets.backgroundLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
 
     InputDecoration deco(String label, {String? hint, String? prefix}) =>
         InputDecoration(
@@ -122,11 +124,11 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: colors.primary, width: 1.6),
+            borderSide: BorderSide(color: Pallets.blurple, width: 1.6),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: colors.error, width: 1.2),
+            borderSide: BorderSide(color: Pallets.error, width: 1.2),
           ),
         );
 
@@ -149,7 +151,7 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
+            color: Colors.black.withOpacity(isDark ? 0.18 : 0.04),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -164,11 +166,12 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: Pallets.transparent,
         title: Text(
           _isEdit ? 'Edit variant' : 'New variant',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
+            color: textPrimary,
           ),
         ),
       ),
@@ -182,6 +185,7 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
             card(
               child: TextFormField(
                 controller: _skuCtrl,
+                style: TextStyle(color: textPrimary),
                 decoration: deco('SKU (optional)', hint: 'e.g. SHIRT-RED-XL'),
               ),
             ),
@@ -195,6 +199,7 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _priceCtrl,
+                      style: TextStyle(color: textPrimary),
                       decoration: deco('Price', prefix: '\$ '),
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
@@ -210,6 +215,7 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _stockCtrl,
+                      style: TextStyle(color: textPrimary),
                       decoration: deco('Stock qty'),
                       keyboardType: TextInputType.number,
                       validator: (v) {
@@ -246,6 +252,7 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
                           Expanded(
                             child: TextFormField(
                               controller: s.key,
+                              style: TextStyle(color: textPrimary),
                               decoration: deco('Key', hint: 'color'),
                             ),
                           ),
@@ -253,6 +260,7 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
                           Expanded(
                             child: TextFormField(
                               controller: s.value,
+                              style: TextStyle(color: textPrimary),
                               decoration: deco('Value', hint: 'red'),
                             ),
                           ),
@@ -261,7 +269,7 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
                             onPressed: () => _removeSpec(i),
                             icon: Icon(
                               Icons.remove_circle_outline,
-                              color: colors.error,
+                              color: Pallets.error,
                               size: 20,
                             ),
                           ),
@@ -271,8 +279,11 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
                   }),
                   TextButton.icon(
                     onPressed: _addSpec,
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add spec'),
+                    icon: Icon(Icons.add, size: 18, color: Pallets.blurple),
+                    label: Text(
+                      'Add spec',
+                      style: TextStyle(color: Pallets.blurple),
+                    ),
                   ),
                 ],
               ),
@@ -287,6 +298,8 @@ class _VariantFormScreenState extends State<VariantFormScreen> {
           child: FilledButton(
             onPressed: _isSubmitting ? null : _submit,
             style: FilledButton.styleFrom(
+              backgroundColor: Pallets.blurple,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/core/widgets/loading/upload_loading_Indicator.dart';
 import 'package:frontendmobile/features/inventory/categories/presentation/widgets/field_row.dart';
 import 'package:image_picker/image_picker.dart';
@@ -93,26 +94,33 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: cardBg,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: Pallets.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
+          icon: Icon(Icons.close_rounded, color: textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           _isEdit ? 'Edit Category' : 'New Category',
-          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: textPrimary,
+          ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0.5),
@@ -134,35 +142,28 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFC62828).withOpacity(0.1),
+                    color: Pallets.error.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFC62828).withOpacity(0.3),
+                      color: Pallets.error.withOpacity(0.3),
                       width: 0.5,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Color(0xFFC62828),
-                        size: 16,
-                      ),
+                      Icon(Icons.error_outline, color: Pallets.error, size: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           _serverError!,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFFC62828),
-                          ),
+                          style: TextStyle(fontSize: 13, color: Pallets.error),
                         ),
                       ),
                       GestureDetector(
                         onTap: () => setState(() => _serverError = null),
-                        child: const Icon(
+                        child: Icon(
                           Icons.close_rounded,
-                          color: Color(0xFFC62828),
+                          color: Pallets.error,
                           size: 16,
                         ),
                       ),
@@ -210,7 +211,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? const Color(0xFF3A3A3C)
+                                  ? Pallets.surfaceElevated
                                   : const Color(0xFFEFEFED),
                               shape: BoxShape.circle,
                             ),
@@ -288,7 +289,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
                 // showDivider removed — only one field, no divider needed
                 child: TextFormField(
                   controller: _nameCtrl,
-                  style: const TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: 14, color: textPrimary),
                   decoration: InputDecoration(
                     hintText: 'e.g. Electronics',
                     hintStyle: TextStyle(color: subText, fontSize: 14),
@@ -310,7 +311,7 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
               child: FilledButton(
                 onPressed: _uploading ? null : _submit,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF3B82F6),
+                  backgroundColor: Pallets.blurple,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),

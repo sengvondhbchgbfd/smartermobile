@@ -4,11 +4,16 @@ import 'package:go_router/go_router.dart';
 
 // ── Box Decoration ────────────────────────────────────────────────────────────
 
-BoxDecoration userFormBox() => BoxDecoration(
-  color: Colors.white.withOpacity(0.05),
-  borderRadius: BorderRadius.circular(14),
-  border: Border.all(color: Colors.white.withOpacity(0.08)),
-);
+BoxDecoration userFormBox(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return BoxDecoration(
+    color: isDark ? Pallets.surfaceCard : Pallets.surfaceLight,
+    borderRadius: BorderRadius.circular(14),
+    border: Border.all(
+      color: isDark ? Pallets.borderDark : Pallets.borderLight,
+    ),
+  );
+}
 
 // ── Section Label ─────────────────────────────────────────────────────────────
 
@@ -17,15 +22,21 @@ class UserFormLabel extends StatelessWidget {
   const UserFormLabel(this.text, {super.key});
 
   @override
-  Widget build(BuildContext context) => Text(
-    text,
-    style: TextStyle(
-      color: Pallets.textSecondaryDark,
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.8,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    return Text(
+      text,
+      style: TextStyle(
+        color: textSecondary,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.8,
+      ),
+    );
+  }
 }
 
 // ── Text Field ────────────────────────────────────────────────────────────────
@@ -47,22 +58,32 @@ class UserFormField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Container(
-    decoration: userFormBox(),
-    child: TextField(
-      controller: controller,
-      obscureText: obscure,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Pallets.textSecondaryDark),
-        prefixIcon: Icon(icon, color: Pallets.textSecondaryDark, size: 20),
-        suffixIcon: suffixIcon,
-        border: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
+    return Container(
+      decoration: userFormBox(context),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        style: TextStyle(color: textPrimary),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: textSecondary),
+          prefixIcon: Icon(icon, color: textSecondary, size: 20),
+          suffixIcon: suffixIcon,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 // ── Dropdown ──────────────────────────────────────────────────────────────────
@@ -84,23 +105,34 @@ class UserFormDropdown<T> extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Container(
-    decoration: userFormBox(),
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    child: DropdownButtonFormField<T>(
-      value: value,
-      dropdownColor: const Color(0xFF2C2C3E),
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Pallets.textSecondaryDark, size: 20),
-        border: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final dropdownBg = isDark ? Pallets.surfaceOverlay : Pallets.surfaceLight;
+
+    return Container(
+      decoration: userFormBox(context),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: DropdownButtonFormField<T>(
+        value: value,
+        dropdownColor: dropdownBg,
+        style: TextStyle(color: textPrimary),
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon, color: textSecondary, size: 20),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+        hint: Text(hint, style: TextStyle(color: textSecondary)),
+        items: items,
+        onChanged: onChanged,
       ),
-      hint: Text(hint, style: TextStyle(color: Pallets.textSecondaryDark)),
-      items: items,
-      onChanged: onChanged,
-    ),
-  );
+    );
+  }
 }
 
 // ── Submit Button ─────────────────────────────────────────────────────────────
@@ -123,7 +155,8 @@ class UserFormButton extends StatelessWidget {
     child: ElevatedButton(
       onPressed: loading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Pallets.gradient2,
+        backgroundColor: Pallets.blurple,
+        disabledBackgroundColor: Pallets.blurple.withOpacity(0.5),
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
@@ -154,19 +187,22 @@ class UserFormBackButton extends StatelessWidget {
   const UserFormBackButton({super.key});
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: () => context.pop(),
-    child: Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.07),
-        shape: BoxShape.circle,
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final iconBg = isDark
+        ? Colors.white.withOpacity(0.07)
+        : Colors.black.withOpacity(0.05);
+
+    return GestureDetector(
+      onTap: () => context.pop(),
+      child: Container(
+        margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+        child: Icon(Icons.chevron_left_rounded, color: textPrimary, size: 22),
       ),
-      child: const Icon(
-        Icons.chevron_left_rounded,
-        color: Colors.white,
-        size: 22,
-      ),
-    ),
-  );
+    );
+  }
 }

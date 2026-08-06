@@ -9,17 +9,17 @@ part 'staff_notifier.g.dart';
 
 @riverpod
 class StaffNotifier extends _$StaffNotifier {
-  late final GetAllStaffUseCase _getAll;
-  late final GetStaffByIdUseCase _getById;
-  late final GetMyStaffProfileUseCase _getMyProfile;
-  late final GetStaffManagersUseCase _getManagers;
-  late final GetStaffByRoleUseCase _getByRole;
-  late final GetStaffByDepartmentUseCase _getByDepartment;
-  late final GetStaffByUserIdUseCase _getByUserId;
-  late final CreateStaffUseCase _create;
-  late final UpdateStaffUseCase _update;
-  late final UpdateStaffAvatarUseCase _updateAvatar;
-  late final DeleteStaffUseCase _delete;
+  late GetAllStaffUseCase _getAll;
+  late GetStaffByIdUseCase _getById;
+  late GetMyStaffProfileUseCase _getMyProfile;
+  late GetStaffManagersUseCase _getManagers;
+  late GetStaffByRoleUseCase _getByRole;
+  late GetStaffByDepartmentUseCase _getByDepartment;
+  late GetStaffByUserIdUseCase _getByUserId;
+  late CreateStaffUseCase _create;
+  late UpdateStaffUseCase _update;
+  late UpdateStaffAvatarUseCase _updateAvatar;
+  late DeleteStaffUseCase _delete;
 
   @override
   Future<List<StaffEntity>> build() async {
@@ -61,12 +61,25 @@ class StaffNotifier extends _$StaffNotifier {
     UpdateStaffRequest request, {
     File? avatarFile,
   }) async {
+    /////////////////////////
+    ///  Ready update
+    ////////////////////////
+
     final updated = await _update(id, request, avatarFile: avatarFile);
     final current = state.valueOrNull ?? [];
+
+    /////////////////////////
+    ///  Ready update
+    ////////////////////////
+
     state = AsyncData(current.map((s) => s.id == id ? updated : s).toList());
     if (updated.userId != null) {
       ref.read(userNotifierProvider.notifier).patchStaff(updated);
     }
+    ref.invalidate(staffDetailProvider(id));
+    ///////////////////////
+    ///
+    //////////////////////
   }
 
   // ── UPDATE AVATAR ─────────────────────────────────────────────────────────
@@ -77,9 +90,8 @@ class StaffNotifier extends _$StaffNotifier {
     if (updated.userId != null) {
       ref.read(userNotifierProvider.notifier).patchStaff(updated);
     }
+    ref.invalidate(staffDetailProvider(id));
   }
-
-
 
   // ── DELETE ────────────────────────────────────────────────────────────────
   Future<void> delete(int id) async {
@@ -93,6 +105,7 @@ class StaffNotifier extends _$StaffNotifier {
     if (target.userId != null) {
       ref.read(userNotifierProvider.notifier).removeStaff(target.userId!);
     }
+    ref.invalidate(staffDetailProvider(id));
   }
 
   // ── Internal fetch helpers (do NOT mutate main state) ────────────────────
@@ -103,7 +116,6 @@ class StaffNotifier extends _$StaffNotifier {
   }
 
   Future<StaffEntity> getMyProfile() => _getMyProfile();
-
   Future<StaffEntity?> getByUserId(int userId) async {
     final cached = state.valueOrNull
         ?.where((s) => s.userId == userId)

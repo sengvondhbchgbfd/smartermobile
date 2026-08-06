@@ -5,7 +5,8 @@ import '../repositories/invoice_repository.dart';
 class GetAllInvoicesUseCase {
   final InvoiceRepository _repo;
   const GetAllInvoicesUseCase(this._repo);
-  Future<List<InvoiceEntity>> call({int? customerId}) => _repo.getAll(customerId: customerId);
+  Future<List<InvoiceEntity>> call({int? customerId}) =>
+      _repo.getAll(customerId: customerId);
 }
 
 class GetInvoiceByIdUseCase {
@@ -25,18 +26,35 @@ class CreateInvoiceUseCase {
     required double tax,
     required String paymentType,
     required List<InvoiceItemInput> items,
-  }) =>
-      _repo.create(
-        customerId: customerId,
-        staffId: staffId,
-        totalAmount: totalAmount,
-        discount: discount,
-        tax: tax,
-        paymentType: paymentType,
-        items: items,
-      );
+  }) => _repo.create(
+    customerId: customerId,
+    staffId: staffId,
+    totalAmount: totalAmount,
+    discount: discount,
+    tax: tax,
+    paymentType: paymentType,
+    items: items,
+  );
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+class CreateFromQuotation {
+  final InvoiceRepository _repo;
+  const CreateFromQuotation(this._repo);
+  Future<InvoiceEntity> call({
+    required int quotationId,
+    required String paymentType,
+  }) => _repo.createFromQuotation(
+    quotationId: quotationId,
+    paymentType: paymentType,
+  );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
 class UpdateInvoiceUseCase {
   final InvoiceRepository _repo;
   const UpdateInvoiceUseCase(this._repo);
@@ -46,14 +64,13 @@ class UpdateInvoiceUseCase {
     double? discount,
     double? tax,
     String? paymentType,
-  }) =>
-      _repo.update(
-        invoiceId: invoiceId,
-        totalAmount: totalAmount,
-        discount: discount,
-        tax: tax,
-        paymentType: paymentType,
-      );
+  }) => _repo.update(
+    invoiceId: invoiceId,
+    totalAmount: totalAmount,
+    discount: discount,
+    tax: tax,
+    paymentType: paymentType,
+  );
 }
 
 class AddInvoiceAttachmentUseCase {

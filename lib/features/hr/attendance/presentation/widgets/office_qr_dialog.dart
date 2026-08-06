@@ -234,38 +234,6 @@ class _OfficeQrDialogState extends State<OfficeQrDialog> {
                   ),
                 ),
               ),
-
-              const SizedBox(height: 14),
-
-              // ── Token string ─────────────────────────────────
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: SelectableText(
-                  widget.token!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 11,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                'Long-press token above to copy',
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
-              ),
             ],
 
             const SizedBox(height: 20),

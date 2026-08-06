@@ -25,7 +25,7 @@ final staffAttendanceProvider =
     );
 
 typedef _$StaffAttendance = AutoDisposeAsyncNotifier<StaffAttendanceState>;
-String _$scanAttendanceHash() => r'eab999eca3e7633ac1ca29eec3ba3e1b2dbac47a';
+String _$scanAttendanceHash() => r'390673bca964b6f47768f48072d720389ec9818c';
 
 /// See also [ScanAttendance].
 @ProviderFor(ScanAttendance)

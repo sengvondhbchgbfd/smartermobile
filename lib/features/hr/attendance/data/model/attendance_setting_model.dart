@@ -1,5 +1,4 @@
 import 'package:frontendmobile/features/hr/attendance/domain/entities/attendance_settings_entity.dart';
-
 class AttendanceSettingsModel extends AttendanceSettingsEntity {
   const AttendanceSettingsModel({
     required super.settingId,

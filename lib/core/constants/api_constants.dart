@@ -1,14 +1,15 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConstants {
-  static const String baseUrl = String.fromEnvironment(
-    "BASE_URL",
-    // defaultValue: "http://localhost:8000 //192.168.217.130 ||  192.168.171.130 | 192.168.51.130 | 192.168.51.130 | 192.168.91.130 | 192.168.244.130',
-    defaultValue: "http://192.168.63.130:8000",
-  );
+  static final String baseUrl =
+      dotenv.env['BASE_URL']?.trim().isNotEmpty == true
+      ? dotenv.env['BASE_URL']!.trim()
+      : 'http://10.154.106.130:8000';
 
   static const String apiVersion = '/api/v1';
-  static const String apiBaseUrl = '$baseUrl$apiVersion';
-  // ── WebSocket ────────────────────────────────────────────────
+  static String get apiBaseUrl => '$baseUrl$apiVersion';
 
+  // ── WebSocket ────────────────────────────────────────────────
   static String get wsBaseUrl => baseUrl
       .replaceFirst("https://", "wss://")
       .replaceFirst("http://", "ws://");
@@ -22,6 +23,7 @@ class ApiConstants {
   static const int connectTimeout = 10000;
   static const int receiveTimeout = 10000;
   // ── Token keys ───────────────────────────────────────────────
+
   static const String accessTokenKey = 'access_token';
   static const String refreshTokenKey = 'refresh_token';
   static const String userIdKey = 'user_id';

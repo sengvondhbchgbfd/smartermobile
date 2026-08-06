@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/config/routes/app_shell.dart';
+import 'package:frontendmobile/config/routes/go_router_refresh_stream.dart';
 import 'package:frontendmobile/config/routes/route_names.dart';
+import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:frontendmobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:frontendmobile/features/auth/presentation/screens/splash_screen.dart';
 import 'package:frontendmobile/features/communication/chat/presentation/screens/chat_groups_screen.dart';
 import 'package:frontendmobile/features/communication/notifications/presentation/screens/notification_screen.dart';
 import 'package:frontendmobile/features/company/domain/entities/company_entity.dart';
+import 'package:frontendmobile/features/company/presentation/screens/company_register_screen.dart';
 import 'package:frontendmobile/features/company/presentation/screens/company_screen.dart';
-import 'package:frontendmobile/features/company/presentation/widgets/company_edit_screen.dart';
+import 'package:frontendmobile/features/company/presentation/widgets/form/company_edit_screen.dart';
 import 'package:frontendmobile/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/screens/wizard_screen.dart';
 import 'package:frontendmobile/features/dashboard/presentation/searching/page/search_page.dart';
@@ -18,7 +22,11 @@ import 'package:frontendmobile/features/hr/attendance/presentation/screens/atten
 import 'package:frontendmobile/features/hr/leave/presentation/screens/leave_screen.dart';
 import 'package:frontendmobile/features/hr/salaries/presentation/screens/salary_screen.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
+import 'package:frontendmobile/features/hr/staff/domain/entities/staff_role_entity.dart';
+import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_avatar_update_screen.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_detail_screen.dart';
+import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_form_screen.dart';
+import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_role_from_screen.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_role_screen.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/screens/staff_screen.dart';
 import 'package:frontendmobile/features/inventory/categories/presentation/screens/categories_detail.dart';
@@ -28,9 +36,14 @@ import 'package:frontendmobile/features/inventory/invoice/presentation/screens/i
 import 'package:frontendmobile/features/inventory/invoice/presentation/screens/invoice_screen.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/screens/product_detail_screen.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/screens/product_screen.dart';
+import 'package:frontendmobile/features/inventory/quotations/presentation/screen/my_quotations_screen.dart';
+import 'package:frontendmobile/features/inventory/quotations/presentation/screen/quotation_detail_screen.dart';
+import 'package:frontendmobile/features/inventory/quotations/presentation/screen/quotation_list_screen.dart';
 import 'package:frontendmobile/features/inventory/supplier/presentation/screens/supplier_detail_screen.dart';
+import 'package:frontendmobile/features/inventory/supplier/presentation/screens/supplier_screen.dart';
 import 'package:frontendmobile/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:frontendmobile/features/profile/domain/entities/profile_entity.dart';
+import 'package:frontendmobile/features/profile/presentation/providers/profile_providers.dart';
 import 'package:frontendmobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:frontendmobile/features/profile/presentation/widgets/profile_edit_card.dart';
 import 'package:frontendmobile/features/settings/domain/entities/system_setting_entity.dart';
@@ -49,13 +62,25 @@ import 'package:frontendmobile/features/users/presentation/widgets/creates/creat
 import 'package:frontendmobile/features/users/presentation/widgets/creates/create_user_page.dart';
 import 'package:frontendmobile/features/users/presentation/widgets/update_user_page.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frontendmobile/features/inventory/supplier/presentation/screens/supplier_screen.dart'
-    hide SupplierDetailScreen;
+
 import 'package:frontendmobile/features/inventory/customer/presentation/screens/customer_screen.dart';
 
-class AppRouter {
-  static final GoRouter router = GoRouter(
+final appRouterProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
     initialLocation: RouteNames.login,
+    refreshListenable: GoRouterRefreshStream(
+      ref.watch(currentUserProvider.notifier).stream,
+    ),
+    redirect: (context, state) {
+      final loggedIn = ref.read(currentUserProvider) != null;
+      final loggingIn =
+          state.matchedLocation == RouteNames.login ||
+          state.matchedLocation == RouteNames.register;
+
+      if (!loggedIn && !loggingIn) return RouteNames.login;
+      if (loggedIn && loggingIn) return RouteNames.dashboard;
+      return null;
+    },
     routes: [
       //////////////////////////////////////////////////////////////////////////
       // ── Auth / Onboarding (no shell) ──────────────────────────────────────
@@ -89,10 +114,6 @@ class AppRouter {
       // ── Pushed screens — full screen, NO shell ────────────────────────────
       //////////////////////////////////////////////////////////////////////////
       GoRoute(
-        path: RouteNames.profile,
-        builder: (context, state) => const ProfileScreen(),
-      ),
-      GoRoute(
         path: RouteNames.editedProfile,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>;
@@ -111,6 +132,11 @@ class AppRouter {
       //////////////////////////////////////////////////////////////////////////
       // ── Company ───────────────────────────────────────────────────────────
       //////////////////////////////////////////////////////////////////////////
+      GoRoute(
+        path: RouteNames.companyRegister,
+        builder: (context, state) => const CompanyRegisterScreen(),
+      ),
+
       GoRoute(
         path: RouteNames.companyDetail,
         builder: (context, state) {
@@ -134,8 +160,34 @@ class AppRouter {
         builder: (context, state) => const StaffRoleScreen(),
       ),
       GoRoute(
+        path: RouteNames.staffRoleForm,
+        builder: (context, state) {
+          final existing = state.extra as StaffRoleEntity?;
+          return StaffRoleFormScreen(existing: existing);
+        },
+      ),
+      GoRoute(
         path: RouteNames.staff,
         builder: (context, state) => const StaffScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.staffForm,
+        builder: (context, state) {
+          final existing = state.extra as StaffEntity?;
+          return StaffFormScreen(existing: existing);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.staffAvatarUpdate,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          final args = state.extra as Map<String, dynamic>?;
+          return StaffAvatarUpdateScreen(
+            staffId: id,
+            name: args?['name'] ?? '',
+            currentAvatarUrl: args?['avatarUrl'],
+          );
+        },
       ),
 
       GoRoute(
@@ -154,7 +206,6 @@ class AppRouter {
       ////////////////////////////////////////////////////////////////////////
       ///
       ///////////////////////////////////////////////////////////////////////
-      
       GoRoute(
         path: RouteNames.leaves,
         builder: (context, state) => const LeaveScreen(),
@@ -451,22 +502,54 @@ class AppRouter {
         builder: (context, state) => const SearchPage(),
       ),
 
+      GoRoute(
+        path: RouteNames.attendance,
+        builder: (context, state) => const AttendanceScreen(),
+        routes: [
+          GoRoute(
+            path: 'my',
+            builder: (context, state) => const AttendanceScreen(),
+          ),
+        ],
+      ),
+
+      //////////////////////////////////////////////////////////////////////////
+      ///
+      //////////////////////////////////////////////////////////////////////////
+      GoRoute(
+        path: '/quotations',
+        builder: (context, state) => const QuotationListScreen(),
+      ),
+      GoRoute(
+        path: '/quotations/my',
+        builder: (context, state) => const MyQuotationsScreen(),
+      ),
+      GoRoute(
+        path: '/quotations/:id',
+        builder: (context, state) => QuotationDetailScreen(
+          quotationId: int.parse(state.pathParameters['id']!),
+        ),
+      ),
+      ////////////////////////////////////////////////////////////////////////////
+      ///
+      ////////////////////////////////////////////////////////////////////////////
       ShellRoute(
-        builder: (context, state, child) => AppShell(child: child),
+        builder: (context, state, child) => Consumer(
+          builder: (context, ref, _) {
+            final profile = ref.watch(profileNotifierProvider);
+            return AppShell(
+              avatarUrl: profile.valueOrNull?.avatarUrl,
+              child: child,
+            );
+          },
+        ),
+
+
+
         routes: [
           GoRoute(
             path: RouteNames.dashboard,
             builder: (context, state) => const DashboardScreen(),
-          ),
-          GoRoute(
-            path: RouteNames.attendance,
-            builder: (context, state) => const AttendanceScreen(),
-            routes: [
-              GoRoute(
-                path: 'my',
-                builder: (context, state) => const AttendanceScreen(),
-              ),
-            ],
           ),
 
           GoRoute(
@@ -474,12 +557,21 @@ class AppRouter {
             builder: (context, state) => const ChatGroupsScreen(),
           ),
 
+
+
           GoRoute(
             path: RouteNames.users,
             builder: (context, state) => const UserScreen(),
+          ),
+
+
+          
+          GoRoute(
+            path: RouteNames.profile,
+            builder: (context, state) => const ProfileScreen(),
           ),
         ],
       ),
     ],
   );
-}
+});

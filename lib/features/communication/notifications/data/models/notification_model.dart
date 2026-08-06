@@ -11,6 +11,7 @@ class NotificationModel extends NotificationEntity {
     required super.isRead,
     super.referenceId,
     super.referenceType,
+    super.referenceStatus,
     required super.createdAt,
   });
 
@@ -25,6 +26,7 @@ class NotificationModel extends NotificationEntity {
       isRead: json['is_read'] as bool? ?? false,
       referenceId: json['reference_id'] as int?,
       referenceType: json['reference_type'] as String?,
+      referenceStatus: json['reference_status'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -38,6 +40,7 @@ class NotificationModel extends NotificationEntity {
     'is_read': isRead,
     'reference_id': referenceId,
     'reference_type': referenceType,
+    'reference_status': referenceStatus,
     'created_at': createdAt.toIso8601String(),
   };
 

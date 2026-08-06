@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/core/utils/confirm_delete_dialog.dart';
 import 'package:frontendmobile/core/utils/error_banner.dart';
 import 'package:frontendmobile/core/widgets/alertmessage/app_snacker.dart';
@@ -7,6 +8,7 @@ import 'package:frontendmobile/core/widgets/shimmer/app_list_shimmer.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/screens/product_form_screen.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/widgets/category_chip.dart'
     show CategoryChip;
+import 'package:frontendmobile/features/inventory/stock_movements/presentation/screens/stock_movement_report_screen.dart';
 import '../providers/product_provider.dart';
 import '../widgets/product_tile.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
@@ -19,29 +21,22 @@ class ProductsScreen extends ConsumerStatefulWidget {
   ConsumerState<ProductsScreen> createState() => _ProductsScreenState();
 }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-////////////////////////////////////////////////////////////////////////////////
-
 class _ProductsScreenState extends ConsumerState<ProductsScreen> {
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
   final _searchCtrl = TextEditingController();
   String _query = '';
   int? _categoryFilter;
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
-  Color get _bg => _isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-  Color get _card => _isDark ? const Color(0xFF2C2C2E) : Colors.white;
-  Color get _border =>
-      _isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE0DED8);
+  Color get _bg => _isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+  Color get _card => _isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+  Color get _border => _isDark ? Pallets.borderDark : Pallets.borderLight;
   Color get _searchBg =>
-      _isDark ? const Color(0xFF3A3A3C) : const Color(0xFFEFEFED);
-  Color get _sub => _isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
+      _isDark ? Pallets.surfaceElevated : Pallets.backgroundLight;
+  Color get _sub =>
+      _isDark ? Pallets.textSecondaryDark : Pallets.textSecondaryLight;
+  Color get _textPrimary =>
+      _isDark ? Pallets.textPrimaryDark : Pallets.textPrimaryLight;
+
   @override
   void initState() {
     super.initState();
@@ -50,19 +45,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       ref.read(categoryNotifierProvider.notifier).loadAll();
     });
   }
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
 
   @override
   void dispose() {
     _searchCtrl.dispose();
     super.dispose();
   }
-
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> _openCreate() async {
     final categories = ref.read(categoryNotifierProvider).categories;
@@ -89,10 +77,6 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       type: ok ? SnackType.success : SnackType.error,
     );
   }
-
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> _openEdit(int id) async {
     final product = ref
@@ -128,10 +112,6 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     );
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
-
   Future<void> _confirmDelete(int id, String name) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -152,19 +132,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     );
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
-
   @override
   Widget build(BuildContext context) {
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
     final state = ref.watch(productNotifierProvider);
     final notifier = ref.read(productNotifierProvider.notifier);
     final categories = ref.watch(categoryNotifierProvider).categories;
-    final colors = Theme.of(context).colorScheme;
 
     final filtered = state.products.where((p) {
       final matchesQuery =
@@ -174,63 +146,80 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       return matchesQuery && matchesCategory;
     }).toList();
 
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
-
     return Scaffold(
       backgroundColor: _bg,
-      //////////////////////////////////////////////////////////////////////////
-      ///
-      //////////////////////////////////////////////////////////////////////////
       appBar: AppBar(
         backgroundColor: _card,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: const Text(
+        surfaceTintColor: Pallets.transparent,
+        title: Text(
           'Products',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.w600, color: _textPrimary),
+        ),
+        actions: [
+          TextButton.icon(
+            icon: Icon(Icons.bar_chart_outlined, color: _textPrimary, size: 18),
+            label: Text(
+              'Stock Report',
+              style: TextStyle(
+                color: _textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const StockMovementReportScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: Pallets.brandGradient,
+          boxShadow: [
+            BoxShadow(
+              color: Pallets.blurple.withOpacity(0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: state.isCreating ? null : _openCreate,
+          backgroundColor: Pallets.transparent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          icon: const Icon(Icons.add),
+          label: const Text(
+            'Add Product',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
       ),
-      //////////////////////////////////////////////////////////////////////////
-      ///
-      //////////////////////////////////////////////////////////////////////////
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: state.isCreating ? null : _openCreate,
-        backgroundColor: colors.primary,
-        foregroundColor: colors.onPrimary,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Add Product',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-      ),
-      //////////////////////////////////////////////////////////////////////////
-      ///
-      //////////////////////////////////////////////////////////////////////////
       body: Column(
         children: [
           if (state.error != null)
             ErrorBanner(message: state.error!, onDismiss: notifier.clearError),
-          //////////////////////////////////////////////////////////////////////
+
           // Search bar
-          //////////////////////////////////////////////////////////////////////
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Container(
               decoration: BoxDecoration(
                 color: _searchBg,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _border, width: 0.5),
               ),
-
-              //////////////////////////////////////////////////////////////////
-              ///
-              //////////////////////////////////////////////////////////////////
               child: TextField(
                 controller: _searchCtrl,
-                style: const TextStyle(fontSize: 15),
+                style: TextStyle(fontSize: 15, color: _textPrimary),
                 decoration: InputDecoration(
                   hintText: 'Search products…',
                   hintStyle: TextStyle(color: _sub, fontSize: 15),
@@ -249,14 +238,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 ),
                 onChanged: (v) => setState(() => _query = v),
               ),
-              //////////////////////////////////////////////////////////////////
-              ///
-              //////////////////////////////////////////////////////////////////
             ),
           ),
-          //////////////////////////////////////////////////////////////////////
+
           // Category chips
-          //////////////////////////////////////////////////////////////////////
           if (categories.isNotEmpty)
             SizedBox(
               height: 40,
@@ -268,7 +253,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     label: 'All',
                     selected: _categoryFilter == null,
                     onTap: () => setState(() => _categoryFilter = null),
-                    colors: colors,
+                    selectedColor: Pallets.blurple,
                     border: _border,
                     sub: _sub,
                   ),
@@ -281,7 +266,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             ? null
                             : c.categoryId,
                       ),
-                      colors: colors,
+                      selectedColor: Pallets.blurple,
                       border: _border,
                       sub: _sub,
                     ),
@@ -291,16 +276,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             ),
 
           const SizedBox(height: 4),
-          //////////////////////////////////////////////////////////////////////
+
           // Product list
-          //////////////////////////////////////////////////////////////////////
           Expanded(
             child: state.isLoading
-                ? AppListShimmer(itemCount: 6)
+                ? const AppListShimmer(itemCount: 6)
                 : filtered.isEmpty
                 ? Center(
                     child: Text(
-                      // ✅ was copy-pasted "No suppliers" text
                       _query.isNotEmpty
                           ? 'No products match "$_query".'
                           : 'No products yet.',
@@ -308,6 +291,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     ),
                   )
                 : RefreshIndicator(
+                    color: Pallets.blurple,
+                    backgroundColor: _card,
                     onRefresh: notifier.loadAll,
                     child: ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),

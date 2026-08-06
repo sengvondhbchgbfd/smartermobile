@@ -49,22 +49,60 @@ class UserNotifier extends _$UserNotifier {
     return _loadAll();
   }
 
+  static const int _pageSize = 10;
   Future<UserState> _loadAll() async {
     final usersResult = await getUsersUseCase(
-      GetUsersParams(skip: 0, limit: 10),
+      GetUsersParams(skip: 0, limit: _pageSize),
     );
     final rolesResult = await getRolesUseCase();
     final departmentsResult = await getDepartmentsUseCase();
+    final users = usersResult.getOrElse(() => []);
+
     return UserState(
-      users: usersResult.getOrElse(() => []),
+      users: users,
       roles: rolesResult.getOrElse(() => []),
       departments: departmentsResult.getOrElse(() => []),
+      currentSkip: users.length,
+      hasMoreUsers: users.length == _pageSize,
     );
   }
 
   Future<void> loadAll() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() => _loadAll());
+  }
+
+  Future<void> loadMore() async {
+    final current = state.valueOrNull;
+    if (current == null) return;
+    if (current.isLoadingMore || !current.hasMoreUsers) return;
+
+    state = AsyncData(current.copyWith(isLoadingMore: true));
+
+    final result = await getUsersUseCase(
+      GetUsersParams(skip: current.currentSkip, limit: _pageSize),
+    );
+
+    result.fold(
+      (failure) {
+        final latest = state.valueOrNull ?? current;
+        state = AsyncData(
+          latest.copyWith(isLoadingMore: false, errorMessage: failure.message),
+        );
+      },
+      (newUsers) {
+        final latest = state.valueOrNull ?? current;
+        state = AsyncData(
+          latest.copyWith(
+            users: [...latest.users, ...newUsers],
+            currentSkip: latest.currentSkip + newUsers.length,
+            hasMoreUsers: newUsers.length == _pageSize,
+            isLoadingMore: false,
+            errorMessage: null,
+          ),
+        );
+      },
+    );
   }
 
   // ── CREATE USER ──
@@ -109,8 +147,6 @@ class UserNotifier extends _$UserNotifier {
     final current = state.value;
     if (current == null) return;
     final old = current.users;
-
-    // optimistic update
     final optimistic = old.map<UserEntity>((e) {
       if (e.id != params.userId) return e;
       return e.copyWith(
@@ -146,7 +182,10 @@ class UserNotifier extends _$UserNotifier {
     );
   }
 
+  //////////////////////////////////////////////////////////////////////////////
   // ── PATCH STAFF (called from StaffNotifier) ──
+  //////////////////////////////////////////////////////////////////////////////
+
   void patchStaff(StaffEntity staff) {
     final current = state.valueOrNull;
     if (current == null) return;
@@ -160,7 +199,9 @@ class UserNotifier extends _$UserNotifier {
     );
   }
 
+  //////////////////////////////////////////////////////////////////////////////
   // ── REMOVE STAFF (called from StaffNotifier) ──
+  //////////////////////////////////////////////////////////////////////////////
   void removeStaff(int userId) {
     final current = state.valueOrNull;
     if (current == null) return;

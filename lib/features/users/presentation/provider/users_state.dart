@@ -9,12 +9,20 @@ class UserState {
   final bool isLoading;
   final String? errorMessage;
 
+  // ── Pagination (users only) ──
+  final int currentSkip;
+  final bool hasMoreUsers;
+  final bool isLoadingMore;
+
   const UserState({
     this.users = const [],
     this.roles = const [],
     this.departments = const [],
     this.isLoading = false,
     this.errorMessage,
+    this.currentSkip = 0,
+    this.hasMoreUsers = true,
+    this.isLoadingMore = false,
   });
 
   static const _clear = Object();
@@ -25,6 +33,9 @@ class UserState {
     List<DepartmentEntity>? departments,
     bool? isLoading,
     Object? errorMessage = _clear, // sentinel
+    int? currentSkip,
+    bool? hasMoreUsers,
+    bool? isLoadingMore,
   }) {
     return UserState(
       users: users ?? this.users,
@@ -34,6 +45,9 @@ class UserState {
       errorMessage: identical(errorMessage, _clear)
           ? this.errorMessage
           : errorMessage as String?,
+      currentSkip: currentSkip ?? this.currentSkip,
+      hasMoreUsers: hasMoreUsers ?? this.hasMoreUsers,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:frontendmobile/core/constants/ApiEndpoints.dart';
 import '../models/notification_model.dart';
+
 abstract class NotificationRemoteDataSource {
   Future<List<NotificationModel>> getMyNotifications({bool unreadOnly = false});
   Future<NotificationSummaryModel> getSummary();
@@ -8,6 +9,7 @@ abstract class NotificationRemoteDataSource {
     bool unreadOnly = false,
   });
   Future<NotificationModel> createNotification(Map<String, dynamic> body);
+
   Future<NotificationModel> markOneRead(int notificationId);
   Future<void> markAllRead();
   Future<void> bulkMarkRead(List<int> ids);

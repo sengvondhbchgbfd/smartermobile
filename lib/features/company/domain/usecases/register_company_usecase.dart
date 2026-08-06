@@ -12,6 +12,11 @@ class RegisterCompanyParams {
   final String planType;
   final String timezone;
 
+  // ── Owner / first user — becomes this company's superuser ──────────────
+  final String adminUsername;
+  final String adminPassword;
+  final String adminFullName;
+
   const RegisterCompanyParams({
     required this.companyCode,
     required this.companyName,
@@ -19,6 +24,9 @@ class RegisterCompanyParams {
     required this.email,
     required this.maxUsers,
     required this.timezone,
+    required this.adminUsername,
+    required this.adminPassword,
+    required this.adminFullName,
     this.planType = 'free',
   });
 }

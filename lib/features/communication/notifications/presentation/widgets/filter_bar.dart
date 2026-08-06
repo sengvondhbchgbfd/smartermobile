@@ -10,12 +10,15 @@ class FilterBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+
     final filter =
         ref.watch(notificationNotifierProvider).valueOrNull?.filter ??
         NotificationFilter.all;
 
     return Container(
-      color: Pallets.surfaceDark,
+      color: surface,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [

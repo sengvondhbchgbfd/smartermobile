@@ -3,7 +3,6 @@ import 'package:frontendmobile/features/inventory/categories/domain/entities/cat
 import 'package:frontendmobile/features/inventory/categories/presentation/widgets/categories_details/category_hero_image.dart';
 import 'package:frontendmobile/features/inventory/categories/presentation/widgets/categories_details/category_info_cart.dart';
 import 'package:frontendmobile/features/inventory/categories/presentation/widgets/categories_details/category_meta_card.dart';
-import 'package:frontendmobile/features/inventory/categories/presentation/widgets/categories_details/category_section_label.dart';
 
 class CategoryDetailBody extends StatelessWidget {
   final CategoryEntity category;
@@ -75,14 +74,6 @@ class CategoryDetailBody extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 6),
-
-                // ── Category ID chip ────────────────────────────────────────
-                Text(
-                  'ID #${category.categoryId}',
-                  style: TextStyle(fontSize: 13, color: subText),
-                ),
-
                 const SizedBox(height: 20),
 
                 // ── Info card ───────────────────────────────────────────────
@@ -94,30 +85,6 @@ class CategoryDetailBody extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 16),
-
-                // ── Image section ───────────────────────────────────────────
-                if (category.imageUrl != null) ...[
-                  SectionLabel(label: 'Image URL', subText: subText),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: borderColor, width: 0.5),
-                    ),
-                    child: Text(
-                      category.imageUrl!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: subText,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
 
                 // ── Metadata card ───────────────────────────────────────────
                 MetaCard(

@@ -84,7 +84,13 @@ class _UpdateUserPageState extends ConsumerState<UpdateUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    /////////////////////////////////////////////////////////////
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surface = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+
     final state = ref.watch(userNotifierProvider).valueOrNull;
     final deptId = (state?.departments ?? [])
         .map((d) => d.departmentId)
@@ -103,18 +109,17 @@ class _UpdateUserPageState extends ConsumerState<UpdateUserPage> {
         if (mounted) setState(() => _selectedDepartmentId = null);
       });
     }
-    ////////////////////////////////////////////////////////////
 
     return Scaffold(
-      backgroundColor: Pallets.backgroundDark,
+      backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: Pallets.backgroundDark,
+        backgroundColor: surface,
         elevation: 0,
         leading: const UserFormBackButton(),
-        title: const Text(
+        title: Text(
           'Update User',
           style: TextStyle(
-            color: Colors.white,
+            color: textPrimary,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -141,10 +146,6 @@ class _UpdateUserPageState extends ConsumerState<UpdateUserPage> {
             const SizedBox(height: 24),
             const UserFormLabel('ASSIGNMENT'),
             const SizedBox(height: 12),
-
-            //////////////////////////////////////////////////////////////
-            ///
-            /////////////////////////////////////////////////////////////
             UserFormDropdown<int>(
               hint: 'Role',
               icon: Icons.badge_outlined,
@@ -157,10 +158,7 @@ class _UpdateUserPageState extends ConsumerState<UpdateUserPage> {
                   .toList(),
               onChanged: (val) => setState(() => _selectedRoleId = val),
             ),
-
-            /////////////////////////////////////////////////////////////
             const SizedBox(height: 12),
-            ////////////////////////////////////////////////////////////
             UserFormDropdown<int?>(
               hint: 'Department',
               icon: Icons.business_outlined,
@@ -179,10 +177,6 @@ class _UpdateUserPageState extends ConsumerState<UpdateUserPage> {
               ],
               onChanged: (val) => setState(() => _selectedDepartmentId = val),
             ),
-
-            ////////////////////////////////////////////////////////////
-            ///
-            ///////////////////////////////////////////////////////////
             const SizedBox(height: 12),
             UserFormDropdown<String>(
               hint: 'Status',

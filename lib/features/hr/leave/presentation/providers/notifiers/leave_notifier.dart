@@ -41,6 +41,11 @@ class StaffLeave extends _$StaffLeave {
     }
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+
   Future<void> submitLeave({
     required LeaveType leaveType,
     required DateTime startDate,
@@ -71,11 +76,19 @@ class StaffLeave extends _$StaffLeave {
     }
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+
   Future<void> fetchMyLeaves({int skip = 0, int limit = 50}) => _run(() async {
     final list = await _getMyLeaves(skip: skip, limit: limit);
     final current = state.value ?? const StaffLeaveState();
     state = AsyncData(current.copyWith(leaves: list, isLoading: false));
   });
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> cancelLeave(int leaveId) => _run(() async {
     final updated = await _cancelLeave(leaveId);
@@ -119,6 +132,10 @@ class ManagerLeave extends _$ManagerLeave {
     return const ManagerLeaveState();
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+
   Future<void> _run(Future<void> Function() fn) async {
     final current = state.value ?? const ManagerLeaveState();
     state = AsyncData(current.copyWith(isLoading: true, error: null));
@@ -130,6 +147,10 @@ class ManagerLeave extends _$ManagerLeave {
       state = AsyncData(s.copyWith(isLoading: false, error: message));
     }
   }
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> fetchAllLeaves({
     int skip = 0,
@@ -146,12 +167,20 @@ class ManagerLeave extends _$ManagerLeave {
     state = AsyncData(state.value!.copyWith(leaves: list, isLoading: false));
   });
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+
   Future<void> fetchPendingLeaves({int skip = 0, int limit = 50}) => _run(
     () async {
       final list = await _getPendingLeaves(skip: skip, limit: limit);
       state = AsyncData(state.value!.copyWith(leaves: list, isLoading: false));
     },
   );
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> fetchLeaveSummary() => _run(() async {
     final summary = await _getLeaveSummary();
@@ -160,32 +189,68 @@ class ManagerLeave extends _$ManagerLeave {
     );
   });
 
-  Future<void> fetchLeaveById(int leaveId) => _run(() async {
-    final leave = await _getLeaveById(leaveId);
-    state = AsyncData(state.value!.copyWith(selected: leave, isLoading: false));
-  });
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
-  Future<void> approveLeave(int leaveId) => _run(() async {
-    final updated = await _approveLeave(leaveId);
-    state = AsyncData(
-      state.value!.copyWith(
-        leaves: _replaceInList(updated),
-        selected: updated,
-        isLoading: false,
-      ),
-    );
-  });
+  Future<LeaveEntity?> fetchLeaveById(int leaveId) async {
+    await future;
+    try {
+      final current = state.value ?? const ManagerLeaveState();
+      state = AsyncData(current.copyWith(isLoading: true, error: null));
+      final leave = await _getLeaveById(leaveId);
+      state = AsyncData(
+        state.value!.copyWith(selected: leave, isLoading: false),
+      );
+      return leave;
+    } on DioException catch (e) {
+      final message = ApiErrorHandler.getMessage(e);
+      state = AsyncData(
+        state.value!.copyWith(isLoading: false, error: message),
+      );
+      return null;
+    }
+  }
 
-  Future<void> rejectLeave(int leaveId, {String? reason}) => _run(() async {
-    final updated = await _rejectLeave(leaveId, reason: reason);
-    state = AsyncData(
-      state.value!.copyWith(
-        leaves: _replaceInList(updated),
-        selected: updated,
-        isLoading: false,
-      ),
-    );
-  });
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+  Future<void> approveLeave(int leaveId) async {
+    await future; // ✅ outside _run, wait for build() to complete
+    await _run(() async {
+      final updated = await _approveLeave(leaveId);
+      final current = state.value ?? const ManagerLeaveState();
+      state = AsyncData(
+        current.copyWith(
+          leaves: current.leaves.isEmpty ? [updated] : _replaceInList(updated),
+          selected: updated,
+          isLoading: false,
+        ),
+      );
+    });
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+
+  Future<void> rejectLeave(int leaveId, {String? reason}) async {
+    await future; // ✅ outside _run, wait for build() to complete
+    await _run(() async {
+      final updated = await _rejectLeave(leaveId, reason: reason);
+      final current = state.value ?? const ManagerLeaveState();
+      state = AsyncData(
+        current.copyWith(
+          leaves: current.leaves.isEmpty ? [updated] : _replaceInList(updated),
+          selected: updated,
+          isLoading: false,
+        ),
+      );
+    });
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> deleteLeave(int leaveId) => _run(() async {
     await _deleteLeave(leaveId);
@@ -200,11 +265,20 @@ class ManagerLeave extends _$ManagerLeave {
     );
   });
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
   void clearError() => state = AsyncData(state.value!.copyWith(error: null));
   void clearSelected() =>
       state = AsyncData(state.value!.copyWith(selected: null));
-  List<LeaveEntity> _replaceInList(LeaveEntity updated) => [
-    for (final l in state.value!.leaves)
-      if (l.leaveId == updated.leaveId) updated else l,
-  ];
+  List<LeaveEntity> _replaceInList(LeaveEntity updated) {
+    final list = state.value?.leaves ?? [];
+    if (list.any((l) => l.leaveId == updated.leaveId)) {
+      return [
+        for (final l in list)
+          if (l.leaveId == updated.leaveId) updated else l,
+      ];
+    }
+    return [...list, updated]; // ✅ add if not found in list
+  }
 }

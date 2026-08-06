@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 class FieldRow extends StatelessWidget {
   final String label;
@@ -15,12 +16,10 @@ class FieldRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
     final labelColor = isDark
-        ? const Color(0xFF8E8E93)
-        : const Color(0xFF6B6B6B);
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
 
     return Column(
       children: [

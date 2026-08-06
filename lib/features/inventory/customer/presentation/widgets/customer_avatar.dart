@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 class AppAvatar extends StatelessWidget {
   final String name;
@@ -29,12 +30,12 @@ class AppAvatar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final backgroundColor = isDark
-        ? const Color(0xFF424242)
-        : const Color(0xFFEEEEEE);
+        ? Pallets.surfaceElevated
+        : Pallets.backgroundLight;
 
     final textColor = isDark
-        ? const Color(0xFFEEEEEE)
-        : const Color(0xFF424242);
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
 
     return Container(
       width: size,

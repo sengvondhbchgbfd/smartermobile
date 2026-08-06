@@ -7,8 +7,10 @@ class StackedAvatars extends StatelessWidget {
   final List<StaffPreview> users;
   final int extra;
   const StackedAvatars({super.key, required this.users, required this.extra});
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const double size = 28;
     const double overlap = 18;
     final totalSlots = users.length + (extra > 0 ? 1 : 0);
@@ -19,16 +21,15 @@ class StackedAvatars extends StatelessWidget {
       width: width,
       child: Stack(
         children: [
-          // Avatars
+          // ── Avatars ───────────────────────────────────────────
           ...users.asMap().entries.map((entry) {
-            final i = entry.key;
-            final u = entry.value;
             return Positioned(
-              left: i * overlap,
-              child: AvatarBubble(user: u, size: size),
+              left: entry.key * overlap,
+              child: AvatarBubble(user: entry.value, size: size),
             );
           }),
-          // +N bubble
+
+          // ── +N bubble ─────────────────────────────────────────
           if (extra > 0)
             Positioned(
               left: users.length * overlap,
@@ -37,16 +38,21 @@ class StackedAvatars extends StatelessWidget {
                 height: size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Pallets.gradient2.withOpacity(0.2),
-                  border: Border.all(color: Pallets.backgroundDark, width: 2),
+                  color: Pallets.blurple.withOpacity(0.15),
+                  border: Border.all(
+                    color: isDark
+                        ? Pallets.backgroundDark
+                        : Pallets.backgroundLight,
+                    width: 2,
+                  ),
                 ),
                 child: Center(
                   child: Text(
                     '+$extra',
-                    style: TextStyle(
-                      color: Pallets.gradient2,
+                    style: const TextStyle(
+                      color: Pallets.blurple,
                       fontSize: 9,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),

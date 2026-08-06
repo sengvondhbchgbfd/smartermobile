@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/core/utils/emty_state.dart';
 import 'package:frontendmobile/core/widgets/alertmessage/app_snacker.dart';
 import 'package:frontendmobile/core/widgets/alertmessage/dialog_helper.dart';
@@ -119,20 +120,20 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-
-    
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final searchBg = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFEFEFED);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
 
-
-
+    // ── Pallets-driven theme tokens ─────────────────────────────────────────
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final tileBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final searchBg = isDark ? Pallets.surfaceElevated : Pallets.backgroundLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
 
     final state = ref.watch(customerNotifierProvider);
     final notifier = ref.read(customerNotifierProvider.notifier);
@@ -156,14 +157,22 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
       appBar: AppBar(
         backgroundColor: cardBg,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: const Text(
+        surfaceTintColor: Pallets.transparent,
+        title: Text(
           'Customers',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: textPrimary,
+          ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0.5),
-          child: Divider(height: 0.5, thickness: 0.5, color: borderColor),
+          child: Divider(
+            height: 0.5,
+            thickness: 0.5,
+            color: isDark ? Pallets.dividerDark : Pallets.dividerLight,
+          ),
         ),
       ),
 
@@ -172,8 +181,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
       //////////////////////////////////////////////////////////////////////////
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openCreate,
-        backgroundColor: const Color(0xFF3B82F6),
-        foregroundColor: Colors.white,
+        backgroundColor: Pallets.blurple,
+        foregroundColor: Pallets.onAccent,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         icon: const Icon(Icons.add_rounded),
@@ -205,14 +214,23 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
               ),
               child: TextField(
                 controller: _searchCtrl,
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14, color: textPrimary),
+                cursorColor: Pallets.blurple,
                 decoration: InputDecoration(
                   hintText: 'Search by name, phone, email…',
                   hintStyle: TextStyle(fontSize: 14, color: subText),
-                  prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    size: 18,
+                    color: subText,
+                  ),
                   suffixIcon: _query.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.close_rounded, size: 16),
+                          icon: Icon(
+                            Icons.close_rounded,
+                            size: 16,
+                            color: subText,
+                          ),
                           onPressed: () {
                             _searchCtrl.clear();
                             setState(() => _query = '');
@@ -226,7 +244,11 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
               ),
             ),
           ),
-          Divider(height: 0.5, thickness: 0.5, color: borderColor),
+          Divider(
+            height: 0.5,
+            thickness: 0.5,
+            color: isDark ? Pallets.dividerDark : Pallets.dividerLight,
+          ),
 
           //////////////////////////////////////////////////////////////////////
           // ── List ───────────────────────────────────────────────────────────
@@ -244,6 +266,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   )
                 : RefreshIndicator(
                     onRefresh: notifier.loadAll,
+                    color: Pallets.blurple,
+                    backgroundColor: cardBg,
                     child: ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 14, 16, 100),
                       itemCount: filtered.length + 1,
@@ -263,17 +287,23 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                         );
                         return CustomerTile(
                           customer: c,
-                          cardBg: cardBg,
+                          cardBg: tileBg,
                           borderColor: borderColor,
-                          onTap: isItemLoading ? null : () => Navigator.of(context).push(
+                          onTap: isItemLoading
+                              ? null
+                              : () => Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => CustomerDetailScreen(
                                       customerId: c.customerId,
                                     ),
                                   ),
                                 ),
-                          onEdit: isItemLoading ? null : () => _openEdit(c.customerId),
-                         onDelete: isItemLoading ? null : () => _confirmDelete(c.customerId, c.name),
+                          onEdit: isItemLoading
+                              ? null
+                              : () => _openEdit(c.customerId),
+                          onDelete: isItemLoading
+                              ? null
+                              : () => _confirmDelete(c.customerId, c.name),
                         );
                       },
                     ),

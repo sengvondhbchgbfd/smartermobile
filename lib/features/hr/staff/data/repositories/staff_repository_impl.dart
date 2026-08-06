@@ -6,8 +6,6 @@ import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.da
 import 'package:frontendmobile/features/hr/staff/domain/repositories/staff_repository.dart';
 
 class StaffRepositoryImpl implements StaffRepository {
- 
- 
   final StaffRemoteDataSource remoteDataSource;
   StaffRepositoryImpl(this.remoteDataSource);
 
@@ -16,6 +14,9 @@ class StaffRepositoryImpl implements StaffRepository {
     final models = await remoteDataSource.getAll();
     return models.map((e) => e.toEntity()).toList();
   }
+
+
+
 
   @override
   Future<StaffEntity> getById(int id) async {
@@ -34,9 +35,6 @@ class StaffRepositoryImpl implements StaffRepository {
     final models = await remoteDataSource.getManagers();
     return models.map((e) => e.toEntity()).toList();
   }
-
-
-
 
   @override
   Future<List<StaffEntity>> getByRole(int staffRoleId) async {
@@ -82,12 +80,6 @@ class StaffRepositoryImpl implements StaffRepository {
     return model.toEntity();
   }
 
-
-
-
-
   @override
   Future<void> delete(int id) => remoteDataSource.delete(id);
-
- 
 }

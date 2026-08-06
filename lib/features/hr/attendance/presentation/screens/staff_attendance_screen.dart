@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontendmobile/core/utils/attendance_auth_helper.dart';
-import 'package:frontendmobile/core/utils/attendance_dialogs.dart';
-import 'package:frontendmobile/core/utils/attendance_token_session.dart';
-import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/providers/attendance_state.dart';
-import 'package:frontendmobile/features/hr/attendance/presentation/widgets/staff/attendance_scann_sheet.dart';
-import 'package:frontendmobile/features/hr/attendance/presentation/widgets/staff/check_in_out_row.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/staff/show_error.dart';
 import '../providers/attendance_notifier.dart';
 import '../widgets/attendance_month_header.dart';
@@ -15,7 +9,6 @@ import '../widgets/attendance_stats_row.dart';
 
 class StaffAttendanceScreen extends ConsumerStatefulWidget {
   const StaffAttendanceScreen({super.key});
-
   @override
   ConsumerState<StaffAttendanceScreen> createState() =>
       _StaffAttendanceScreenState();
@@ -25,9 +18,10 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
   late int _month;
   late int _year;
   ProviderSubscription<AsyncValue<StaffAttendanceState>>? _staffSub;
-  ProviderSubscription<AsyncValue<ScanAttendanceState>>? _scanSub;
 
+  //////////////////////////////////////////////////////////////////////////////
   // ── Lifecycle ──────────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   @override
   void initState() {
@@ -51,17 +45,6 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
         }
       });
 
-      _scanSub = ref.listenManual(scanAttendanceProvider, (prev, next) {
-        if (!mounted) return;
-        final error = next.value?.error;
-        if (error != null && error != prev?.value?.error) {
-          AttendanceErrorMessage.show(
-            context,
-            message: error,
-            onDismiss: ref.read(scanAttendanceProvider.notifier).clearError,
-          );
-        }
-      });
       _loadInitialData();
     });
   }
@@ -69,21 +52,20 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
   @override
   void dispose() {
     _staffSub?.close();
-    _scanSub?.close();
     super.dispose();
   }
 
+  //////////////////////////////////////////////////////////////////////////////
   // ── Data loading ───────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> _loadInitialData() async {
     if (!mounted) return;
     final staffState = ref.read(staffAttendanceProvider).value;
-    final scanState = ref.read(scanAttendanceProvider).value;
     final alreadyLoaded =
         staffState != null &&
         staffState.records.isNotEmpty &&
-        staffState.monthlyStats.isNotEmpty &&
-        scanState?.officeQr != null;
+        staffState.monthlyStats.isNotEmpty;
     if (alreadyLoaded) return;
     await Future.wait([
       if (staffState == null || staffState.records.isEmpty)
@@ -94,8 +76,6 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
         ref
             .read(staffAttendanceProvider.notifier)
             .fetchMonthlyStats(month: _month, year: _year),
-      if (scanState?.officeQr == null)
-        ref.read(scanAttendanceProvider.notifier).fetchOfficeQr(),
     ]);
   }
 
@@ -106,7 +86,9 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
         .fetchMyAttendance(month: _month, year: _year);
   }
 
+  //////////////////////////////////////////////////////////////////////////////
   // ── Month navigation ───────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
 
   void _changeMonth(int delta) {
     if (!mounted) return;
@@ -126,64 +108,11 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
     notifier.fetchMonthlyStats(month: _month, year: _year);
   }
 
-  // ── Core: auth-gate → scan sheet ──────────────────────────────────────────
-
-  Future<void> _handleAttendance({required bool isCheckIn}) async {
-    if (!mounted) return;
-
-    final user = ref.read(currentUserProvider);
-    if (user == null) {
-      AttendanceDialogs.showError(
-        context,
-        'Session expired. Please log in again.',
-      );
-      return;
-    }
-    final hasSession = await AttendanceAuthHelper.ensureValidSession(
-      context: context,
-      isMounted: () => mounted,
-      isSessionValid: () => AttendanceTokenSession.instance.isValid,
-      onAuthenticate: (password) async {
-        if (!mounted) return;
-        await ref
-            .read(scanAttendanceProvider.notifier)
-            .authenticate(password: password);
-        if (!mounted) return;
-        final scanState = ref.read(scanAttendanceProvider).value;
-        if (scanState?.error != null) return;
-        AttendanceAuthHelper.extractAndPersistTokens(
-          context: context,
-          scanState: scanState,
-        );
-      },
-    );
-    ///////////////////////////////////////////////////////////////////////////
-    ///
-    //////////////////////////////////////////////////////////////////////////
-
-    if (!hasSession || !mounted) return;
-    final success = await AttendanceScanSheet.show(
-      context: context,
-      isCheckIn: isCheckIn,
-      companyId: user.companyId.toString(),
-    );
-
-    if (!mounted) return;
-    if (success == true) {
-      await _refreshRecords();
-    }
-  }
-  ///////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////
-
   // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final asyncState = ref.watch(staffAttendanceProvider);
-    final isScanLoading =
-        ref.watch(scanAttendanceProvider).value?.isLoading ?? false;
     return Scaffold(
       body: SafeArea(
         child: asyncState.when(
@@ -191,15 +120,6 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
           error: (e, _) => Center(child: Text('Error: $e')),
           data: (state) => Column(
             children: [
-              ////////////////////////////////////////////////////////////////
-              ///
-              ////////////////////////////////////////////////////////////////
-              CheckInOutRow(
-                isLoading: isScanLoading,
-                onCheckIn: () => _handleAttendance(isCheckIn: true),
-                onCheckOut: () => _handleAttendance(isCheckIn: false),
-              ),
-
               //////////////////////////////////////////////////////////////
               ///
               //////////////////////////////////////////////////////////////

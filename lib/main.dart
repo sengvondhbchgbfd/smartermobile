@@ -8,9 +8,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/shared/providers/core_providers.dart';
 import 'app.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+
   await SharedPreferences.getInstance();
 
   // ── Restore session before the app renders any screen ──────────────────────

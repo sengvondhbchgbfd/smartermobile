@@ -43,9 +43,17 @@ class UpdateSupplierProductPriceUseCase {
 
   Future<SupplierProductPriceEntity> call({
     required int priceId,
+    int? supplierId,
+    int? variantId,
     double? unitPrice,
     String? note,
-  }) => _repo.update(priceId: priceId, unitPrice: unitPrice, note: note);
+  }) => _repo.update(
+    priceId: priceId,
+    supplierId: supplierId,
+    variantId: variantId,
+    unitPrice: unitPrice,
+    note: note,
+  );
 }
 
 class DeleteSupplierProductPriceUseCase {

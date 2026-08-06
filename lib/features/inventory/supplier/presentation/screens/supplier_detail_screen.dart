@@ -1,36 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontendmobile/core/themes/supplier_color.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/inventory/supplier/domain/entities/supplier.dart';
 import 'package:frontendmobile/features/inventory/supplier/presentation/widgets/supplier_form_screen.dart';
 import 'package:frontendmobile/features/inventory/supplier/presentation/widgets/supplier_info_tile.dart';
+import 'package:frontendmobile/features/inventory/supplier/presentation/widgets/supplier_price_in_line_list.dart';
 import 'package:frontendmobile/features/inventory/supplier_product_price/presentation/screens/supplier_product_price_list_screen.dart';
-import 'package:frontendmobile/features/inventory/supplier_product_price/presentation/providers/supplier_product_price_provider.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/providers/product_provider.dart';
 import '../providers/supplier_provider.dart';
+
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
 
 class SupplierDetailScreen extends ConsumerStatefulWidget {
   final int supplierId;
   const SupplierDetailScreen({super.key, required this.supplierId});
-
   @override
   ConsumerState<SupplierDetailScreen> createState() =>
       _SupplierDetailScreenState();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
 class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
   @override
   void initState() {
     super.initState();
     Future.microtask(() => ref.read(variantLabelsProvider.future));
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
   void _openEdit(SupplierEntity supplier) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => SupplierFormScreen(existing: supplier)),
     );
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///  GO CREATE SUPPLIER PRODUCT NOTED
+  //////////////////////////////////////////////////////////////////////////////
   void _openAddPrice(SupplierEntity supplier) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -43,58 +59,88 @@ class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
     );
   }
 
-
-
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
+        .toUpperCase();
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
-
-
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
 
     final theme = Theme.of(context);
-    final c = SupplierColors.of(context);
-    final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final borderColor = isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFE8E6E1);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
-
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final surface = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final border = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
     final state = ref.watch(supplierNotifierProvider);
     final supplier = state.suppliers.cast<SupplierEntity?>().firstWhere(
       (s) => s?.supplierId == widget.supplierId,
       orElse: () => null,
     );
 
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+
     if (supplier == null) {
       return Scaffold(
-        backgroundColor: c.background,
+        backgroundColor: bg,
         appBar: AppBar(
-          backgroundColor: c.background,
+          backgroundColor: bg,
           elevation: 0,
-          title: Text('Detail view', style: TextStyle(color: c.textPrimary)),
+          title: Text('Detail view', style: TextStyle(color: textPrimary)),
         ),
         body: Center(
           child: Text(
             'Supplier not found or has been removed.',
-            style: TextStyle(color: c.textSecondary),
+            style: TextStyle(color: textSecondary),
           ),
         ),
       );
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+
     final isWorking = state.loadingIds.contains(supplier.supplierId);
 
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+
     return Scaffold(
-      backgroundColor: c.background,
+      backgroundColor: bg,
+      extendBodyBehindAppBar: true,
+
+      /////////////////////////////////////////////////////
+      ///
+      ////////////////////////////////////////////////////
       appBar: AppBar(
-        backgroundColor: c.background,
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: Text(
-          supplier.name,
-          style: TextStyle(color: c.textPrimary, fontWeight: FontWeight.w600),
-        ),
+        foregroundColor: Colors.white,
+        title: const Text(''),
+
         actions: [
           if (!isWorking)
             Padding(
@@ -104,71 +150,108 @@ class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
                 icon: const Icon(Icons.edit_outlined, size: 15),
                 label: const Text('Edit', style: TextStyle(fontSize: 13)),
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF3B82F6),
-                  backgroundColor: const Color(0xFFE6F1FB),
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white.withOpacity(0.18),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 6,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Colors.white.withOpacity(0.25)),
                   ),
                 ),
               ),
             ),
         ],
       ),
+
+      /////////////////////////////////////////////////////
+      ///
+      ////////////////////////////////////////////////////
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Avatar / Header ──────────────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
+            // ── Gradient hero header ─────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
             Container(
               width: double.infinity,
-              color: c.surfaceMuted,
-              padding: const EdgeInsets.symmetric(vertical: 40),
+              decoration: const BoxDecoration(gradient: Pallets.brandGradient),
+              padding: EdgeInsets.fromLTRB(
+                24,
+                MediaQuery.of(context).padding.top + 56,
+                24,
+                36,
+              ),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 52,
-                    backgroundColor: c.accentMuted,
-                    backgroundImage: supplier.avatarUrl != null
-                        ? NetworkImage(supplier.avatarUrl!)
-                        : null,
-                    child: supplier.avatarUrl == null
-                        ? Text(
-                            supplier.name.isNotEmpty
-                                ? supplier.name[0].toUpperCase()
-                                : '?',
-                            style: TextStyle(
-                              fontSize: 32,
-                              color: c.accent,
-                              fontWeight: FontWeight.w600,
+                  Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.16),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.35),
+                        width: 2,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: supplier.avatarUrl != null
+                        ? ClipOval(
+                            child: Image.network(
+                              supplier.avatarUrl!,
+                              width: 92,
+                              height: 92,
+                              fit: BoxFit.cover,
                             ),
                           )
-                        : null,
+                        : Text(
+                            _initials(supplier.name),
+                            style: const TextStyle(
+                              fontSize: 32,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
                   Text(
                     supplier.name,
                     style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: c.textPrimary,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
                     textAlign: TextAlign.center,
                   ),
+                  if (supplier.contactPerson != null &&
+                      supplier.contactPerson!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      supplier.contactPerson!,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 13.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ],
               ),
             ),
 
-            // ── Info card ────────────────────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
+            // ── Info card ────────────────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
               child: Container(
                 decoration: BoxDecoration(
-                  color: c.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: c.border),
+                  color: surface,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: border),
                 ),
                 child: Column(
                   children: [
@@ -176,246 +259,100 @@ class _SupplierDetailScreenState extends ConsumerState<SupplierDetailScreen> {
                       icon: Icons.person_outline,
                       label: 'Contact person',
                       value: supplier.contactPerson,
-                      c: c,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
                     ),
-                    Divider(height: 1, color: c.border, indent: 56),
+                    Divider(height: 1, color: border, indent: 56),
                     InfoTile(
-                      icon: Icons.phone_outlined,
+                      icon: Icons.call_outlined,
                       label: 'Phone',
                       value: supplier.phone,
-                      c: c,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
                     ),
                     if (supplier.phone2 != null) ...[
-                      Divider(height: 1, color: c.border, indent: 56),
+                      Divider(height: 1, color: border, indent: 56),
                       InfoTile(
-                        icon: Icons.phone_outlined,
+                        icon: Icons.call_outlined,
                         label: 'Phone 2',
                         value: supplier.phone2,
-                        c: c,
+                        textPrimary: textPrimary,
+                        textSecondary: textSecondary,
                       ),
                     ],
-                    Divider(height: 1, color: c.border, indent: 56),
+                    Divider(height: 1, color: border, indent: 56),
                     InfoTile(
-                      icon: Icons.email_outlined,
+                      icon: Icons.mail_outline_rounded,
                       label: 'Email',
                       value: supplier.email,
-                      c: c,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
                     ),
-                    Divider(height: 1, color: c.border, indent: 56),
+                    Divider(height: 1, color: border, indent: 56),
                     InfoTile(
                       icon: Icons.location_on_outlined,
                       label: 'Address',
                       value: supplier.address,
                       maxLines: 3,
-                      c: c,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
                     ),
                   ],
                 ),
               ),
             ),
 
-            // ── Prices section header ─────────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
+            // ── Prices section header ────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 16, 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  ///////////////
+                  ///
+                  //////////////
                   Text(
                     'SUPPLIER PRICES',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: subText,
+                      color: textSecondary,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.7,
                     ),
                   ),
+                  ///////////////
+                  ///
+                  //////////////
                   TextButton.icon(
                     onPressed: () => _openAddPrice(supplier),
-                    icon: const Icon(Icons.add, size: 15),
+                    icon: const Icon(Icons.add_rounded, size: 16),
                     label: const Text('Add', style: TextStyle(fontSize: 13)),
                     style: TextButton.styleFrom(
-                      foregroundColor: colors.primary,
+                      foregroundColor: Pallets.blurple,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
                       ),
                     ),
                   ),
+                  ///////////////
+                  ///
+                  //////////////
                 ],
               ),
             ),
 
-            // ── Inline prices list ────────────────────────────────────────
-            _SupplierPriceInlineList(
+            ////////////////////////////////////////////////////////////////////
+            // ── Inline prices list ────────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
+            SupplierPriceInlineList(
               supplierId: supplier.supplierId,
               supplierName: supplier.name,
               onManage: () => _openAddPrice(supplier),
             ),
-
             const SizedBox(height: 24),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SupplierPriceInlineList extends ConsumerStatefulWidget {
-  final int supplierId;
-  final String supplierName;
-  final VoidCallback onManage;
-
-  const _SupplierPriceInlineList({
-    required this.supplierId,
-    required this.supplierName,
-    required this.onManage,
-  });
-
-  @override
-  ConsumerState<_SupplierPriceInlineList> createState() =>
-      _SupplierPriceInlineListState();
-}
-
-class _SupplierPriceInlineListState
-    extends ConsumerState<_SupplierPriceInlineList> {
-  @override
-  void initState() {
-    super.initState();
-    // ✅ actually call loadAll with supplierId
-    Future.microtask(
-      () => ref
-          .read(supplierProductPriceNotifierProvider.notifier)
-          .loadAll(supplierId: widget.supplierId),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(supplierProductPriceNotifierProvider);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2C2C2E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
-    final colors = theme.colorScheme;
-
-    if (state.isLoading && state.prices.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 32),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final prices = state.prices
-        .where((p) => p.supplierId == widget.supplierId)
-        .toList();
-
-    if (prices.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 28),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor),
-          ),
-          child: Column(
-            children: [
-              Icon(Icons.price_change_outlined, size: 32, color: subText),
-              const SizedBox(height: 8),
-              Text(
-                'No prices yet',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: subText,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Tap Add to set a supplier price',
-                style: theme.textTheme.bodySmall?.copyWith(color: subText),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor),
-        ),
-        child: ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: prices.length,
-          separatorBuilder: (_, __) =>
-              Divider(height: 1, color: borderColor, indent: 16, endIndent: 16),
-          itemBuilder: (_, i) {
-            final price = prices[i];
-            final isBusy = state.loadingIds.contains(price.priceId);
-
-            return ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 6,
-              ),
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.inventory_2_outlined,
-                  size: 20,
-                  color: colors.primary,
-                ),
-              ),
-              title: Text(
-                price.productName,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              subtitle: price.sku != null
-                  ? Text(
-                      price.sku!,
-                      style: TextStyle(color: subText, fontSize: 12),
-                    )
-                  : price.note != null
-                  ? Text(
-                      price.note!,
-                      style: TextStyle(color: subText, fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    )
-                  : null,
-              trailing: isBusy
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(
-                      '\$${price.unitPrice.toStringAsFixed(2)}',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colors.primary,
-                      ),
-                    ),
-            );
-          },
         ),
       ),
     );

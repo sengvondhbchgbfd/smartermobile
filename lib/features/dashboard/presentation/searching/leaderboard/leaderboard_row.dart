@@ -20,25 +20,25 @@ class LeaderboardRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
     final rankColor = rank == 1
-        ? Colors.orange
+        ? Pallets
+              .warning // gold/amber
         : rank == 2
-        ? Colors.red
+        ? Pallets
+              .error // red
         : rank == 3
-        ? Pallets.gradient1
+        ? Pallets
+              .gradient1 // purple
         : textSecondary;
+
     final badge = rank == 1
         ? 'NEW'
         : rank == 2
         ? 'HOT'
         : null;
-    final badgeColor = rank == 1 ? Colors.orange : Colors.red;
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
+
+    final badgeColor = rank == 1 ? Pallets.warning : Pallets.error;
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -56,23 +56,13 @@ class LeaderboardRow extends StatelessWidget {
                 ),
               ),
             ),
-            ////////////////////////////////////////////////////////////////////
-            ///
-            ////////////////////////////////////////////////////////////////////
             const SizedBox(width: 12),
-
             _iconBox(item.icon, item.iconColor),
             const SizedBox(width: 10),
-            ////////////////////////////////////////////////////////////////////
-            ///
-            ////////////////////////////////////////////////////////////////////
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //////////////////////////////////////////////////////////////
-                  ///
-                  //////////////////////////////////////////////////////////////
                   Text(
                     item.title,
                     style: TextStyle(
@@ -81,23 +71,14 @@ class LeaderboardRow extends StatelessWidget {
                       color: textPrimary,
                     ),
                   ),
-                  //////////////////////////////////////////////////////////////
-                  ///
-                  //////////////////////////////////////////////////////////////
                   Text(
                     item.subtitle,
                     style: TextStyle(fontSize: 11, color: textSecondary),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  //////////////////////////////////////////////////////////////
-                  ///
-                  //////////////////////////////////////////////////////////////
                 ],
               ),
             ),
-            ////////////////////////////////////////////////////////////////////
-            ///
-            ////////////////////////////////////////////////////////////////////
             if (badge != null)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -114,9 +95,6 @@ class LeaderboardRow extends StatelessWidget {
                   ),
                 ),
               ),
-            ////////////////////////////////////////////////////////////////////
-            ///
-            ////////////////////////////////////////////////////////////////////
           ],
         ),
       ),

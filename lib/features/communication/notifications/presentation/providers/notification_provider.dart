@@ -400,10 +400,32 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
       ),
     );
   }
+  //////////////////////////////////////////////////////////////////////////
+  ///
+  /////////////////////////////////////////////////////////////////////////
+
+  void updateReferenceStatus({
+    required int notificationId,
+    required String referenceStatus,
+  }) {
+    final current = state.value;
+    if (current == null) return;
+    final updated = current.notifications.map((n) {
+      if (n.notificationId == notificationId) {
+        return n.copyWith(referenceStatus: referenceStatus, isRead: true);
+      }
+      return n;
+    }).toList();
+
+    state = AsyncData(current.copyWith(notifications: updated));
+  }
 }
 //////////////////////////////////////////////////////////////////////////////
 // ── Provider ───────────────────────────────────────────────────────────────
 //////////////////////////////////////////////////////////////////////////////
+///
+///
+///
 
 final notificationNotifierProvider =
     AsyncNotifierProvider<NotificationNotifier, NotificationState>(

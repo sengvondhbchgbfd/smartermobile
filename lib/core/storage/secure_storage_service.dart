@@ -66,13 +66,16 @@ class SecureStorageService {
   // ─────────────────────────────
   //////////////////////////////////////////////////////////
   ///
-  //////////////////////////////////////////////////////////
+  ////////////////////////////////
 
   Future<void> saveUserInfo(UserInfo user) async {
     await Future.wait([
       _write(ApiConstants.userIdKey, user.userId.toString()),
       _write(ApiConstants.companyIdKey, user.companyId.toString()),
-      _write(ApiConstants.staffIdKey, user.staffId.toString()),
+      _write(
+        ApiConstants.staffIdKey,
+        user.staffId?.toString() ?? '',
+      ), // ← must have `?.` now that staffId is int?
       _write(ApiConstants.usernameKey, user.username),
       _write(ApiConstants.fullNameKey, user.fullName),
       _write(ApiConstants.roleKey, user.role),
@@ -85,6 +88,7 @@ class SecureStorageService {
   ///////////////////////////////
   ///
   ////////////////////////////////
+
   Future<UserInfo?> getUserInfo() async {
     final results = await Future.wait([
       _read(ApiConstants.userIdKey),
@@ -97,20 +101,22 @@ class SecureStorageService {
       _read(ApiConstants.isManagerKey),
       _read(ApiConstants.departmentIdKey),
     ]);
-
     if (results[0] == null) return null;
-
     return UserInfo(
       userId: int.parse(results[0]!),
       companyId: int.parse(results[1]!),
-      staffId: int.parse(results[2]!),
+      staffId: (results[2] != null && results[2]!.isNotEmpty)
+          ? int.parse(results[2]!)
+          : null,
       username: results[3] ?? '',
       fullName: results[4] ?? '',
       role: results[5] ?? '',
       status: results[6] ?? '',
       isManager: results[7] == 'true',
       permissions: [],
-      departmentId: results[8] != null ? int.parse(results[8]!) : null,
+      departmentId: (results[8] != null && results[8]!.isNotEmpty)
+          ? int.parse(results[8]!)
+          : null,
     );
   }
 
@@ -125,7 +131,6 @@ class SecureStorageService {
     final token = await getAccessToken();
     return token != null;
   }
-
   // ─────────────────────────────
   // CLEAR ALL
   // ─────────────────────────────
@@ -136,7 +141,6 @@ class SecureStorageService {
   //     _delete(ApiConstants.userIdKey),
   //     _delete(ApiConstants.companyIdKey),
   //   ]);
-
   //////////////////////////////////////////////////////////
   ///
   /////////////////////////////////////////////////////////

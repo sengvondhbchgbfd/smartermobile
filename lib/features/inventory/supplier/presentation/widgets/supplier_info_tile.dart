@@ -1,53 +1,62 @@
-
-
 import 'package:flutter/material.dart';
-import 'package:frontendmobile/core/themes/supplier_color.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 class InfoTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String? value;
   final int maxLines;
-  final SupplierColors c;
-  const InfoTile({super.key, 
+  final Color textPrimary;
+  final Color textSecondary;
+
+  const InfoTile({
+    super.key,
     required this.icon,
     required this.label,
     required this.value,
-    required this.c,
+    required this.textPrimary,
+    required this.textSecondary,
     this.maxLines = 1,
   });
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final hasValue = value != null && value!.isNotEmpty;
-
+    final hasValue = value != null && value!.trim().isNotEmpty;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
-        crossAxisAlignment: maxLines > 1
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: c.textSecondary, size: 20),
-          const SizedBox(width: 16),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: Pallets.infoTint,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, size: 17, color: Pallets.blurple),
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: c.textTertiary,
-                  ),
+                  style: TextStyle(fontSize: 11.5, color: textSecondary),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
                 Text(
                   hasValue ? value! : 'Not provided',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: hasValue ? c.textPrimary : c.textTertiary,
-                  ),
                   maxLines: maxLines,
                   overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w500,
+                    color: hasValue ? textPrimary : textSecondary,
+                    fontStyle: hasValue ? FontStyle.normal : FontStyle.italic,
+                  ),
                 ),
               ],
             ),

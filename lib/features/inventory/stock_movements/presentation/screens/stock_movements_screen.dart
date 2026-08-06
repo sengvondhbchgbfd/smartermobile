@@ -9,9 +9,10 @@ import '../providers/stock_movement_provider.dart';
 import '../widgets/stock_movement_widgets.dart';
 
 class StockMovementsScreen extends ConsumerStatefulWidget {
+  final int? productId;
   final int? variantId;
 
-  const StockMovementsScreen({this.variantId, super.key});
+  const StockMovementsScreen({this.productId, this.variantId, super.key});
 
   @override
   ConsumerState<StockMovementsScreen> createState() =>
@@ -44,7 +45,16 @@ class _StockMovementsScreenState extends ConsumerState<StockMovementsScreen> {
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (_) => StockMovementFormDialog(variants: allVariants),
+      builder: (_) => StockMovementFormDialog(
+        variants: allVariants,
+        // Opened from a specific variant's own screen — productId narrows
+        // the match to that exact product+variant pair (rather than only
+        // matching variantId across every product), and locks the dialog
+        // instead of asking the user to pick Category -> Product -> Variant
+        // again.
+        preselectedProductId: widget.productId,
+        preselectedVariantId: widget.variantId,
+      ),
     );
     if (result == null || !mounted) return;
 

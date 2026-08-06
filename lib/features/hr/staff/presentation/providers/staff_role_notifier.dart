@@ -1,3 +1,4 @@
+import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_role_entity.dart';
 import 'package:frontendmobile/features/hr/staff/domain/usecases/staff_role_usecases.dart';
@@ -27,7 +28,6 @@ class StaffRoleNotifier extends _$StaffRoleNotifier {
     _create = CreateStaffRoleUseCase(repository);
     _updateRole = UpdateStaffRoleUseCase(repository);
     _delete = DeleteStaffRoleUseCase(repository);
-
     // ── fetch once, automatically, no microtask needed ──
     return await _getAll();
   }
@@ -56,6 +56,7 @@ class StaffRoleNotifier extends _$StaffRoleNotifier {
     state = const AsyncValue.loading();
     await AsyncValue.guard(() => _updateRole(id, role));
     await fetchAll();
+    ref.invalidate(staffNotifierProvider);
   }
 
   Future<void> delete(int id) async {

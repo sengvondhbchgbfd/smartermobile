@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/config/routes/route_names.dart';
+import 'package:frontendmobile/config/routes/router_app_shell_controls/shell_scroll_controller.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
+import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/features/communication/notifications/presentation/providers/notification_provider.dart';
 import 'package:frontendmobile/features/company/presentation/providers/company_provider.dart';
 import 'package:frontendmobile/features/dashboard/presentation/searching/bar/search_bar_widgets.dart';
@@ -9,8 +11,11 @@ import 'package:frontendmobile/features/dashboard/presentation/widgets/header_wi
 import 'package:frontendmobile/features/dashboard/presentation/components/cart/profile_row_cart.dart';
 import 'package:frontendmobile/features/dashboard/presentation/components/state_section.dart';
 import 'package:frontendmobile/features/profile/presentation/providers/profile_providers.dart';
-import 'package:frontendmobile/config/routes/app_shell.dart';
 import 'package:go_router/go_router.dart';
+
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -18,52 +23,77 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   bool _companyFetched = false;
   //////////////////////////////////////////////////////////////////////////////
   // ──Cache scroll controller here, not inside build() ──────────────
   //////////////////////////////////////////////////////////////////////////////
   ScrollController? _scrollController;
+  ////////////////////////////////////////
+  ///
+  ////////////////////////////////////////
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _scrollController ??= ShellScrollController.of(context);
   }
+
   //////////////////////////////////////////////////////////////////////////////
   ///  INITSTATE
   //////////////////////////////////////////////////////////////////////////////
-
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(notificationNotifierProvider.notifier).loadMyNotifications();
-      ref.listenManual(profileNotifierProvider, (_, next) {
-        next.whenData((profile) {
-          final companyId = profile.companyId;
-          if (companyId > 0 && !_companyFetched) {
-            _companyFetched = true;
-            ref.read(companyProvider.notifier).fetchCompany(companyId);
-          }
-        });
-      }, fireImmediately: true);
-    });
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+
+    ref.read(notificationNotifierProvider.notifier).loadMyNotifications();
+    ref.listenManual(profileNotifierProvider, (_, next) {
+      next.whenData((profile) {
+        final companyId = profile.companyId;
+
+        ////////////////////////
+        ///
+        /////////////////////////
+        if (companyId > 0 && !_companyFetched) {
+          _companyFetched = true;
+          ref.read(companyProvider.notifier).fetchCompany(companyId).then((_) {
+            final hasError =
+                ref.read(companyProvider).valueOrNull?.error != null;
+            if (hasError) _companyFetched = false;
+          });
+        }
+        ////////////////////////
+        ///
+        ///////////////////////
+      });
+    }, fireImmediately: true);
+
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
   }
 
   //////////////////////////////////////////////////////////////////////////////
   ///
   //////////////////////////////////////////////////////////////////////////////
-
   @override
   Widget build(BuildContext context) {
     ////////////////////////////////////////////////////////////////////////////
     ///
     ////////////////////////////////////////////////////////////////////////////
+
     final companyName = ref.watch(
       companyProvider.select(
         (s) => s.valueOrNull?.company?.companyName ?? 'Loading...',
       ),
     );
+
     ////////////////////////////////////////
     ///
     ////////////////////////////////////////
@@ -95,6 +125,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ////////////////////////////////////////////////////////////////////////////
     ///
     ////////////////////////////////////////////////////////////////////////////
+    final currentUser = ref.watch(currentUserProvider);
     return Scaffold(
       backgroundColor: Theme.of(context).brightness == Brightness.dark
           ? Pallets.backgroundDark
@@ -117,16 +148,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               companyName: companyName,
               logoUrl: logoUrl,
               //////////////////////////////////////////////////////////////////
-              // ── microtask lets the tap ripple finish before push ────
+              //
               //////////////////////////////////////////////////////////////////
-              onCompanyTap: () =>
-                  Future.microtask(() => context.push('/companies/$companyId')),
-              onNotificationTap: () => Future.microtask(
-                () => context.push(RouteNames.notifications),
-              ),
+              onCompanyTap: () {
+                context.push('/companies/$companyId');
+              },
+              onNotificationTap: () {
+                context.push(RouteNames.notifications);
+              },
               unreadCount: unreadCount,
             ),
-
             ////////////////////////////////////////////////////////////////////
             ///  SEARCHING
             ////////////////////////////////////////////////////////////////////
@@ -141,12 +172,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ///STATESECTION
             ////////////////////////////////////////////////////////////////////
             const SizedBox(height: 20),
-            StatsSection(screenWidth: screenWidth),
-            ////////////////////////////////////////////////////////////////////
-            /// MODUKESECTION
-            ////////////////////////////////////////////////////////////////////
-            const SizedBox(height: 24),
-            ModulesSection(screenWidth: screenWidth),
+            ModulesSection(screenWidth: screenWidth, currentUser: currentUser),
             ////////////////////////////////////////////////////////////////////
             /// ATTENDANCESECTION
             ////////////////////////////////////////////////////////////////////

@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/hr/leave/domain/entities/leave_entity.dart';
 import 'package:frontendmobile/features/hr/leave/presentation/providers/notifiers/leave_notifier.dart';
-import '../widgets/leave_status_badge.dart';
-import '../widgets/leave_summary_card.dart';
+import 'package:frontendmobile/features/hr/leave/presentation/screens/leave_detail_screen.dart';
+import 'package:frontendmobile/features/hr/leave/presentation/widgets/leave_action_row.dart';
+import 'package:frontendmobile/features/hr/leave/presentation/widgets/leave_card.dart';
+import 'package:frontendmobile/features/hr/leave/presentation/widgets/leave_empty.dart'
+    show EmptyState;
+import 'package:frontendmobile/features/hr/leave/presentation/widgets/leave_filter_chip.dart';
+import 'package:frontendmobile/features/hr/leave/presentation/widgets/leave_summary_card_import.dart';
+import 'package:intl/intl.dart';
 
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
 class ManagerDashboardScreen extends ConsumerStatefulWidget {
   const ManagerDashboardScreen({super.key});
 
@@ -13,9 +22,17 @@ class ManagerDashboardScreen extends ConsumerStatefulWidget {
       _ManagerDashboardScreenState();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
 class _ManagerDashboardScreenState
     extends ConsumerState<ManagerDashboardScreen> {
   bool _showOnlyPending = true;
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
 
   @override
   void initState() {
@@ -34,133 +51,159 @@ class _ManagerDashboardScreenState
     }
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+
+  String _fmt(DateTime d) => DateFormat('dd MMM yyyy').format(d);
+  int _days(DateTime start, DateTime end) => end.difference(start).inDays + 1;
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+
   @override
   Widget build(BuildContext context) {
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? const Color(0xFF0A0A0F) : const Color(0xFFF4F4F8);
+    final card = isDark ? const Color(0xFF141418) : Colors.white;
+    final border = isDark ? const Color(0xFF232329) : const Color(0xFFE8E8EF);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF0F0F14);
+    final textSecondary = isDark
+        ? const Color(0xFF8B8B9A)
+        : const Color(0xFF6B6B7A);
+    const accent = Color(0xFF6366F1);
     final asyncState = ref.watch(managerLeaveProvider);
     final notifier = ref.read(managerLeaveProvider.notifier);
 
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    ////////////////////////////////////////////////////////////////////////////
+
     return Scaffold(
+      backgroundColor: bg,
       body: asyncState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
-        data: (state) => Column(
-          children: [
-            if (state.summary != null && state.summary!.isNotEmpty)
-              LeaveSummaryCard(summary: state.summary!),
+        loading: () => Center(child: CircularProgressIndicator(color: accent)),
+        error: (e, _) => Center(
+          child: Text('Error: $e', style: TextStyle(color: textSecondary)),
+        ),
+        data: (state) => RefreshIndicator(
+          color: accent,
+          backgroundColor: card,
+          onRefresh: () async => _loadLeaves(),
+          child: CustomScrollView(
+            slivers: [
+              //////////////////////////////////////////////////////////////////
+              // ── Summary ────────────────────────────────────────────────
+              //////////////////////////////////////////////////////////////////
+              if (state.summary != null && state.summary!.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: LeaveSummaryCardImport(summary: state.summary!),
+                ),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _showOnlyPending
-                        ? 'Pending Requests'
-                        : 'All Requests History',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+              //////////////////////////////////////////////////////////////////
+              // ── Filter row ─────────────────────────────────────────────
+              //////////////////////////////////////////////////////////////////
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: Row(
+                    children: [
+                      Text(
+                        _showOnlyPending ? 'Pending Requests' : 'All Requests',
+                        style: TextStyle(
+                          color: textPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const Spacer(),
+                      FilterChips(
+                        label: 'Pending only',
+                        selected: _showOnlyPending,
+                        accent: accent,
+                        textSecondary: textSecondary,
+                        border: border,
+                        card: card,
+                        onTap: () {
+                          setState(() => _showOnlyPending = !_showOnlyPending);
+                          _loadLeaves();
+                        },
+                      ),
+                    ],
                   ),
-                  FilterChip(
-                    label: const Text('Only Pending'),
-                    selected: _showOnlyPending,
-                    onSelected: (val) {
-                      setState(() => _showOnlyPending = val);
-                      _loadLeaves();
-                    },
-                  ),
-                ],
+                ),
               ),
-            ),
 
-            // 2. Main List
-            Expanded(
-              child: state.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : state.leaves.isEmpty
-                  ? const Center(child: Text('No requests match filters.'))
-                  : ListView.builder(
-                      itemCount: state.leaves.length,
-                      itemBuilder: (context, index) {
-                        final leave = state.leaves[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
+              //////////////////////////////////////////////////////////////////
+              // ── List ───────────────────────────────────────────────────
+              //////////////////////////////////////////////////////////////////
+              if (state.isLoading)
+                SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(color: accent),
+                  ),
+                )
+              else if (state.leaves.isEmpty)
+                SliverFillRemaining(
+                  child: EmptyState(
+                    textSecondary: textSecondary,
+                    accent: accent,
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final leave = state.leaves[index];
+                      final days = _days(leave.startDate, leave.endDate);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: LeaveCard(
+                          leave: leave,
+                          days: days,
+                          card: card,
+                          border: border,
+                          textPrimary: textPrimary,
+                          textSecondary: textSecondary,
+                          accent: accent,
+                          showCountdown: true,
+                          fmtDate: _fmt,
+                          onTap: () => Navigator.push(
+                            context,
+                            LeaveDetailScreen.fromEntity(leave),
                           ),
-                          child: ExpansionTile(
-                            title: Text(
-                              '${leave.displayName} · ${leave.leaveType.name.toUpperCase()}',
-                            ),
-                            subtitle: Text(
-                              '${_fmt(leave.startDate)} to ${_fmt(leave.endDate)}',
-                            ),
-                            leading: LeaveStatusBadge(status: leave.status),
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Reason: ${leave.reason ?? "No reason specified"}',
-                                    ),
-                                    const SizedBox(height: 12),
-                                    if (leave.status == LeaveStatus.pending)
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                notifier.rejectLeave(
-                                                  leave.leaveId,
-                                                  reason: 'Rejected by Manager',
-                                                ),
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: Colors.red,
-                                            ),
-                                            child: const Text('Reject'),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          ElevatedButton(
-                                            onPressed: () => notifier
-                                                .approveLeave(leave.leaveId),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.green,
-                                            ),
-                                            child: const Text('Approve'),
-                                          ),
-                                        ],
-                                      )
-                                    else
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: IconButton(
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.grey,
-                                          ),
-                                          onPressed: () => notifier.deleteLeave(
-                                            leave.leaveId,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
+                          trailing: leave.status == LeaveStatus.pending
+                              ? ActionRow(
+                                  onApprove: () =>
+                                      notifier.approveLeave(leave.leaveId),
+                                  onReject: () => notifier.rejectLeave(
+                                    leave.leaveId,
+                                    reason: 'Rejected by Manager',
+                                  ),
+                                )
+                              : IconButton(
+                                  icon: Icon(
+                                    Icons.delete_outline,
+                                    color: textSecondary,
+                                    size: 20,
+                                  ),
+                                  onPressed: () =>
+                                      notifier.deleteLeave(leave.leaveId),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
+                        ),
+                      );
+                    }, childCount: state.leaves.length),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
-
-  String _fmt(DateTime d) => d.toLocal().toString().split(' ')[0];
 }

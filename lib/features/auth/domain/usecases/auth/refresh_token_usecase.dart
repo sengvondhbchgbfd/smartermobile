@@ -6,9 +6,7 @@ class RefreshTokenUseCase {
 
   RefreshTokenUseCase(this.repository);
 
-  Future<UserModel> call(
-    String refreshToken,
-  ) async {
+  Future<UserModel> call(String refreshToken) async {
     return await repository.refreshToken(refreshToken);
   }
 }

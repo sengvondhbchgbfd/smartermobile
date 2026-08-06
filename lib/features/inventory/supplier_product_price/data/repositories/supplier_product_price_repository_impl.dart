@@ -34,10 +34,17 @@ class SupplierProductPriceRepositoryImpl
   @override
   Future<SupplierProductPriceEntity> update({
     required int priceId,
+    int? supplierId,
+    int? variantId,
     double? unitPrice,
     String? note,
-  }) => _remote.update(priceId: priceId, unitPrice: unitPrice, note: note);
-
+  }) => _remote.update(
+    priceId: priceId,
+    supplierId: supplierId,
+    variantId: variantId,
+    unitPrice: unitPrice,
+    note: note,
+  );
   @override
   Future<void> delete(int priceId) => _remote.delete(priceId);
 }

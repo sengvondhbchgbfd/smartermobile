@@ -47,6 +47,8 @@ class CreateNotificationUseCase {
       );
 }
 
+
+
 class MarkOneReadUseCase {
   final NotificationRepository _repo;
   MarkOneReadUseCase(this._repo);

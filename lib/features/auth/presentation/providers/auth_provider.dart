@@ -18,6 +18,8 @@ import 'package:frontendmobile/features/auth/domain/usecases/user/get_user_useca
 import 'package:frontendmobile/features/auth/domain/usecases/user/get_users_usecase.dart';
 import 'package:frontendmobile/features/auth/domain/usecases/user/register_user_usecase.dart';
 import 'package:frontendmobile/features/auth/domain/usecases/user/update_user_usecase.dart';
+import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
+import 'package:frontendmobile/features/inventory/product/presentation/providers/product_provider.dart';
 import 'package:frontendmobile/shared/providers/core_providers.dart'; // ← import core
 
 // ── Auth providers ───────────────────────────────────────────
@@ -33,12 +35,6 @@ final authRepositoryProvider = FutureProvider<AuthRepository>((ref) async {
 });
 
 // ── UseCase providers ────────────────────────────────────────
-// final validateTokenUseCaseProvider = FutureProvider<ValidateTokenUseCase>((
-//   ref,
-// ) async {
-//   final repo = await ref.watch(authRepositoryProvider.future);
-//   return ValidateTokenUseCase(repo);
-// });
 
 final loginUseCaseProvider = FutureProvider<LoginUseCase>((ref) async {
   return LoginUseCase(await ref.watch(authRepositoryProvider.future));
@@ -306,53 +302,26 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
   final SecureStorageService _storage;
   AuthNotifier(this._ref, this._storage) : super(const AsyncData(null));
 
-  ///////////////////////////////////////////////////////////////////
-  //
-  //////////////////////////////////////////////////////////////////
-
-  // Future<void> login(String username, String password) async {
-  //   state = const AsyncLoading();
-  //   try {
-  //     final loginUseCase = await _ref.read(loginUseCaseProvider.future);
-  //     final user = await loginUseCase(username, password);
-  //     await _storage.saveTokens(
-  //       accessToken: user.accessToken,
-  //       refreshToken: user.refreshToken,
-  //     );
-  //     await _storage.saveUserInfo(
-  //       userId: user.user.userId.toString(),
-  //       companyId: user.user.companyId.toString(),
-  //     );
-  //     state = const AsyncData(null);
-  //   } on DioException catch (e) {
-  //     state = AsyncError(ApiErrorHandler.getMessage(e), StackTrace.current);
-  //   } catch (e) {
-  //     state = AsyncError(e.toString(), StackTrace.current);
-  //   }
-  // }
   // ============================================================
   // AUTH NOTIFIER LOGIN
   // ============================================================
 
   Future<void> login(String username, String password) async {
     state = const AsyncLoading();
-
     try {
       final loginUseCase = await _ref.read(loginUseCaseProvider.future);
 
       final result = await loginUseCase(username, password);
 
-      // SAVE TOKEN
       await _storage.saveTokens(
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
       );
 
-      // SAVE USER
       await _storage.saveUserInfo(result.user);
 
-      // SET CURRENT USER
       _ref.read(currentUserProvider.notifier).state = result.user;
+      _invalidateCompanyScopedProviders();
 
       state = const AsyncData(null);
     } catch (e, s) {
@@ -372,8 +341,22 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     } catch (_) {
     } finally {
       await _storage.clearAuth();
+      _ref.read(currentUserProvider.notifier).state = null;
+      _invalidateCompanyScopedProviders();
+
       state = const AsyncData(null);
     }
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////
+  void _invalidateCompanyScopedProviders() {
+    _ref.invalidate(staffNotifierProvider);
+    _ref.invalidate(productNotifierProvider);
+    _ref.invalidate(userProvider);
+    _ref.invalidate(staffNotifierProvider);
+    _ref.invalidate(productNotifierProvider);
   }
 
   /////////////////////////////////////////////////////////////////

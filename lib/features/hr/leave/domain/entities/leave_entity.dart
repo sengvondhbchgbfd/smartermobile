@@ -14,6 +14,7 @@ class LeaveEntity extends Equatable {
   final String? reason;
   final LeaveStatus status;
   final int? approvedBy;
+  final String? approvedByName;
   final DateTime createdAt;
   final String? staffName;
   final String? staffAvatarUrl;
@@ -28,6 +29,7 @@ class LeaveEntity extends Equatable {
     this.reason,
     required this.status,
     this.approvedBy,
+    this.approvedByName,
     required this.createdAt,
     this.staffName,
     this.staffAvatarUrl,
@@ -46,6 +48,7 @@ class LeaveEntity extends Equatable {
     reason,
     status,
     approvedBy,
+    approvedByName,
     createdAt,
     staffName,
     staffAvatarUrl,

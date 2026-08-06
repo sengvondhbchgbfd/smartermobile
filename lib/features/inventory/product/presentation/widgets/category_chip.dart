@@ -1,19 +1,19 @@
-
 import 'package:flutter/material.dart';
 
 class CategoryChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final ColorScheme colors;
+  final Color selectedColor;
   final Color border;
   final Color sub;
 
-  const CategoryChip({super.key, 
+  const CategoryChip({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,
-    required this.colors,
+    required this.selectedColor,
     required this.border,
     required this.sub,
   });
@@ -27,11 +27,11 @@ class CategoryChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
         decoration: BoxDecoration(
           color: selected
-              ? colors.primary.withOpacity(0.15)
+              ? selectedColor.withOpacity(0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? colors.primary : border,
+            color: selected ? selectedColor : border,
             width: 0.5,
           ),
         ),
@@ -40,7 +40,7 @@ class CategoryChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: selected ? colors.primary : sub,
+            color: selected ? selectedColor : sub,
           ),
         ),
       ),

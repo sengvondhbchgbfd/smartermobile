@@ -10,6 +10,7 @@ class LeaveModel {
   final String? reason;
   final String status;
   final int? approvedBy;
+  final String? approvedByName;
   final String createdAt;
   final String? staffName; // ✅ from nested staff object
   final String? staffAvatarUrl; // ✅ from nested staff object
@@ -24,6 +25,7 @@ class LeaveModel {
     this.reason,
     required this.status,
     this.approvedBy,
+    this.approvedByName,
     required this.createdAt,
     this.staffName,
     this.staffAvatarUrl,
@@ -41,6 +43,7 @@ class LeaveModel {
       reason: json['reason'] as String?,
       status: json['status'] as String,
       approvedBy: json['approved_by'] as int?,
+      approvedByName: json['approved_by_name'] as String?,
       createdAt: json['created_at'] as String,
       staffName: staff?['name'] as String?,
       staffAvatarUrl: staff?['avatar_url'] as String?,
@@ -57,6 +60,7 @@ class LeaveModel {
     reason: reason,
     status: _mapLeaveStatus(status),
     approvedBy: approvedBy == 0 ? null : approvedBy,
+    approvedByName: approvedByName,
     createdAt: DateTime.parse(createdAt),
     staffName: staffName,
     staffAvatarUrl: staffAvatarUrl,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import '../../domain/entities/category_entity.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -10,7 +11,7 @@ class CategoryCard extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback? onTap;
   final VoidCallback? onOptions;
-  final bool isLoading; // ← new
+  final bool isLoading;
 
   const CategoryCard({
     required this.category,
@@ -27,7 +28,12 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
 
     // ── Loading overlay state ──────────────────────────────────────────────
     if (isLoading) {
@@ -39,9 +45,9 @@ class CategoryCard extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: Shimmer.fromColors(
-          baseColor: isDark ? const Color(0xFF3A3A3C) : Colors.grey.shade300,
+          baseColor: isDark ? Pallets.borderDark : Colors.grey.shade300,
           highlightColor: isDark
-              ? const Color(0xFF4A4A4C)
+              ? Pallets.surfaceElevated
               : Colors.grey.shade100,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -119,9 +125,10 @@ class CategoryCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       category.categoryName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
+                        color: textPrimary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -143,7 +150,7 @@ class CategoryCard extends StatelessWidget {
   }
 
   Widget _placeholder(bool isDark, Color subText) => Container(
-    color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFEFEFED),
+    color: isDark ? Pallets.surfaceCard : Pallets.surfaceLight,
     child: Icon(Icons.category_outlined, size: 36, color: subText),
   );
 }

@@ -23,8 +23,6 @@ class StockMovementModel extends StockMovementEntity {
 
         openingBalance:  int.tryParse(j['opening_balance'].toString()) ?? 0, 
         balanceQuantity: int.tryParse(j['balance_quantity'].toString()) ?? 0,
-
-
         movementType: j['movement_type'] as String?,
         // ✅ Bug 5 fix: removed note
         date: DateTime.parse(j['date'] as String),

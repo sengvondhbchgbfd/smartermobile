@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
-import 'package:frontendmobile/core/utils/attendance_export_helper.dart';
-import 'package:frontendmobile/core/utils/attendance_filter_helpers.dart';
+import 'package:frontendmobile/core/utils/attendance/attendance_export_helper.dart';
+import 'package:frontendmobile/core/utils/attendance/attendance_filter_helpers.dart';
 import 'package:frontendmobile/core/utils/date_formatter.dart';
 import 'package:frontendmobile/core/utils/staff_profile_helper.dart';
 import 'package:frontendmobile/features/communication/notifications/presentation/providers/notification_provider.dart';
@@ -471,19 +471,23 @@ class _ManagerAttendanceScreenState
   );
 
   // ── Build ───────────────────────────────────────────────────────────────────
+  //
+  // STYLE: minimal flat — no box shadows, no boxed card borders. Sections
+  // are separated by generous whitespace and (where truly needed) a single
+  // hairline divider instead of a bordered container. Accent color is used
+  // sparingly, only where it carries meaning (active filter, loading, links).
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
-    final surfaceColor = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
-    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
     final textPrimary = isDark
         ? Pallets.textPrimaryDark
         : Pallets.textPrimaryLight;
     final textSecondary = isDark
         ? Pallets.textSecondaryDark
         : Pallets.textSecondaryLight;
+    final dividerColor = isDark ? Pallets.dividerDark : Pallets.dividerLight;
 
     final asyncState = ref.watch(managerAttendanceProvider);
     final isScanLoading =
@@ -494,237 +498,192 @@ class _ManagerAttendanceScreenState
       body: SafeArea(
         child: asyncState.when(
           loading: () => Center(
-            child: CircularProgressIndicator(color: Pallets.gradient2),
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Pallets.gradient2,
+            ),
           ),
           error: (e, _) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline, color: Pallets.error, size: 48),
-                const SizedBox(height: 12),
-                Text(
-                  'Something went wrong',
-                  style: TextStyle(
-                    color: textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: Pallets.error,
+                    size: 40,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$e',
-                  style: TextStyle(color: textSecondary, fontSize: 13),
-                ),
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: _loadInitialData,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Pallets.gradient2,
+                  const SizedBox(height: 16),
+                  Text(
+                    'Something went wrong',
+                    style: TextStyle(
+                      color: textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Text(
+                    '$e',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: textSecondary, fontSize: 13),
+                  ),
+                  const SizedBox(height: 20),
+                  TextButton.icon(
+                    onPressed: _loadInitialData,
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: const Text('Retry'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Pallets.gradient2,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           data: (state) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Stats card ────────────────────────────────────────
-              if (state.todaySummary.isNotEmpty)
+              // ── Today's stats ─────────────────────────────────────
+              if (state.todaySummary.isNotEmpty) ...[
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: surfaceColor,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: borderColor),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: AttendanceStatsRow(stats: state.todaySummary),
-                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: AttendanceStatsRow(stats: state.todaySummary),
                 ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: Divider(height: 1, thickness: 1, color: dividerColor),
+                ),
+              ],
 
-              const SizedBox(height: 12),
-
-              // ── Month header card ─────────────────────────────────
+              // ── Month header ────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: borderColor),
-                  ),
-                  child: AttendanceMonthHeader.manager(
-                    month: _month,
-                    year: _year,
-                    onPrevious: () => _changeMonth(-1),
-                    onNext: () => _changeMonth(1),
-                    filterLabel: _filterLabel,
-                    hasFilter: _hasFilter,
-                    showSearch: _showSearch,
-                    onPickDate: _pickDate,
-                    onPickDateRange: _pickDateRange,
-                    onToggleSearch: () =>
-                        setState(() => _showSearch = !_showSearch),
-                    onClearFilter: _clearFilter,
-                  ),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: AttendanceMonthHeader.manager(
+                  month: _month,
+                  year: _year,
+                  onPrevious: () => _changeMonth(-1),
+                  onNext: () => _changeMonth(1),
+                  filterLabel: _filterLabel,
+                  hasFilter: _hasFilter,
+                  showSearch: _showSearch,
+                  onPickDate: _pickDate,
+                  onPickDateRange: _pickDateRange,
+                  onToggleSearch: () =>
+                      setState(() => _showSearch = !_showSearch),
+                  onClearFilter: _clearFilter,
                 ),
               ),
 
               // ── Search field ──────────────────────────────────────
               if (_showSearch)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: surfaceColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: borderColor),
-                    ),
-                    child: StaffSearchField(
-                      controller: _searchController,
-                      onSubmit: _fetchByStaff,
-                      onClear: () {
-                        _searchController.clear();
-                        setState(() {
-                          _filterStaffId = null;
-                          _showSearch = false;
-                        });
-                        ref
-                            .read(managerAttendanceProvider.notifier)
-                            .fetchAllAttendance();
-                      },
-                    ),
-                  ),
-                ),
-
-              const SizedBox(height: 10),
-
-              // ── Toolbar card ──────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: borderColor),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ManagerToolbar(
-                    isScanLoading: isScanLoading,
-                    onShowQr: _showOfficeQrDialog,
-                    onRefreshQr: () async {
-                      await ref
-                          .read(scanAttendanceProvider.notifier)
-                          .fetchOfficeQr();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Office QR refreshed.'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                  child: StaffSearchField(
+                    controller: _searchController,
+                    onSubmit: _fetchByStaff,
+                    onClear: () {
+                      _searchController.clear();
+                      setState(() {
+                        _filterStaffId = null;
+                        _showSearch = false;
+                      });
+                      ref
+                          .read(managerAttendanceProvider.notifier)
+                          .fetchAllAttendance();
                     },
-                    onExport: _openExport,
-                    onRemind: _openRemind,
-                    onSettings: _openSettings,
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 10),
-
-              // ── Active filter chip ────────────────────────────────
+              // ── Active filter (plain text link, not a chip) ───────
               if (_hasFilter)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  child: GestureDetector(
+                    onTap: _clearFilter,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.filter_alt_outlined,
+                          size: 14,
+                          color: Pallets.gradient2,
                         ),
-                        decoration: BoxDecoration(
-                          color: Pallets.gradient2.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Pallets.gradient2.withOpacity(0.4),
+                        const SizedBox(width: 6),
+                        Text(
+                          _filterLabel,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: Pallets.gradient2,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.filter_alt_outlined,
-                              size: 14,
-                              color: Pallets.gradient2,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _filterLabel,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Pallets.gradient2,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            GestureDetector(
-                              onTap: _clearFilter,
-                              child: Icon(
-                                Icons.close,
-                                size: 14,
-                                color: Pallets.gradient2,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.close_rounded,
+                          size: 14,
+                          color: Pallets.gradient2.withOpacity(0.7),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              // ── Records list ──────────────────────────────────────
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: RecordsList(
-                      isLoading: state.isLoading,
-                      records: state.records,
-                      selectedId: state.selected?.attendanceId,
-                      onTap: _onRecordTap,
-                      onLongPress: _onRecordLongPress,
-                      onRefresh: () => ref
-                          .read(managerAttendanceProvider.notifier)
-                          .fetchAllAttendance(filterDate: _filterDate),
+                      ],
                     ),
                   ),
                 ),
+
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Divider(height: 1, thickness: 1, color: dividerColor),
               ),
 
-              const SizedBox(height: 8),
+              // ── Toolbar (flat row, no boxed background) ───────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                child: ManagerToolbar(
+                  isScanLoading: isScanLoading,
+                  onShowQr: _showOfficeQrDialog,
+                  onRefreshQr: () async {
+                    await ref
+                        .read(scanAttendanceProvider.notifier)
+                        .fetchOfficeQr();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Office QR refreshed.'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                  onExport: _openExport,
+                  onRemind: _openRemind,
+                  onSettings: _openSettings,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Divider(height: 1, thickness: 1, color: dividerColor),
+              ),
+
+              // ── Records list ──────────────────────────────────────
+              // No manual bottom padding needed here: this screen's own
+              // SafeArea (in build()) already consumes the nav-bar space
+              // that AppShell reports via MediaQuery.padding.bottom.
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: RecordsList(
+                    isLoading: state.isLoading,
+                    records: state.records,
+                    selectedId: state.selected?.attendanceId,
+                    onTap: _onRecordTap,
+                    onLongPress: _onRecordLongPress,
+                    onRefresh: () => ref
+                        .read(managerAttendanceProvider.notifier)
+                        .fetchAllAttendance(filterDate: _filterDate),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

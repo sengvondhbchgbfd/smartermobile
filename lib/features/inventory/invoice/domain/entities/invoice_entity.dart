@@ -36,8 +36,16 @@ class InvoiceItemEntity {
   final int itemId;
   final int invoiceId;
   final int companyId;
-  final int productId;
-  final int variantId;
+  final int? productId;
+  final int? variantId;
+  final String? itemName;
+  final String? size;
+  final int? pages;
+  final String? printSide;
+  final String? colorSpec;
+  final String? paperCover;
+  final String? paperInside;
+  final String? finishing;
   final int quantity;
   final double unitPrice;
   final double? totalPrice;
@@ -46,12 +54,21 @@ class InvoiceItemEntity {
     required this.itemId,
     required this.invoiceId,
     required this.companyId,
-    required this.productId,
-    required this.variantId,
+    this.productId,
+    this.variantId,
+    this.itemName,
+    this.size,
+    this.pages,
+    this.printSide,
+    this.colorSpec,
+    this.paperCover,
+    this.paperInside,
+    this.finishing,
     required this.quantity,
     required this.unitPrice,
     this.totalPrice,
   });
+  bool get isInventoryItem => productId != null && variantId != null;
 }
 
 // ── InvoiceAttachment ────────────────────────────────────────

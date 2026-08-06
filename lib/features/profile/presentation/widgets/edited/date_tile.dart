@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 class DateTile extends StatelessWidget {
   final DateTime? dob;
@@ -15,32 +16,38 @@ class DateTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fillColor = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF2B2D31),
+          color: fillColor,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF3F4147)),
+          border: Border.all(color: borderColor),
         ),
         child: Row(
           children: [
-            const Icon(Icons.cake_outlined, size: 18, color: Color(0xFF80848E)),
+            Icon(Icons.cake_outlined, size: 18, color: textSecondary),
             const SizedBox(width: 10),
             Text(
               _label,
               style: TextStyle(
                 fontSize: 14,
-                color: dob == null ? const Color(0xFF80848E) : Colors.white,
+                color: dob == null ? textSecondary : textPrimary,
               ),
             ),
             const Spacer(),
-            const Icon(
-              Icons.chevron_right_rounded,
-              size: 18,
-              color: Color(0xFF80848E),
-            ),
+            Icon(Icons.chevron_right_rounded, size: 18, color: textSecondary),
           ],
         ),
       ),

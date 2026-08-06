@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/features/auth/data/models/auth_user_model.dart';
 import 'package:frontendmobile/features/company/domain/usecases/register_company_usecase.dart';
 import 'package:frontendmobile/features/company/presentation/providers/company_provider.dart';
 import 'package:frontendmobile/features/dashboard/presentation/setup_wizard/providers/wizard_state.dart';
@@ -20,6 +21,9 @@ class WizardNotifier extends StateNotifier<WizardState> {
     required String email,
     required int maxUsers,
     required String timezone,
+    required String adminUsername,
+    required String adminPassword,
+    required String adminFullName,
     String planType = 'free',
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -36,6 +40,9 @@ class WizardNotifier extends StateNotifier<WizardState> {
           maxUsers: maxUsers,
           timezone: timezone,
           planType: planType,
+          adminUsername: adminUsername,
+          adminPassword: adminPassword,
+          adminFullName: adminFullName,
         ),
       );
       return result.fold(
@@ -43,7 +50,30 @@ class WizardNotifier extends StateNotifier<WizardState> {
           state = state.copyWith(isLoading: false, error: failure.message);
           return false;
         },
-        (response) {
+
+        (response) async {
+          final storage = _ref.read(secureStorageProvider);
+
+          await storage.saveTokens(
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+          );
+
+          await storage.saveUserInfo(
+            UserInfo(
+              userId: response.userId,
+              companyId: response.companyId,
+              username: response.username,
+              fullName: response.fullName,
+              role: response.role,
+              departmentId: null,
+              permissions: const ['*'],
+              staffId: null,
+              status: 'active',
+              isManager: false,
+            ),
+          );
+
           state = state.copyWith(
             isLoading: false,
             companyId: response.companyId,
@@ -69,6 +99,7 @@ class WizardNotifier extends StateNotifier<WizardState> {
   ///////////////////////////////////////////////////////////////
 
   Future<int> getCompanyId() async {
+    if (state.companyId != null) return state.companyId!;
     final storage = _ref.read(secureStorageProvider);
     final companyId = await storage.getCompanyId();
     if (companyId == null) {

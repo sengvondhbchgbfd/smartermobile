@@ -32,15 +32,19 @@ class RouteNames {
   // ── Company ──────────────────────────
   static const companies = "/companies";
   static const companyDetail = "/companies/:id";
-  static const companyEdit = "/companies/:id/edit"; // ← added
+  static const companyEdit = "/companies/:id/edit";
+  static const companyRegister = '/companies/register';
 
   // ── HR Staff ──────────────────────────
   static const staffRoles = "/staff-roles";
-
+  static const staffRoleForm = "/staff-role-form";
   static const staff = "/staff";
-
   static const staffDetail = "/staff/:id";
+  static String staffDetailPath(int id) => "/staff/$id";
+  static const staffForm = "/staff-form";
   static const staffManagers = "/staff/managers";
+  static const staffAvatarUpdate = "/staff/:id/avatar";
+  static String staffAvatarUpdatePath(int id) => "/staff/$id/avatar";
 
   // ── Departments ──────────────────────
   static const departments = "/departments";
@@ -85,8 +89,10 @@ class RouteNames {
   static const productDetail = "/products/:id";
   static const categories = "/categories";
   static const categoryDetail = "/categories/:id";
-  
 
+  // ── Quotations       ─────────────────
+
+  static const String quotations = '/quotations';
   // ── Sales / Invoice ──────────────────
   static const invoices = "/invoices";
   static const invoiceDetail = "/invoices/:id";

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/widgets/card.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/widgets/section_header.dart'
     show SectionHeader;
@@ -12,14 +13,8 @@ class ProductFormScreen extends StatefulWidget {
   @override
   State<ProductFormScreen> createState() => _ProductFormScreenState();
 }
-////////////////////////////////////////////////////////////////////////////////
-///
-////////////////////////////////////////////////////////////////////////////////
 
 class _ProductFormScreenState extends State<ProductFormScreen> {
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameCtrl;
   late final TextEditingController _descCtrl;
@@ -27,9 +22,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   int? _categoryId;
   bool _isSubmitting = false;
   bool get _isEdit => widget.existing != null;
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
+
   @override
   void initState() {
     super.initState();
@@ -51,19 +44,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         : null;
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
-
   @override
   void dispose() {
     _nameCtrl.dispose();
     _descCtrl.dispose();
     super.dispose();
   }
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -79,28 +65,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           : _descCtrl.text.trim(),
     });
   }
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF5F5F4);
-    final borderColor = isDark
-        ? const Color(0xFF3A3A3C)
-        : const Color(0xFFE0DED8);
-    final searchBg = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFEFEFED);
-    final subText = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6B6B6B);
-
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
+    final bg = isDark ? Pallets.backgroundDark : Pallets.backgroundLight;
+    final cardBg = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final searchBg = isDark ? Pallets.surfaceElevated : Pallets.backgroundLight;
+    final subText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
 
     InputDecoration deco(
       String label, {
@@ -126,30 +105,27 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: colors.primary, width: 1.6),
+        borderSide: BorderSide(color: Pallets.blurple, width: 1.6),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: colors.error, width: 1.2),
+        borderSide: BorderSide(color: Pallets.error, width: 1.2),
       ),
     );
-
-    ////////////////////////////////////////////////////////////////////////////
-    ///
-    ////////////////////////////////////////////////////////////////////////////
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        surfaceTintColor: Pallets.transparent,
         scrolledUnderElevation: 0,
         centerTitle: false,
         title: Text(
           _isEdit ? 'Edit product' : 'New product',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
+            color: textPrimary,
           ),
         ),
       ),
@@ -158,23 +134,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
           children: [
-            ////////////////////////////////////////////////////////////////////
             // ── Basics ───────────────────────────────────────────────────
-            ////////////////////////////////////////////////////////////////////
             SectionHeader(
               icon: Icons.tune_outlined,
               text: 'Basic',
               subText: subText,
             ),
             DetailCard(
-              cardBg: bg,
+              cardBg: cardBg,
               borderColor: borderColor,
               isDark: isDark,
-
               child: Column(
                 children: [
                   TextFormField(
                     controller: _nameCtrl,
+                    style: TextStyle(color: textPrimary),
                     decoration: deco('Product name', icon: Icons.label_outline),
                     textCapitalization: TextCapitalization.sentences,
                     validator: (v) => (v == null || v.trim().isEmpty)
@@ -187,6 +161,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     decoration: deco('Category', icon: Icons.sell_outlined),
                     hint: const Text('No category'),
                     borderRadius: BorderRadius.circular(12),
+                    style: TextStyle(color: textPrimary, fontSize: 14),
                     items: [
                       const DropdownMenuItem<int?>(
                         value: null,
@@ -205,20 +180,19 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
             ),
 
-            ////////////////////////////////////////////////////////////////////
             // ── Description ───────────────────────────────────────────────
-            ////////////////////////////////////////////////////////////////////
             SectionHeader(
               icon: Icons.tune_outlined,
               text: 'Description',
               subText: subText,
             ),
             DetailCard(
-              cardBg: bg,
+              cardBg: cardBg,
               borderColor: borderColor,
               isDark: isDark,
               child: TextFormField(
                 controller: _descCtrl,
+                style: TextStyle(color: textPrimary),
                 decoration: deco(
                   'Description (optional)',
                   hint: 'Notes, materials, usage…',
@@ -228,9 +202,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
             ),
 
-            ////////////////////////////////////////////////////////////////////
             // ── Variants hint ─────────────────────────────────────────────
-            ////////////////////////////////////////////////////////////////////
             SectionHeader(
               icon: Icons.tune_outlined,
               text: 'Pricing & stock',
@@ -238,16 +210,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             ),
             Container(
               decoration: BoxDecoration(
-                color: colors.primaryContainer.withValues(alpha: 0.35),
+                color: Pallets.blurple.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: colors.primary.withValues(alpha: 0.25),
-                ),
+                border: Border.all(color: Pallets.blurple.withOpacity(0.25)),
               ),
               padding: const EdgeInsets.all(14),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: colors.primary, size: 18),
+                  Icon(Icons.info_outline, color: Pallets.blurple, size: 18),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -256,7 +226,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           : 'After creating the product, add variants to set price, stock, and specs.',
                       style: TextStyle(
                         fontSize: 13,
-                        color: colors.primary,
+                        color: Pallets.blurple,
                         height: 1.4,
                       ),
                     ),
@@ -274,6 +244,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           child: FilledButton(
             onPressed: _isSubmitting ? null : _submit,
             style: FilledButton.styleFrom(
+              backgroundColor: Pallets.blurple,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),

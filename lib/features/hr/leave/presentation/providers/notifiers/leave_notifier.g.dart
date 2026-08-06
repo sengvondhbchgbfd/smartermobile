@@ -22,7 +22,7 @@ final staffLeaveProvider =
     );
 
 typedef _$StaffLeave = AutoDisposeAsyncNotifier<StaffLeaveState>;
-String _$managerLeaveHash() => r'70931c674bbfeb8834cffdc917822a60781dc889';
+String _$managerLeaveHash() => r'a8afd63790e5298c920297f61fb0053287cc02d9';
 
 /// See also [ManagerLeave].
 @ProviderFor(ManagerLeave)

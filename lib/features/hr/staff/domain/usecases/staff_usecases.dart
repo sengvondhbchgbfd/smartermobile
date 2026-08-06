@@ -9,6 +9,8 @@ class GetAllStaffUseCase {
   Future<List<StaffEntity>> call() => repository.getAll();
 }
 
+
+
 class GetStaffByIdUseCase {
   final StaffRepository repository;
   GetStaffByIdUseCase(this.repository);
@@ -21,15 +23,11 @@ class GetMyStaffProfileUseCase {
   Future<StaffEntity> call() => repository.getMyProfile();
 }
 
-
-
 class GetStaffManagersUseCase {
   final StaffRepository repository;
   GetStaffManagersUseCase(this.repository);
   Future<List<StaffEntity>> call() => repository.getManagers();
 }
-
-
 
 class GetStaffByRoleUseCase {
   final StaffRepository repository;
@@ -57,10 +55,6 @@ class CreateStaffUseCase {
   Future<StaffEntity> call(StaffEntity staff) => repository.create(staff);
 }
 
-
-
-
-
 class UpdateStaffUseCase {
   final StaffRepository repository;
   UpdateStaffUseCase(this.repository);
@@ -70,6 +64,9 @@ class UpdateStaffUseCase {
     File? avatarFile,
   }) => repository.update(id, request, avatarFile: avatarFile);
 }
+
+
+
 
 class UpdateStaffAvatarUseCase {
   final StaffRepository repository;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_role_notifier.dart';
 import '../../../domain/entities/staff_role_entity.dart';
 
@@ -18,6 +19,7 @@ class _StaffRoleFormState extends ConsumerState<StaffRoleForm> {
   late final TextEditingController _descriptionCtrl;
   late final TextEditingController _baseSalaryCtrl;
   late bool _isManager;
+  bool _isSubmitting = false;
 
   bool get _isEditing => widget.existing != null;
 
@@ -42,7 +44,10 @@ class _StaffRoleFormState extends ConsumerState<StaffRoleForm> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
 
     final role = StaffRoleEntity(
       id: widget.existing?.id,
@@ -54,16 +59,37 @@ class _StaffRoleFormState extends ConsumerState<StaffRoleForm> {
     );
 
     final notifier = ref.read(staffRoleNotifierProvider.notifier);
-    _isEditing
-        ? await notifier.updates(widget.existing!.id!, role)
-        : await notifier.create(role);
 
-    if (mounted) Navigator.of(context).pop();
+    try {
+      _isEditing
+          ? await notifier.updates(widget.existing!.id!, role)
+          : await notifier.create(role);
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _isEditing
+                  ? 'Failed to update role: $e'
+                  : 'Failed to create role: $e',
+            ),
+            backgroundColor: Pallets.error,
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+
+    return SingleChildScrollView(
       padding: EdgeInsets.only(
         left: 16,
         right: 16,
@@ -76,11 +102,6 @@ class _StaffRoleFormState extends ConsumerState<StaffRoleForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              _isEditing ? 'Edit Staff Role' : 'Create Staff Role',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
             _field(_roleNameCtrl, 'Role Name'),
             _field(_descriptionCtrl, 'Description', maxLines: 2),
             _field(
@@ -97,15 +118,43 @@ class _StaffRoleFormState extends ConsumerState<StaffRoleForm> {
               },
             ),
             SwitchListTile(
-              title: const Text('Is Manager'),
+              title: Text('Is Manager', style: TextStyle(color: textPrimary)),
               value: _isManager,
-              onChanged: (val) => setState(() => _isManager = val),
+              activeColor: Pallets.blurple,
+              onChanged: _isSubmitting
+                  ? null
+                  : (val) => setState(() => _isManager = val),
               contentPadding: EdgeInsets.zero,
             ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: _submit,
-              child: Text(_isEditing ? 'Update' : 'Create'),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _isSubmitting ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Pallets.blurple,
+                  disabledBackgroundColor: Pallets.blurple.withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        _isEditing ? 'Update' : 'Create',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              ),
             ),
           ],
         ),
@@ -125,6 +174,7 @@ class _StaffRoleFormState extends ConsumerState<StaffRoleForm> {
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: ctrl,
+        enabled: !_isSubmitting,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),

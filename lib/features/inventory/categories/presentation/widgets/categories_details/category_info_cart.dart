@@ -31,13 +31,6 @@ class InfoCard extends StatelessWidget {
             value: category.categoryName,
             subText: subText,
             borderColor: borderColor,
-            showDivider: true,
-          ),
-          DetailRow(
-            label: 'Category ID',
-            value: '#${category.categoryId}',
-            subText: subText,
-            borderColor: borderColor,
           ),
         ],
       ),

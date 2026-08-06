@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 
 class SwitchAccountButton extends StatelessWidget {
   const SwitchAccountButton({super.key});
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        ////////////////////////////////////////////////////////////////////////
         // TODO: open account switcher bottom sheet
+        ////////////////////////////////////////////////////////////////////////
       },
+
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(

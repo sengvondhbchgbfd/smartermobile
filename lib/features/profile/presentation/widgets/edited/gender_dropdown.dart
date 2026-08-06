@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 class GenderDropdown extends StatelessWidget {
   final String? value;
   final List<String> genders;
   final ValueChanged<String?> onChanged;
 
-  const GenderDropdown({super.key, 
+  const GenderDropdown({
+    super.key,
     required this.value,
     required this.genders,
     required this.onChanged,
@@ -13,29 +15,39 @@ class GenderDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fillColor = isDark ? Pallets.surfaceDark : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final textPrimary = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF2B2D31),
+        color: fillColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF3F4147)),
+        border: Border.all(color: borderColor),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          hint: const Text(
+          hint: Text(
             'Gender',
-            style: TextStyle(color: Color(0xFF80848E), fontSize: 13),
+            style: TextStyle(color: textSecondary, fontSize: 13),
           ),
-          dropdownColor: const Color(0xFF2B2D31),
-          iconEnabledColor: const Color(0xFF80848E),
+          dropdownColor: fillColor,
+          iconEnabledColor: textSecondary,
           isExpanded: true,
           items: [
-            const DropdownMenuItem(
+            DropdownMenuItem(
               value: null,
               child: Text(
                 'Prefer not to say',
-                style: TextStyle(color: Color(0xFFB5BAC1), fontSize: 14),
+                style: TextStyle(color: textSecondary, fontSize: 14),
               ),
             ),
             ...genders.map(
@@ -46,7 +58,7 @@ class GenderDropdown extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       g[0].toUpperCase() + g.substring(1),
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      style: TextStyle(color: textPrimary, fontSize: 14),
                     ),
                   ],
                 ),

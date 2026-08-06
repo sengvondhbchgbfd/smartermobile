@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import '../../../../core/themes/app_pallets.dart';
 
 class HeaderWidget extends StatelessWidget {
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
   final String companyName;
   final int unreadCount;
   final String? logoUrl;
   final VoidCallback? onCompanyTap;
   final VoidCallback? onNotificationTap;
+
   const HeaderWidget({
     super.key,
     required this.companyName,
@@ -18,16 +16,23 @@ class HeaderWidget extends StatelessWidget {
     this.onCompanyTap,
     this.onNotificationTap,
   });
-  //////////////////////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final surfaceColor = isDark ? Pallets.surfaceCard : Pallets.surfaceLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final iconColor = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+
     return Row(
       children: [
         ////////////////////////////////////////////////////////////////////////
-        // ── Company section (logo + name) ─────────────────────────────────
+        // ── Company section (logo + name) ────────────────────────────────
         ////////////////////////////////////////////////////////////////////////
         GestureDetector(
           onTap: onCompanyTap,
@@ -49,14 +54,14 @@ class HeaderWidget extends StatelessWidget {
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const Icon(
                             Icons.dashboard_rounded,
-                            color: Colors.white,
+                            color: Pallets.onAccent,
                             size: 24,
                           ),
                         ),
                       )
                     : const Icon(
                         Icons.dashboard_rounded,
-                        color: Colors.white,
+                        color: Pallets.onAccent,
                         size: 24,
                       ),
               ),
@@ -66,14 +71,15 @@ class HeaderWidget extends StatelessWidget {
                 children: [
                   Text(
                     companyName,
-                    style: const TextStyle(color: Pallets.textSecondaryLight),
+                    style: TextStyle(
+                      color: textSecondary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
                   Text(
                     'Unread Messages: $unreadCount',
-                    style: const TextStyle(
-                      color: Pallets.textSecondaryLight,
-                      fontSize: 11,
-                    ),
+                    style: TextStyle(color: textSecondary, fontSize: 11),
                   ),
                 ],
               ),
@@ -83,7 +89,7 @@ class HeaderWidget extends StatelessWidget {
 
         const Spacer(),
         ////////////////////////////////////////////////////////////////////////
-        // ── Notification bell ─────────────────────────────────────────────
+        // ── Notification bell ────────────────────────────────────────────
         ////////////////////////////////////////////////////////////////////////
         GestureDetector(
           onTap: onNotificationTap,
@@ -95,13 +101,22 @@ class HeaderWidget extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: Pallets.surfaceDark,
+                  color: surfaceColor,
                   borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: Pallets.borderDark),
+                  border: Border.all(color: borderColor),
+                  boxShadow: isDark
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.notifications_rounded,
-                  color: Colors.white,
+                  color: iconColor,
                   size: 20,
                 ),
               ),
@@ -112,12 +127,15 @@ class HeaderWidget extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: const BoxDecoration(
-                      color: Colors.red,
+                      color: Pallets.error,
                       shape: BoxShape.circle,
                     ),
                     child: Text(
                       '$unreadCount',
-                      style: const TextStyle(color: Colors.white, fontSize: 8),
+                      style: const TextStyle(
+                        color: Pallets.onError,
+                        fontSize: 8,
+                      ),
                     ),
                   ),
                 ),
