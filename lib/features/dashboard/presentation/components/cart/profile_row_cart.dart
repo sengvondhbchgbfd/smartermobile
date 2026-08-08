@@ -7,13 +7,10 @@ import 'package:frontendmobile/features/dashboard/presentation/providers/dashboa
 
 class ProfileRow extends ConsumerWidget {
   const ProfileRow({super.key, required this.profileAsync});
-
   final AsyncValue<dynamic> profileAsync;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(dashboardStatsNotifierProvider());
-
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -24,46 +21,35 @@ class ProfileRow extends ConsumerWidget {
           onRetry: () =>
               ref.read(dashboardStatsNotifierProvider().notifier).refresh(),
         ),
+
         data: (stats) => Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             StatCard(
-              icon: Icons.chat_bubble_outline_rounded,
-              iconColor: Pallets.blurple,
-              iconBg: Pallets.blurple.withOpacity(0.12),
-              label: 'Live chat',
-              value: stats.liveChat.value.toInt().toString(),
-              sub: stats.liveChat.sub,
-              isUp: true,
-              isLive: true,
-              badge: 'Live',
-              sparkData: stats.liveChat.spark,
-              sparkColor: Pallets.blurple,
-            ),
-            const SizedBox(width: 10),
-
-            StatCard(
+              width: 150,
+              height: 170,
               icon: Icons.trending_up_rounded,
               iconColor: Pallets.success,
               iconBg: Pallets.success.withOpacity(0.10),
               label: 'Stock',
               value: stats.stock.value.toStringAsFixed(0),
-              stockIn: stats.stock.stockIn != null
-                  ? stats.stock.stockIn!.toStringAsFixed(0)
-                  : null,
-              stockOut: stats.stock.stockOut != null
-                  ? stats.stock.stockOut!.toStringAsFixed(0)
-                  : null,
+              stockIn: stats.stock.stockIn?.toStringAsFixed(0),
+              stockOut: stats.stock.stockOut?.toStringAsFixed(0),
               sub: stats.stock.sub,
               isUp: (stats.stock.badgePct ?? 0) >= 0,
               isLive: false,
               badge: _formatPct(stats.stock.badgePct),
               sparkData: stats.stock.spark,
               sparkColor: Pallets.success,
+              allTime: stats.stock.allTimeValue != null
+                  ? 'All: ${_compact(stats.stock.allTimeValue!)}'
+                  : null,
             ),
-            const SizedBox(width: 10),
 
+            const SizedBox(width: 10),
             StatCard(
+              width: 150,
+              height: 170,
               icon: Icons.inventory_2_outlined,
               iconColor: Pallets.blurple,
               iconBg: Pallets.blurple.withOpacity(0.10),
@@ -79,6 +65,8 @@ class ProfileRow extends ConsumerWidget {
 
             const SizedBox(width: 10),
             StatCard(
+              width: 150,
+              height: 170,
               icon: Icons.receipt_long_outlined,
               iconColor: Pallets.warning,
               iconBg: Pallets.warning.withOpacity(0.10),
@@ -90,10 +78,15 @@ class ProfileRow extends ConsumerWidget {
               badge: _formatPct(stats.expenses.badgePct),
               sparkData: stats.expenses.spark,
               sparkColor: Pallets.warning,
+              allTime: stats.expenses.allTimeValue != null
+                  ? 'All: \$${_compact(stats.expenses.allTimeValue!)}'
+                  : null,
             ),
 
             const SizedBox(width: 10),
             StatCard(
+              width: 150,
+              height: 170,
               icon: Icons.account_balance_wallet_outlined,
               iconColor: Pallets.info,
               iconBg: Pallets.info.withOpacity(0.10),
@@ -105,6 +98,9 @@ class ProfileRow extends ConsumerWidget {
               badge: _formatPct(stats.revenue.badgePct),
               sparkData: stats.revenue.spark,
               sparkColor: Pallets.info,
+              allTime: stats.revenue.allTimeValue != null
+                  ? 'All: \$${_compact(stats.revenue.allTimeValue!)}'
+                  : null,
             ),
           ],
         ),
@@ -118,11 +114,6 @@ class ProfileRow extends ConsumerWidget {
     return '$sign${pct.toStringAsFixed(1)}%';
   }
 
-  // static String _compact(double value) {
-  //   if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}k';
-  //   return value.toStringAsFixed(0);
-  // }
-
   static String _compact(double value) {
     final s = value.toStringAsFixed(0);
     return s.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => ',');
@@ -132,9 +123,9 @@ class ProfileRow extends ConsumerWidget {
 ////////////////////////////////////////////////////////////////////////////
 /// Loading skeleton — 4 ghost cards in a row
 ////////////////////////////////////////////////////////////////////////////
+
 class _StatRowSkeleton extends StatelessWidget {
   const _StatRowSkeleton();
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -158,10 +149,10 @@ class _StatRowSkeleton extends StatelessWidget {
 ////////////////////////////////////////////////////////////////////////////
 /// Error state — small retry chip
 ////////////////////////////////////////////////////////////////////////////
+
 class _StatRowError extends StatelessWidget {
   const _StatRowError({required this.onRetry});
   final VoidCallback onRetry;
-
   @override
   Widget build(BuildContext context) {
     return Container(

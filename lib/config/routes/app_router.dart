@@ -53,6 +53,7 @@ import 'package:frontendmobile/features/settings/presentation/screens/settings_s
 import 'package:frontendmobile/features/settings/presentation/widgets/setting_create_page.dart';
 import 'package:frontendmobile/features/settings/presentation/widgets/setting_edit_page.dart';
 import 'package:frontendmobile/features/settings/presentation/widgets/theme_mode_page.dart';
+import 'package:frontendmobile/features/users/domain/entities/role_entity.dart';
 import 'package:frontendmobile/features/users/domain/entities/user_entity.dart';
 import 'package:frontendmobile/features/users/presentation/screen/user_screen.dart';
 import 'package:frontendmobile/features/users/presentation/screen/fillter_users_screen.dart';
@@ -60,6 +61,7 @@ import 'package:frontendmobile/features/users/presentation/screen/user_detail_sc
 import 'package:frontendmobile/features/users/presentation/widgets/creates/create_department_page.dart';
 import 'package:frontendmobile/features/users/presentation/widgets/creates/create_role_page.dart';
 import 'package:frontendmobile/features/users/presentation/widgets/creates/create_user_page.dart';
+import 'package:frontendmobile/features/users/presentation/widgets/tabs/role_permissions_screen.dart';
 import 'package:frontendmobile/features/users/presentation/widgets/update_user_page.dart';
 import 'package:go_router/go_router.dart';
 
@@ -67,20 +69,25 @@ import 'package:frontendmobile/features/inventory/customer/presentation/screens/
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: RouteNames.login,
+    initialLocation: RouteNames.splash,
     refreshListenable: GoRouterRefreshStream(
       ref.watch(currentUserProvider.notifier).stream,
     ),
+
     redirect: (context, state) {
       final loggedIn = ref.read(currentUserProvider) != null;
       final loggingIn =
           state.matchedLocation == RouteNames.login ||
           state.matchedLocation == RouteNames.register;
+      final onSplash = state.matchedLocation == RouteNames.splash;
 
+      if (onSplash) return null;
       if (!loggedIn && !loggingIn) return RouteNames.login;
       if (loggedIn && loggingIn) return RouteNames.dashboard;
+
       return null;
     },
+
     routes: [
       //////////////////////////////////////////////////////////////////////////
       // ── Auth / Onboarding (no shell) ──────────────────────────────────────
@@ -123,7 +130,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-
       GoRoute(
         path: RouteNames.notifications,
         builder: (context, state) => const NotificationScreen(),
@@ -189,7 +195,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-
       GoRoute(
         path: RouteNames.staffDetail,
         builder: (context, state) {
@@ -197,7 +202,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return StaffDetailScreen(staffId: id);
         },
       ),
-
       GoRoute(
         path: RouteNames.salaries,
         builder: (context, state) => const SalaryScreen(),
@@ -263,6 +267,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
+      GoRoute(
+        path: '/users/role-permissions',
+        builder: (context, state) {
+          final role = state.extra as RoleEntity;
+          return RolePermissionsScreen(role: role);
+        },
+      ),
 
       //////////////////////////////////////////////////////////////////////////
       // ── Inventory ─────────────────────────────────────────────────────────
@@ -271,7 +282,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.categories,
         builder: (context, state) => const CategoriesScreen(),
       ),
-
       GoRoute(
         path: RouteNames.categoryDetail,
         name: 'categoryDetail',
@@ -299,7 +309,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.suppliers,
         builder: (context, state) => const SuppliersScreen(),
       ),
-      // ── keep but use placeholder ──
       GoRoute(
         path: RouteNames.supplierDetail,
         builder: (context, state) {
@@ -313,14 +322,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return SupplierDetailScreen(supplierId: id);
         },
       ),
-
       GoRoute(
         path: RouteNames.customers,
         builder: (context, state) => const CustomersScreen(),
       ),
 
       //////////////////////////////////////////////////////////////////////////
-      // ── keep but use placeholder ──
+      //
       //////////////////////////////////////////////////////////////////////////
       GoRoute(
         path: RouteNames.customerDetail,
@@ -370,12 +378,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             SettingEditPage(setting: state.extra as SystemSettingEntity),
       ),
-
       GoRoute(
         path: RouteNames.theme,
         builder: (context, state) => const ThemeModePage(),
       ),
-
       GoRoute(
         path: '/settings/payroll/currency',
         builder: (context, state) => SettingDetailPage(
@@ -400,8 +406,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           existing: state.extra as SystemSettingEntity?,
         ),
       ),
-
-      // Leave
       GoRoute(
         path: '/settings/leave/annual',
         builder: (context, state) => SettingDetailPage(
@@ -426,8 +430,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           existing: state.extra as SystemSettingEntity?,
         ),
       ),
-
+      //////////////////////////////////////////////////////////////////////////
       // Inventory
+      //////////////////////////////////////////////////////////////////////////
       GoRoute(
         path: '/settings/inventory/low-stock',
         builder: (context, state) => SettingDetailPage(
@@ -501,7 +506,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.searchPage,
         builder: (context, state) => const SearchPage(),
       ),
-
       GoRoute(
         path: RouteNames.attendance,
         builder: (context, state) => const AttendanceScreen(),
@@ -530,6 +534,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           quotationId: int.parse(state.pathParameters['id']!),
         ),
       ),
+
       ////////////////////////////////////////////////////////////////////////////
       ///
       ////////////////////////////////////////////////////////////////////////////
@@ -543,29 +548,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             );
           },
         ),
-
-
-
         routes: [
           GoRoute(
             path: RouteNames.dashboard,
             builder: (context, state) => const DashboardScreen(),
           ),
-
-          GoRoute(
-            path: RouteNames.chat,
-            builder: (context, state) => const ChatGroupsScreen(),
-          ),
-
-
-
           GoRoute(
             path: RouteNames.users,
             builder: (context, state) => const UserScreen(),
           ),
-
-
-          
           GoRoute(
             path: RouteNames.profile,
             builder: (context, state) => const ProfileScreen(),

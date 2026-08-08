@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/features/company/presentation/providers/company_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/shared/widgets/custom_button.dart';
 import 'package:frontendmobile/shared/widgets/custom_textfield.dart';
+
 const _timezones = ['Asia/Phnom_Penh', 'Asia/Bangkok', 'Asia/Singapore', 'UTC'];
 const _currencies = ['USD', 'KHR', 'THB', 'SGD'];
 
@@ -21,6 +23,8 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
   final _companyName = TextEditingController();
   final _companyCode = TextEditingController();
+  final _email = TextEditingController();
+  final _maxUsers = TextEditingController(text: '10');
   final _fullName = TextEditingController();
   final _username = TextEditingController();
   final _password = TextEditingController();
@@ -32,50 +36,50 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
   void dispose() {
     _companyName.dispose();
     _companyCode.dispose();
+    _email.dispose();
+    _maxUsers.dispose();
     _fullName.dispose();
     _username.dispose();
     _password.dispose();
     super.dispose();
   }
 
-  //==========================================================
-  //  event
-  //==========================================================
-
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (!_formKey.currentState!.validate()) return;
-
-    await ref
-        .read(registerProvider.notifier)
-        .register(
-          companyName: _companyName.text.trim(),
+    final success = await ref
+        .read(companyProvider.notifier)
+        .registerCompany(
           companyCode: _companyCode.text.trim(),
-          username: _username.text.trim(),
-          password: _password.text,
-          fullName: _fullName.text.trim(),
-          timezone: _timezone,
+          companyName: _companyName.text.trim(),
           currency: _currency,
+          email: _email.text.trim(),
+          maxUsers: int.tryParse(_maxUsers.text.trim()) ?? 10,
+          timezone: _timezone,
+          adminUsername: _username.text.trim(),
+          adminPassword: _password.text,
+          adminFullName: _fullName.text.trim(),
         );
 
     if (!mounted) return;
-    ref
-        .read(registerProvider)
-        .whenOrNull(
-          data: (_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Company registered successfully!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            context.go('/login');
-          },
-          error: (e, _) => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-          ),
-        );
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Company registered successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      context.go('/login');
+    } else {
+      final error = ref.read(companyProvider).valueOrNull?.error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error ?? 'Registration failed'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   //==========================================================
@@ -84,7 +88,8 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(registerProvider) is AsyncLoading;
+    final isLoading =
+        ref.watch(companyProvider).valueOrNull?.isUpdating ?? false;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -139,6 +144,38 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                       v!.isEmpty ? 'Company code is required' : null,
                 ),
 
+                const SizedBox(height: 12),
+
+                // 👇 email field — was missing before
+                CustomTextField(
+                  controller: _email,
+                  label: 'Company email',
+                  hint: 'contact@acme.com',
+                  prefixIcon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Email is required';
+                    }
+                    if (!v.contains('@')) return 'Enter a valid email';
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 12),
+
+                CustomTextField(
+                  controller: _maxUsers,
+                  label: 'Max users',
+                  hint: '10',
+                  prefixIcon: Icons.people_outline,
+                  keyboardType: TextInputType.number,
+                  validator: (v) {
+                    if (v!.isEmpty) return 'Max users is required';
+                    if (int.tryParse(v) == null) return 'Enter a valid number';
+                    return null;
+                  },
+                ),
                 ////////////////////////////////////////////////////////////
                 const SizedBox(height: 24),
 

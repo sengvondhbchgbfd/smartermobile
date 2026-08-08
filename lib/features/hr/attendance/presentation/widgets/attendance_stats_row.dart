@@ -26,12 +26,17 @@ class AttendanceStat {
         color: Pallets.success,
         icon: Icons.check_circle_outline,
       ),
+
+
       AttendanceStat(
         label: 'Checked Out',
         value: m['checked_out']?.toString() ?? '0',
         color: Pallets.info,
         icon: Icons.logout_outlined,
       ),
+
+
+
       AttendanceStat(
         label: 'Still In',
         value: m['still_in']?.toString() ?? '0',
@@ -75,6 +80,10 @@ class AttendanceStatsRow extends StatelessWidget {
     }
     return const [];
   }
+
+  ////////////////////////////////////////////////////////////////////////////
+  ///
+  ///////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {

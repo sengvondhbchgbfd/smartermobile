@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frontendmobile/core/network/dio_client.dart';
-import 'package:frontendmobile/features/dashboard/data/models/dashboard_stats.dart';
+import 'package:frontendmobile/features/dashboard/presentation/providers/dashboard_stats.dart';
 
 class DashboardRemoteDatasource {
   final DioClient _dioClient;

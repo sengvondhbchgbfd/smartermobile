@@ -19,9 +19,9 @@ class StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08), // ← fixed
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)), // ← fixed
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -45,8 +45,3 @@ class StatCard extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

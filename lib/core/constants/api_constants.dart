@@ -2,9 +2,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
   static final String baseUrl =
-      dotenv.env['BASE_URL']?.trim().isNotEmpty == true
-      ? dotenv.env['BASE_URL']!.trim()
-      : 'http://10.154.106.130:8000';
+      (dotenv.env['BASE_URL']?.trim().isNotEmpty == true
+              ? dotenv.env['BASE_URL']!.trim()
+              : 'http://172.31.80.130:8000')
+          .replaceAll(RegExp(r'/+$'), '');
 
   static const String apiVersion = '/api/v1';
   static String get apiBaseUrl => '$baseUrl$apiVersion';

@@ -28,6 +28,7 @@ class UserNotifier extends _$UserNotifier {
   late GetRolesUseCase getRolesUseCase;
   late CreateRoleUsecae createRoleUsecase;
   late DeleteRoleUsecase deleteRoleUsecase;
+  late SetRolePermissionsUseCase setRolePermissionsUseCase;
 
   late GetDepartmentsUseCase getDepartmentsUseCase;
   late CreateDepartmentUsecase createDepartmentUsecase;
@@ -43,6 +44,7 @@ class UserNotifier extends _$UserNotifier {
     getRolesUseCase = GetRolesUseCase(repo);
     createRoleUsecase = CreateRoleUsecae(repo);
     deleteRoleUsecase = DeleteRoleUsecase(repo);
+    setRolePermissionsUseCase = SetRolePermissionsUseCase(repo);
     getDepartmentsUseCase = GetDepartmentsUseCase(repo);
     createDepartmentUsecase = CreateDepartmentUsecase(repo);
     deleteDepartmentUsecase = DeleteDepartmentUsecase(repo);
@@ -250,6 +252,36 @@ class UserNotifier extends _$UserNotifier {
           current.copyWith(
             roles: old.where((e) => e.id != roleId).toList(),
             users: updatedUsers,
+            errorMessage: null,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> setRolePermissions(
+    int roleId,
+    List<String> permissionCodes,
+  ) async {
+    final current = state.value;
+    if (current == null) return;
+    final old = current.roles;
+
+    final result = await setRolePermissionsUseCase(
+      SetRolePermissionsParams(
+        roleId: roleId,
+        permissionCodes: permissionCodes,
+      ),
+    );
+
+    result.fold(
+      (f) => state = AsyncData(current.copyWith(errorMessage: f.message)),
+      (updatedRole) {
+        state = AsyncData(
+          current.copyWith(
+            roles: old
+                .map((r) => r.id == updatedRole.id ? updatedRole : r)
+                .toList(),
             errorMessage: null,
           ),
         );

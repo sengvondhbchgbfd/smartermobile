@@ -71,7 +71,6 @@ class UserDatasourceImpl implements UserDatasource {
   //=============================================================
   //
   //=============================================================
-
   @override
   Future<void> deleteUser(int userId) async {
     await dio.delete('/users/$userId');
@@ -109,6 +108,22 @@ class UserDatasourceImpl implements UserDatasource {
   Future<void> deleteRole(int id) async {
     await dio.delete('/roles/$id');
   }
+
+  @override
+  Future<RoleEntity> setRolePermissions(
+    int roleId,
+    List<String> permissionCodes,
+  ) async {
+    final res = await dio.put(
+      '/roles/$roleId/permissions',
+      data: {'permission_codes': permissionCodes},
+    );
+    return RoleModel.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  //=============================================================
+  //
+  //=============================================================
 
   // ================================================================
   // DEPARTMENTS

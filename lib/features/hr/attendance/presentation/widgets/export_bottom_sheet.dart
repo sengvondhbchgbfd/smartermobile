@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendmobile/core/themes/app_pallets.dart';
 
 enum ExportFormat { csv, pdf }
 
@@ -25,9 +26,12 @@ class ExportBottomSheet extends StatefulWidget {
     BuildContext context, {
     required Future<void> Function(ExportRequest) onExport,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: isDark ? Pallets.surfaceOverlay : Pallets.surfaceLight,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -75,7 +79,7 @@ class _ExportBottomSheetState extends State<ExportBottomSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Export failed: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Pallets.error,
           ),
         );
       }
@@ -86,6 +90,16 @@ class _ExportBottomSheetState extends State<ExportBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final primaryText = isDark
+        ? Pallets.textPrimaryDark
+        : Pallets.textPrimaryLight;
+    final secondaryText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+    final borderColor = isDark ? Pallets.borderDark : Pallets.borderLight;
+
     return Padding(
       padding: EdgeInsets.fromLTRB(
         24,
@@ -104,31 +118,35 @@ class _ExportBottomSheetState extends State<ExportBottomSheet> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: isDark ? Pallets.borderDark : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
 
-          const Text(
+          Text(
             'Export Attendance',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              color: primaryText,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             'Choose format and date range',
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 13, color: secondaryText),
           ),
           const SizedBox(height: 24),
 
           // ── Format picker ────────────────────────────────────────────────
-          const Text(
+          Text(
             'FORMAT',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
-              color: Colors.grey,
+              color: Pallets.textMuted,
             ),
           ),
           const SizedBox(height: 8),
@@ -138,7 +156,7 @@ class _ExportBottomSheetState extends State<ExportBottomSheet> {
                 child: _FormatCard(
                   label: 'CSV',
                   icon: Icons.table_chart_outlined,
-                  color: Colors.green,
+                  color: Pallets.success,
                   selected: _format == ExportFormat.csv,
                   onTap: () => setState(() => _format = ExportFormat.csv),
                 ),
@@ -148,7 +166,7 @@ class _ExportBottomSheetState extends State<ExportBottomSheet> {
                 child: _FormatCard(
                   label: 'PDF',
                   icon: Icons.picture_as_pdf_outlined,
-                  color: Colors.red,
+                  color: Pallets.error,
                   selected: _format == ExportFormat.pdf,
                   onTap: () => setState(() => _format = ExportFormat.pdf),
                 ),
@@ -159,13 +177,13 @@ class _ExportBottomSheetState extends State<ExportBottomSheet> {
           const SizedBox(height: 20),
 
           // ── Date range ───────────────────────────────────────────────────
-          const Text(
+          Text(
             'DATE RANGE',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
-              color: Colors.grey,
+              color: Pallets.textMuted,
             ),
           ),
           const SizedBox(height: 8),
@@ -175,22 +193,27 @@ class _ExportBottomSheetState extends State<ExportBottomSheet> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: borderColor),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.date_range, size: 18, color: Colors.blue),
+                  const Icon(
+                    Icons.date_range,
+                    size: 18,
+                    color: Pallets.blurple,
+                  ),
                   const SizedBox(width: 10),
                   Text(
                     '${_fmt(_start)}  →  ${_fmt(_end)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
+                      color: primaryText,
                     ),
                   ),
                   const Spacer(),
-                  const Icon(Icons.chevron_right, color: Colors.grey),
+                  Icon(Icons.chevron_right, color: secondaryText),
                 ],
               ),
             ),
@@ -199,27 +222,36 @@ class _ExportBottomSheetState extends State<ExportBottomSheet> {
           const SizedBox(height: 28),
 
           // ── Export button ────────────────────────────────────────────────
-          ElevatedButton.icon(
-            onPressed: _loading ? null : _export,
-            icon: _loading
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(Icons.download, size: 18),
-            label: Text(
-              _loading ? 'Exporting…' : 'Export ${_format.name.toUpperCase()}',
+          Container(
+            decoration: BoxDecoration(
+              gradient: Pallets.brandGradient,
+              borderRadius: BorderRadius.circular(10),
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade700,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+            child: ElevatedButton.icon(
+              onPressed: _loading ? null : _export,
+              icon: _loading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Pallets.onAccent,
+                      ),
+                    )
+                  : const Icon(Icons.download, size: 18),
+              label: Text(
+                _loading
+                    ? 'Exporting…'
+                    : 'Export ${_format.name.toUpperCase()}',
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Pallets.transparent,
+                shadowColor: Pallets.transparent,
+                foregroundColor: Pallets.onAccent,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
           ),
@@ -246,28 +278,36 @@ class _FormatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final unselectedBg = isDark ? Pallets.surfaceCard : Pallets.backgroundLight;
+    final unselectedBorder = isDark ? Pallets.borderDark : Pallets.borderLight;
+    final unselectedText = isDark
+        ? Pallets.textSecondaryDark
+        : Pallets.textSecondaryLight;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.1) : Colors.grey.shade50,
+          color: selected ? color.withOpacity(0.15) : unselectedBg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? color : Colors.grey.shade200,
+            color: selected ? color : unselectedBorder,
             width: selected ? 2 : 1,
           ),
         ),
         child: Column(
           children: [
-            Icon(icon, color: selected ? color : Colors.grey, size: 28),
+            Icon(icon, color: selected ? color : unselectedText, size: 28),
             const SizedBox(height: 6),
             Text(
               label,
               style: TextStyle(
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                color: selected ? color : Colors.grey,
+                color: selected ? color : unselectedText,
               ),
             ),
           ],

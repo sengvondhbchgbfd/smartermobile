@@ -21,6 +21,7 @@ class AttendanceMonthHeader extends StatefulWidget {
   final VoidCallback? onPickDateRange;
   final VoidCallback? onToggleSearch;
   final VoidCallback? onClearFilter;
+  final VoidCallback? onReport;
 
   // ── Staff-only / shared ───────────────────────────────────────────────────
   final String? subtitle;
@@ -46,7 +47,8 @@ class AttendanceMonthHeader extends StatefulWidget {
        onPickDate = null,
        onPickDateRange = null,
        onToggleSearch = null,
-       onClearFilter = null;
+       onClearFilter = null,
+       onReport = null;
 
   // ── Manager constructor ───────────────────────────────────────────────────
   const AttendanceMonthHeader.manager({
@@ -63,6 +65,7 @@ class AttendanceMonthHeader extends StatefulWidget {
     this.onPickDateRange,
     this.onToggleSearch,
     this.onClearFilter,
+    this.onReport,
     this.subtitle,
     this.trailing,
   }) : _isManager = true;
@@ -110,7 +113,9 @@ class _AttendanceMonthHeaderState extends State<AttendanceMonthHeader> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        ////////////////////////////////////////////////////////////////////////
         // ── Row 1: month navigation ──────────────────────────────────────
+        ////////////////////////////////////////////////////////////////////////
         Row(
           children: [
             _NavArrow(
@@ -137,22 +142,30 @@ class _AttendanceMonthHeaderState extends State<AttendanceMonthHeader> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        _monthLabel,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: textPrimary,
+                      Flexible(
+                        child: Text(
+                          _monthLabel,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (_isCurrentMonth) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          'This month',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Pallets.gradient2,
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'This month',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Pallets.gradient2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -168,7 +181,18 @@ class _AttendanceMonthHeaderState extends State<AttendanceMonthHeader> {
               onTap: widget.onNext,
             ),
 
+            ////////////////////////////////////////////////////////////////////
+            ///
+            ////////////////////////////////////////////////////////////////////
             if (widget._isManager) ...[
+              if (widget.onReport != null)
+                _IconBtn(
+                  icon: Icons.download_outlined,
+                  active: false,
+                  iconColor: iconColor,
+                  tooltip: 'Report',
+                  onTap: widget.onReport,
+                ),
               _IconBtn(
                 icon: widget.showSearch
                     ? Icons.search_off_rounded
@@ -193,7 +217,6 @@ class _AttendanceMonthHeaderState extends State<AttendanceMonthHeader> {
                 onTap: widget.onPickDateRange,
               ),
             ],
-
             if (!widget._isManager && widget.trailing != null) ...[
               const SizedBox(width: 4),
               widget.trailing!,
@@ -201,7 +224,9 @@ class _AttendanceMonthHeaderState extends State<AttendanceMonthHeader> {
           ],
         ),
 
+        ////////////////////////////////////////////////////////////////////////
         // ── Row 2: active filter (plain text, no chip) ────────────────────
+        ////////////////////////////////////////////////////////////////////////
         if (widget._isManager && widget.hasFilter && widget.filterLabel != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -235,7 +260,9 @@ class _AttendanceMonthHeaderState extends State<AttendanceMonthHeader> {
             ),
           ),
 
+        ////////////////////////////////////////////////////////////////////////
         // ── Row 3: search field (manager only, when open) — underline style
+        ////////////////////////////////////////////////////////////////////////
         if (widget._isManager && widget.showSearch)
           Padding(
             padding: const EdgeInsets.only(top: 10),
@@ -332,10 +359,10 @@ class _IconBtn extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(4),
           child: Icon(
             icon,
-            size: 20,
+            size: 19,
             color: active ? Pallets.gradient2 : iconColor,
           ),
         ),

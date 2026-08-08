@@ -137,7 +137,6 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
               itemBuilder: (context, index) {
                 final leave = state.leaves[index];
                 final days = leaveDays(leave.startDate, leave.endDate);
-
                 return LeaveCard(
                   leave: leave,
                   days: days,

@@ -66,6 +66,9 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
         staffState != null &&
         staffState.records.isNotEmpty &&
         staffState.monthlyStats.isNotEmpty;
+
+
+
     if (alreadyLoaded) return;
     await Future.wait([
       if (staffState == null || staffState.records.isEmpty)
@@ -129,12 +132,17 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
                 onPrevious: () => _changeMonth(-1),
                 onNext: () => _changeMonth(1),
               ),
+
               //////////////////////////////////////////////////////////////
               ///
               ///////////////////////////////////////////////////////////////
               if (state.monthlyStats.isNotEmpty)
                 AttendanceStatsRow(stats: state.monthlyStats),
               const SizedBox(height: 8),
+
+              //////////////////////////////////////////////////////////////
+              ///
+              //////////////////////////////////////////////////////////////
               Expanded(
                 child: state.isLoading
                     ? const Center(child: CircularProgressIndicator())

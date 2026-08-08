@@ -10,6 +10,10 @@ import 'package:frontendmobile/features/hr/staff/presentation/widgets/error_view
 import 'package:frontendmobile/features/hr/staff/presentation/widgets/staff/staff_card.dart';
 import 'package:go_router/go_router.dart';
 
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+
 class StaffScreen extends ConsumerStatefulWidget {
   const StaffScreen({super.key});
   @override
@@ -24,6 +28,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     ////////////////////////////////////////////////////////////////////////////
     ///
     ////////////////////////////////////////////////////////////////////////////
+
     final notifier = ref.read(staffNotifierProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -38,9 +43,11 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     final border = isDark ? Pallets.borderDark : Pallets.borderLight;
 
     // ── Switch source based on filter ──
+
     final asyncList = _managersOnly
         ? ref.watch(staffManagersProvider)
         : ref.watch(staffNotifierProvider);
+
     ////////////////////////////////////////////////////////////////////////////
     ///
     ////////////////////////////////////////////////////////////////////////////

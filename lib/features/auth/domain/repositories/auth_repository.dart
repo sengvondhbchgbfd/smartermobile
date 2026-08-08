@@ -10,6 +10,7 @@ abstract class AuthRepository {
   ////////////////////////////////////////////////
 
   Future<void> logout();
+  Future<bool> validateToken(String token);
 
   // Future<bool> validateToken(String token);
 

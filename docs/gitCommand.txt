@@ -1,0 +1,10 @@
+git fetch origin |=> 
+
+git merge --abort |=>
+
+
+git reset --hard origin/main |=>
+
+git clean -fd |=>
+
+git status  |=>

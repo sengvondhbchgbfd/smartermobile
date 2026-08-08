@@ -29,14 +29,20 @@ class NotchedBarClipper extends CustomClipper<Path> {
 
     // Curve down into the notch (bite out of the bar)
     path.cubicTo(
-      cx - notchR * 0.7, 0,
-      cx - notchR, notchR * 1.15,
-      cx, notchR * 1.15,
+      cx - notchR * 0.7,
+      0,
+      cx - notchR,
+      notchR * 1.15,
+      cx,
+      notchR * 1.15,
     );
     path.cubicTo(
-      cx + notchR, notchR * 1.15,
-      cx + notchR * 0.7, 0,
-      cx + notchR * 1.4, 0,
+      cx + notchR,
+      notchR * 1.15,
+      cx + notchR * 0.7,
+      0,
+      cx + notchR * 1.4,
+      0,
     );
 
     // Line to top-right corner
@@ -45,7 +51,12 @@ class NotchedBarClipper extends CustomClipper<Path> {
 
     // Down the right side
     path.lineTo(size.width, size.height - r);
-    path.quadraticBezierTo(size.width, size.height, size.width - r, size.height);
+    path.quadraticBezierTo(
+      size.width,
+      size.height,
+      size.width - r,
+      size.height,
+    );
 
     // Bottom edge
     path.lineTo(r, size.height);

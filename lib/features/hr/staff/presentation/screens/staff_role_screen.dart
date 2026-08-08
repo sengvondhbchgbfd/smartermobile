@@ -142,9 +142,14 @@ class _RoleStats extends StatelessWidget {
     ////////////////////////////////////////////////////////////////////////////
     final total = roles.length;
     final managerRoles = roles.where((r) => r.isManager).length;
-    final avgSalary = total == 0
+
+    // ✅ only average roles that actually have a salary set —
+    // roles with baseSalary == 0 no longer drag the average down.
+    final salaried = roles.where((r) => r.baseSalary > 0).toList();
+    final avgSalary = salaried.isEmpty
         ? 0
-        : roles.map((r) => r.baseSalary).reduce((a, b) => a + b) / total;
+        : salaried.map((r) => r.baseSalary).reduce((a, b) => a + b) /
+              salaried.length;
     ////////////////////////////////////////////////////////////////////////////
     ///
     ////////////////////////////////////////////////////////////////////////////

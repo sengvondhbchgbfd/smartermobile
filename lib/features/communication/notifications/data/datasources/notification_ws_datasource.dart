@@ -40,8 +40,7 @@ class WsErrorEvent extends WsEvent {
 ///////////////////////////////////////////////////////////////////////
 
 class NotificationWsDataSource {
-  final String _wsBaseUrl;
-
+  final String _wsUrl;
   final Future<String?> Function() _getToken;
 
   WebSocketChannel? _channel;
@@ -55,9 +54,9 @@ class NotificationWsDataSource {
   bool get isConnected => _channel != null;
 
   NotificationWsDataSource({
-    required String wsBaseUrl,
+    required String wsUrl,
     required Future<String?> Function() getToken,
-  }) : _wsBaseUrl = wsBaseUrl,
+  }) : _wsUrl = wsUrl,
        _getToken = getToken;
 
   // ── Connection ─────────────────────────────────────────────────────────────
@@ -73,7 +72,7 @@ class NotificationWsDataSource {
       return;
     }
 
-    final uri = Uri.parse('$_wsBaseUrl/api/v1/ws/notifications?token=$token');
+    final uri = Uri.parse('$_wsUrl?token=$token');
     print('🔌 WS URI: $uri');
     _channel = WebSocketChannel.connect(uri);
     // ✅ force handshake
@@ -145,7 +144,6 @@ class NotificationWsDataSource {
   void _scheduleReconnect() {
     disconnect();
     _reconnectTimer?.cancel();
-    // Re-fetches a fresh token on the next connect attempt
     _reconnectTimer = Timer(const Duration(seconds: 5), connect);
   }
 

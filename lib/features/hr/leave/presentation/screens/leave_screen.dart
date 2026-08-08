@@ -15,26 +15,14 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen>
     with SingleTickerProviderStateMixin {
   TabController? _tabController;
 
-  ///////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////
-
   void _ensureTabController() {
     _tabController ??= TabController(length: 2, vsync: this);
   }
-
-  ///////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////
 
   void _disposeTabController() {
     _tabController?.dispose();
     _tabController = null;
   }
-
-  ///////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////
 
   @override
   void dispose() {
@@ -42,33 +30,28 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen>
     super.dispose();
   }
 
-  ///////////////////////////////////////////////////////////////
-  ///
-  //////////////////////////////////////////////////////////////
-
   @override
   Widget build(BuildContext context) {
-    ///////////////////////////////////////////////////////////////
-    ///
-    //////////////////////////////////////////////////////////////
     final currentUser = ref.watch(currentUserProvider);
-    final canManageLeave =
+
+    final hasStaffRecord = currentUser?.staffId != null;
+    final canManage =
         (currentUser?.canApproveLeave ?? false) ||
         (currentUser?.canViewTeamLeave ?? false);
-    if (canManageLeave) {
+
+    final showBothTabs = hasStaffRecord && canManage;
+    final showManagerOnly = canManage && !hasStaffRecord;
+
+    if (showBothTabs) {
       _ensureTabController();
     } else {
       _disposeTabController();
     }
 
-    ///////////////////////////////////////////////////////////////
-    ///
-    //////////////////////////////////////////////////////////////
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Leave Management'),
-        bottom: !canManageLeave
+        bottom: !showBothTabs
             ? null
             : TabBar(
                 controller: _tabController,
@@ -81,7 +64,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen>
                 ],
               ),
       ),
-      body: canManageLeave
+      body: showBothTabs
           ? TabBarView(
               controller: _tabController,
               children: const [
@@ -89,7 +72,9 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen>
                 ManagerDashboardScreen(),
               ],
             )
-          : const StaffDashboardScreen(),
+          : showManagerOnly
+              ? const ManagerDashboardScreen()
+              : const StaffDashboardScreen(),
     );
   }
 }

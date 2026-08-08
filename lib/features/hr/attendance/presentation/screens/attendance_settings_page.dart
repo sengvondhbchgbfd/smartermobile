@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
-import 'package:frontendmobile/features/hr/attendance/presentation/providers/attendance_notifier.dart'hide AttendanceSettings;
+import 'package:frontendmobile/features/hr/attendance/presentation/providers/attendance_notifier.dart'
+    hide AttendanceSettings;
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/attendance_settings_sheet.dart';
+import 'package:frontendmobile/features/hr/attendance/presentation/widgets/office_qr_helper.dart';
 import 'package:go_router/go_router.dart';
 
 class AttendanceSettingsPage extends ConsumerStatefulWidget {
   const AttendanceSettingsPage({super.key});
-
   @override
   ConsumerState<AttendanceSettingsPage> createState() =>
       _AttendanceSettingsPageState();
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -21,9 +21,7 @@ class AttendanceSettingsPage extends ConsumerStatefulWidget {
 class _AttendanceSettingsPageState
     extends ConsumerState<AttendanceSettingsPage> {
   bool _loading = true;
-  bool _saving = false;
   String? _error;
-
   @override
   void initState() {
     super.initState();
@@ -35,12 +33,11 @@ class _AttendanceSettingsPageState
     if (mounted) setState(() => _loading = false);
   }
 
-////////////////////////////////////////////////////////////////////////////////
-///
-////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////
+  ///
+  ////////////////////////////////////////////////////////////////////////////////
 
   Future<void> _save(AttendanceSettings s) async {
-    setState(() => _saving = true);
     await ref
         .read(attendanceSettingsProvider.notifier)
         .updateSettings(
@@ -54,7 +51,6 @@ class _AttendanceSettingsPageState
           timezone: s.timezone,
         );
     if (!mounted) return;
-    setState(() => _saving = false);
     final err = ref.read(attendanceSettingsProvider).error;
     if (err != null) {
       setState(() => _error = err);
@@ -69,10 +65,9 @@ class _AttendanceSettingsPageState
       context.pop();
     }
   }
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-
+  ////////////////////////////////////////////////////////////////////////////////
+  //
+  ////////////////////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {
@@ -129,11 +124,9 @@ class _AttendanceSettingsPageState
       );
     }
 
-
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-
+    ////////////////////////////////////////////////////////////////////////////////
+    //
+    ////////////////////////////////////////////////////////////////////////////////
 
     return AttendanceSettingsSheet(
       initial: AttendanceSettings(
@@ -148,6 +141,8 @@ class _AttendanceSettingsPageState
         departments: const [],
       ),
       onSave: _save,
+      onShowQr: () => showOfficeQrDialog(context, ref),
+      onRefreshQr: () => refreshOfficeQr(ref),
       asPage: true,
     );
   }

@@ -19,14 +19,19 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   //
   ///////////////////////////////////////////////////////////////////////
 
-  // @override
-  // Future<bool> validateToken(String token) async {
-  //   final response = await _dio.get(
-  //     "auth/validate",
-  //     options: Options(headers: {'Authorization': 'Bearer $token'}),
-  //   );
-  //   return response.statusCode == 200;
-  // }
+  @override
+  Future<bool> validateToken(String token) async {
+    try {
+      final response = await _dio.get(
+        "/auth/validate",
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return response.statusCode == 200;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) return false;
+      rethrow;
+    }
+  }
 
   ////////////////////////////////////////////////////////////////////////
   //

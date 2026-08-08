@@ -12,25 +12,11 @@ import 'package:go_router/go_router.dart';
 
 final List<DashboardModule> allModules = const [
   DashboardModule(
-    title: 'User Control',
-    subtitle: 'Roles & Permissions',
-    icon: Icons.admin_panel_settings_rounded,
-    color: Colors.indigo,
-    route: RouteNames.staffRoles,
-  ),
-  DashboardModule(
     title: 'Attendance',
-    subtitle: 'QR & Face Scan',
+    subtitle: 'QR &  Scan',
     icon: Icons.qr_code_scanner_rounded,
     color: Colors.green,
     route: RouteNames.attendance,
-  ),
-  DashboardModule(
-    title: 'Chat System',
-    subtitle: 'DM & Groups',
-    icon: Icons.chat_rounded,
-    color: Colors.purple,
-    route: RouteNames.chat,
   ),
   DashboardModule(
     title: 'HR / Staff',

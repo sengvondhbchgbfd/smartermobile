@@ -19,9 +19,7 @@ class AvatarPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    // avatar fallback bg — slightly elevated surface in both modes
     final avatarBg = isDark ? Pallets.surfaceDark : Pallets.borderLight;
-    // camera badge border matches page background
     final badgeBorder = isDark
         ? Pallets.backgroundDark
         : Pallets.backgroundLight;
@@ -59,7 +57,7 @@ class AvatarPicker extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: Pallets.gradient2, // brand, same in both modes
+                  color: Pallets.gradient2, 
                   shape: BoxShape.circle,
                   border: Border.all(color: badgeBorder, width: 2),
                 ),

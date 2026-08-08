@@ -20,6 +20,8 @@ abstract class UserDatasource {
   Future<List<RoleEntity>> getRoles();
   Future<dynamic> createRole(Map<String, dynamic> data);
   Future<void> deleteRole(int id);
+  Future<RoleEntity> setRolePermissions(int roleId, List<String> permissionCodes); // 👈 new
+
 
   ////////////////////////////////////////////
   //  DEPARTMENT

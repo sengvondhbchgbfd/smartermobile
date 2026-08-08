@@ -18,7 +18,9 @@ class AttendanceRecordTile extends StatelessWidget {
     this.avatarUrl,
   });
 
+  //////////////////////////////////////////////////////////////////////////////
   // ── Status ─────────────────────────────────────────────────────────────────
+  //////////////////////////////////////////////////////////////////////////////
   _StatusStyle get _status {
     if (record.isCheckedIn && record.isCheckedOut) {
       return const _StatusStyle(
@@ -85,12 +87,16 @@ class AttendanceRecordTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            ////////////////////////////////////////////////////////////////////
             // ── Leading icon / avatar ──────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
             _buildLeading(statusColor, weekendColor, isDark),
 
             const SizedBox(width: 12),
 
+            ////////////////////////////////////////////////////////////////////
             // ── Main content ───────────────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,7 +114,9 @@ class AttendanceRecordTile extends StatelessWidget {
                       ),
                     ),
 
+                  //////////////////////////////////////////////////////////////
                   // ── Date + status words row ──────────────────────────
+                  //////////////////////////////////////////////////////////////
                   Row(
                     children: [
                       Flexible(
@@ -152,7 +160,9 @@ class AttendanceRecordTile extends StatelessWidget {
 
                   const SizedBox(height: 5),
 
+                  //////////////////////////////////////////////////////////////
                   // ── Times + duration row ─────────────────────────────
+                  //////////////////////////////////////////////////////////////
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -195,7 +205,9 @@ class AttendanceRecordTile extends StatelessWidget {
 
             const SizedBox(width: 8),
 
+            ////////////////////////////////////////////////////////////////////
             // ── Status word + chevron ────────────────────────────────────
+            ////////////////////////////////////////////////////////////////////
             Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,

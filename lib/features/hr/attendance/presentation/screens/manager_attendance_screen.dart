@@ -8,11 +8,10 @@ import 'package:frontendmobile/core/utils/staff_profile_helper.dart';
 import 'package:frontendmobile/features/communication/notifications/presentation/providers/notification_provider.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/attendance_settings_sheet.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/export_bottom_sheet.dart';
-import 'package:frontendmobile/features/hr/attendance/presentation/widgets/manager_tool_bar.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/managers/records_list.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/managers/search_field.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/manual_correction_dialog.dart';
-import 'package:frontendmobile/features/hr/attendance/presentation/widgets/office_qr_dialog.dart';
+import 'package:frontendmobile/features/hr/attendance/presentation/widgets/office_qr_helper.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/remind_dialog.dart';
 import 'package:frontendmobile/features/hr/attendance/presentation/widgets/staff_profile_sheet.dart';
 import 'package:frontendmobile/features/hr/leave/presentation/providers/notifiers/leave_notifier.dart';
@@ -237,25 +236,6 @@ class _ManagerAttendanceScreenState
     );
   }
 
-  // ── Office QR ───────────────────────────────────────────────────────────────
-
-  void _showOfficeQrDialog() {
-    final qrData = ref.read(scanAttendanceProvider).value?.officeQr;
-    showDialog(
-      context: context,
-      builder: (ctx) => OfficeQrDialog(
-        token: qrData?['qr_token']?.toString(),
-        expiresAt: qrData?['expires_at']?.toString(),
-        onRefresh: () async {
-          Navigator.pop(ctx);
-          if (!mounted) return;
-          await ref.read(scanAttendanceProvider.notifier).fetchOfficeQr();
-          if (mounted) _showOfficeQrDialog();
-        },
-      ),
-    );
-  }
-
   // ── Export ──────────────────────────────────────────────────────────────────
 
   void _openExport() {
@@ -285,7 +265,7 @@ class _ManagerAttendanceScreenState
           return;
         }
         final dateRange =
-            '${DateFormatter.fmt(req.startDate)} → ${DateFormatter.fmt(req.endDate)}';
+            '${DateFormatter.fmt(req.startDate)} - ${DateFormatter.fmt(req.endDate)}';
         final filename =
             'attendance_${DateFormatter.fmtApi(req.startDate)}_${DateFormatter.fmtApi(req.endDate)}';
         final bytes = req.format == ExportFormat.csv
@@ -313,112 +293,114 @@ class _ManagerAttendanceScreenState
 
   // ── Remind ──────────────────────────────────────────────────────────────────
 
-  Future<void> _openRemind() async {
-    await ref
-        .read(managerAttendanceProvider.notifier)
-        .fetchAllAttendance(filterDate: fmtDate(DateTime.now()));
-    if (!mounted) return;
-    final records = ref.read(managerAttendanceProvider).value?.records ?? [];
-    final unchecked = records
-        .where((r) => r.checkInTime == null || r.checkInTime!.isEmpty)
-        .map(
-          (r) => StaffRemindItem(
-            id: r.staffId,
-            name: r.displayName,
-            department: r.staffName,
-            photoUrl: r.staffAvatarUrl,
-          ),
-        )
-        .toList();
-    if (!mounted) return;
-    await RemindDialog.show(
-      context,
-      uncheckedStaff: unchecked,
-      onSendReminder: (staffUserIds) async {
-        if (staffUserIds.isEmpty) return;
-        final notifier = ref.read(notificationNotifierProvider.notifier);
-        try {
-          await Future.wait(
-            staffUserIds.map(
-              (userId) => notifier.adminCreate(
-                userId: userId,
-                title: 'Attendance reminder',
-                message:
-                    "You haven't checked in yet today. Please check in now.",
-                type: 'warning',
-              ),
-            ),
-          );
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Reminder sent to ${staffUserIds.length} staff member${staffUserIds.length == 1 ? '' : 's'}.',
-                ),
-                backgroundColor: Colors.green.shade700,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        } catch (e) {
-          if (mounted)
-            _showErrorSnackBar('Failed to send reminders: $e', () {});
-        }
-      },
-    );
-    if (mounted) {
-      ref
-          .read(managerAttendanceProvider.notifier)
-          .fetchAllAttendance(
-            filterDate: _filterDate,
-            month: _month,
-            year: _year,
-          );
-    }
-  }
+  // Future<void> _openRemind() async {
+  //   await ref
+  //       .read(managerAttendanceProvider.notifier)
+  //       .fetchAllAttendance(filterDate: fmtDate(DateTime.now()));
+  //   if (!mounted) return;
+  //   final records = ref.read(managerAttendanceProvider).value?.records ?? [];
+  //   final unchecked = records
+  //       .where((r) => r.checkInTime == null || r.checkInTime!.isEmpty)
+  //       .map(
+  //         (r) => StaffRemindItem(
+  //           id: r.staffId,
+  //           name: r.displayName,
+  //           department: r.staffName,
+  //           photoUrl: r.staffAvatarUrl,
+  //         ),
+  //       )
+  //       .toList();
+  //   if (!mounted) return;
+  //   await RemindDialog.show(
+  //     context,
+  //     uncheckedStaff: unchecked,
+  //     onSendReminder: (staffUserIds) async {
+  //       if (staffUserIds.isEmpty) return;
+  //       final notifier = ref.read(notificationNotifierProvider.notifier);
+  //       try {
+  //         await Future.wait(
+  //           staffUserIds.map(
+  //             (userId) => notifier.adminCreate(
+  //               userId: userId,
+  //               title: 'Attendance reminder',
+  //               message:
+  //                   "You haven't checked in yet today. Please check in now.",
+  //               type: 'warning',
+  //             ),
+  //           ),
+  //         );
+  //         if (mounted) {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             SnackBar(
+  //               content: Text(
+  //                 'Reminder sent to ${staffUserIds.length} staff member${staffUserIds.length == 1 ? '' : 's'}.',
+  //               ),
+  //               backgroundColor: Colors.green.shade700,
+  //               behavior: SnackBarBehavior.floating,
+  //             ),
+  //           );
+  //         }
+  //       } catch (e) {
+  //         if (mounted)
+  //           _showErrorSnackBar('Failed to send reminders: $e', () {});
+  //       }
+  //     },
+  //   );
+  //   if (mounted) {
+  //     ref
+  //         .read(managerAttendanceProvider.notifier)
+  //         .fetchAllAttendance(
+  //           filterDate: _filterDate,
+  //           month: _month,
+  //           year: _year,
+  //         );
+  //   }
+  // }
 
   // ── Settings ────────────────────────────────────────────────────────────────
 
-  Future<void> _openSettings() async {
-    if (!mounted) return;
-    final notifier = ref.read(attendanceSettingsProvider.notifier);
-    await notifier.fetchSettings();
-    if (!mounted) return;
-    final s = ref.read(attendanceSettingsProvider);
-    if (s.settings == null) {
-      _showSaveResult(s.error ?? 'Failed to load settings');
-      return;
-    }
-    final formData = AttendanceSettings(
-      officeLat: s.settings!.officeLatitude,
-      officeLng: s.settings!.officeLongitude,
-      geofenceRadius: s.settings!.allowedRadiusMeters,
-      lateThresholdMinutes: s.settings!.lateThresholdMinutes,
-      overtimeThresholdMinutes: s.settings!.overtimeThresholdMinutes,
-      officeOpenTime: s.settings!.officeOpenTime,
-      officeCloseTime: s.settings!.officeCloseTime,
-      timezone: s.settings!.timezone,
-      departments: const [],
-    );
-    await AttendanceSettingsSheet.show(
-      context,
-      initial: formData,
-      onSave: (newSettings) async {
-        await notifier.updateSettings(
-          officeLatitude: newSettings.officeLat,
-          officeLongitude: newSettings.officeLng,
-          allowedRadiusMeters: newSettings.geofenceRadius,
-          lateThresholdMinutes: newSettings.lateThresholdMinutes,
-          overtimeThresholdMinutes: newSettings.overtimeThresholdMinutes,
-          officeOpenTime: newSettings.officeOpenTime,
-          officeCloseTime: newSettings.officeCloseTime,
-          timezone: newSettings.timezone,
-        );
-        if (!mounted) return;
-        _showSaveResult(ref.read(attendanceSettingsProvider).error);
-      },
-    );
-  }
+  // Future<void> _openSettings() async {
+  //   if (!mounted) return;
+  //   final notifier = ref.read(attendanceSettingsProvider.notifier);
+  //   await notifier.fetchSettings();
+  //   if (!mounted) return;
+  //   final s = ref.read(attendanceSettingsProvider);
+  //   if (s.settings == null) {
+  //     _showSaveResult(s.error ?? 'Failed to load settings');
+  //     return;
+  //   }
+  //   final formData = AttendanceSettings(
+  //     officeLat: s.settings!.officeLatitude,
+  //     officeLng: s.settings!.officeLongitude,
+  //     geofenceRadius: s.settings!.allowedRadiusMeters,
+  //     lateThresholdMinutes: s.settings!.lateThresholdMinutes,
+  //     overtimeThresholdMinutes: s.settings!.overtimeThresholdMinutes,
+  //     officeOpenTime: s.settings!.officeOpenTime,
+  //     officeCloseTime: s.settings!.officeCloseTime,
+  //     timezone: s.settings!.timezone,
+  //     departments: const [],
+  //   );
+  //   await AttendanceSettingsSheet.show(
+  //     context,
+  //     initial: formData,
+  //     onSave: (newSettings) async {
+  //       await notifier.updateSettings(
+  //         officeLatitude: newSettings.officeLat,
+  //         officeLongitude: newSettings.officeLng,
+  //         allowedRadiusMeters: newSettings.geofenceRadius,
+  //         lateThresholdMinutes: newSettings.lateThresholdMinutes,
+  //         overtimeThresholdMinutes: newSettings.overtimeThresholdMinutes,
+  //         officeOpenTime: newSettings.officeOpenTime,
+  //         officeCloseTime: newSettings.officeCloseTime,
+  //         timezone: newSettings.timezone,
+  //       );
+  //       if (!mounted) return;
+  //       _showSaveResult(ref.read(attendanceSettingsProvider).error);
+  //     },
+  //     onShowQr: () => showOfficeQrDialog(context, ref),
+  //     onRefreshQr: () => refreshOfficeQr(ref),
+  //   );
+  // }
 
   // ── Snackbars ───────────────────────────────────────────────────────────────
 
@@ -438,22 +420,22 @@ class _ManagerAttendanceScreenState
     );
   }
 
-  void _showSaveResult(String? error) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      error != null
-          ? SnackBar(
-              content: Text(error),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            )
-          : const SnackBar(
-              content: Text('✅ Settings saved'),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-    );
-  }
+  // void _showSaveResult(String? error) {
+  //   if (!mounted) return;
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     error != null
+  //         ? SnackBar(
+  //             content: Text(error),
+  //             backgroundColor: Colors.red,
+  //             behavior: SnackBarBehavior.floating,
+  //           )
+  //         : const SnackBar(
+  //             content: Text('✅ Settings saved'),
+  //             backgroundColor: Colors.green,
+  //             behavior: SnackBarBehavior.floating,
+  //           ),
+  //   );
+  // }
 
   // ── Computed ────────────────────────────────────────────────────────────────
 
@@ -490,8 +472,6 @@ class _ManagerAttendanceScreenState
     final dividerColor = isDark ? Pallets.dividerDark : Pallets.dividerLight;
 
     final asyncState = ref.watch(managerAttendanceProvider);
-    final isScanLoading =
-        ref.watch(scanAttendanceProvider).value?.isLoading ?? false;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -565,6 +545,7 @@ class _ManagerAttendanceScreenState
                   year: _year,
                   onPrevious: () => _changeMonth(-1),
                   onNext: () => _changeMonth(1),
+                  onReport: _openExport,
                   filterLabel: _filterLabel,
                   hasFilter: _hasFilter,
                   showSearch: _showSearch,
@@ -636,39 +617,7 @@ class _ManagerAttendanceScreenState
                 child: Divider(height: 1, thickness: 1, color: dividerColor),
               ),
 
-              // ── Toolbar (flat row, no boxed background) ───────────
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                child: ManagerToolbar(
-                  isScanLoading: isScanLoading,
-                  onShowQr: _showOfficeQrDialog,
-                  onRefreshQr: () async {
-                    await ref
-                        .read(scanAttendanceProvider.notifier)
-                        .fetchOfficeQr();
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Office QR refreshed.'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  },
-                  onExport: _openExport,
-                  onRemind: _openRemind,
-                  onSettings: _openSettings,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Divider(height: 1, thickness: 1, color: dividerColor),
-              ),
-
               // ── Records list ──────────────────────────────────────
-              // No manual bottom padding needed here: this screen's own
-              // SafeArea (in build()) already consumes the nav-bar space
-              // that AppShell reports via MediaQuery.padding.bottom.
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 4),

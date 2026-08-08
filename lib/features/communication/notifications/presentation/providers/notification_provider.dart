@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/core/constants/api_constants.dart';
+import 'package:frontendmobile/core/service/local_notification_service.dart';
 import 'package:frontendmobile/features/communication/notifications/data/datasources/notification_remote_datasource.dart';
 import 'package:frontendmobile/features/communication/notifications/data/datasources/notification_ws_datasource.dart';
 import 'package:frontendmobile/features/communication/notifications/data/repositories/notification_repository_impl.dart';
@@ -35,7 +36,7 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
     final storage = ref.read(secureStorageProvider);
     _remote = NotificationRemoteDataSourceImpl(dio: dioClient.dio);
     _ws = NotificationWsDataSource(
-      wsBaseUrl: ApiConstants.wsBaseUrl,
+      wsUrl: ApiConstants.notificationWs,
       getToken: storage.getAccessToken,
     );
 
@@ -54,8 +55,13 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
       _wsSub?.cancel();
       _ws.dispose();
     });
-
-    return const NotificationState();
+    try {
+      final notifications = await _getMyNotifications(unreadOnly: false);
+      final summary = await _getSummary();
+      return NotificationState(notifications: notifications, summary: summary);
+    } catch (_) {
+      return const NotificationState();
+    }
   }
   //////////////////////////////////////////////////////////////////////////////
   // ── WebSocket ──────────────────────────────────────────────────────────────
@@ -78,6 +84,10 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
             ),
           );
 
+        //////////////////////////////////////////////
+        ///
+        ////////////////////////////////////////////
+
         case WsNewNotificationEvent(:final notification):
           final updated = [notification, ...current.notifications];
           final summary = current.summary != null
@@ -90,11 +100,24 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
           state = AsyncData(
             current.copyWith(notifications: updated, summary: summary),
           );
+
+          LocalNotificationService.show(
+            title: notification.title,
+            body: notification.message,
+            id: notification.notificationId != 0
+                ? notification.notificationId
+                : DateTime.now().millisecondsSinceEpoch.remainder(100000),
+          );
+
         case WsErrorEvent():
           state = AsyncData(current.copyWith(wsConnected: false));
         case WsPongEvent():
           break;
       }
+
+      //////////////////////////////////////////////
+      ///
+      ////////////////////////////////////////////
     });
     _ws.connect();
   }

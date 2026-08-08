@@ -28,14 +28,14 @@ class AuthRepositoryImpl implements AuthRepository {
   //
   ///////////////////////////////////////////////////////////////////////
 
-  // @override
-  // Future<bool> validateToken(String token) async {
-  //   try {
-  //     return await _datasource.validateToken(token);
-  //   } on DioException catch (e) {
-  //     throw ApiErrorHandler.getMessage(e);
-  //   }
-  // }
+ @override
+Future<bool> validateToken(String token) async {
+  try {
+    return await _datasource.validateToken(token);
+  } on DioException catch (e) {
+    throw ApiErrorHandler.getMessage(e);
+  }
+}
 
   ////////////////////////////////////////////////////////////////////////
   //

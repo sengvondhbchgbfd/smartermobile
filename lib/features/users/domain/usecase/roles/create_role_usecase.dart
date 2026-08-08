@@ -19,3 +19,25 @@ class CreateRoleUsecae {
     return repository.createRole(params.toJson());
   }
 }
+
+class SetRolePermissionsParams {
+  final int roleId;
+  final List<String> permissionCodes;
+  const SetRolePermissionsParams({
+    required this.roleId,
+    required this.permissionCodes,
+  });
+}
+
+class SetRolePermissionsUseCase {
+  final UserRepository repository;
+
+  SetRolePermissionsUseCase(this.repository);
+
+  Future<Either<Failure, RoleEntity>> call(SetRolePermissionsParams params) {
+    return repository.setRolePermissions(
+      params.roleId,
+      params.permissionCodes,
+    );
+  }
+}

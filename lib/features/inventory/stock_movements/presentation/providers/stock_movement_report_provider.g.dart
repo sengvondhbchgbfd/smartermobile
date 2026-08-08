@@ -47,7 +47,7 @@ final stockMovementReportRepositoryProvider =
 typedef StockMovementReportRepositoryRef =
     AutoDisposeFutureProviderRef<StockMovementReportRepository>;
 String _$stockMovementReportNotifierHash() =>
-    r'97fc821da8625dc84e3b3f7ef190791ac044bab5';
+    r'e49142c04d139c2bb26c27f911a53e182a5c0823';
 
 /// See also [StockMovementReportNotifier].
 @ProviderFor(StockMovementReportNotifier)

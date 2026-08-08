@@ -107,6 +107,8 @@ class UsersRepositoryImpl implements UserRepository {
     }
   }
 
+  
+
   ////////////////////////////////////////////////////////////
   /// ROLES
   ///////////////////////////////////////////////////////////
@@ -119,6 +121,11 @@ class UsersRepositoryImpl implements UserRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     }
+
+
+
+
+
   }
 
   ////////////////////////////////////////////
@@ -162,7 +169,28 @@ class UsersRepositoryImpl implements UserRepository {
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
+
+
+
   }
+
+
+  @override
+  Future<Either<Failure, RoleEntity>> setRolePermissions(
+    int roleId,
+    List<String> permissionCodes,
+  ) async {
+    try {
+      final result = await datasource.setRolePermissions(roleId, permissionCodes);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
+    }
+  }
+
+  
 
   ///////////////////////////////////////
   ///

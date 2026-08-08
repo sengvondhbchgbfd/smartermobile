@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/auth/data/models/auth_user_model.dart';
 import 'package:frontendmobile/features/dashboard/presentation/components/attendance_scann.dart';
 import 'package:frontendmobile/features/dashboard/presentation/widgets/chat_preview_widget.dart';
@@ -17,7 +18,7 @@ class StatsSection extends StatelessWidget {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-///
+/// ATTENDNCE CARD
 ////////////////////////////////////////////////////////////////////////////////
 
 class AttendanceSection extends StatelessWidget {
@@ -35,10 +36,8 @@ class ModulesSection extends StatelessWidget {
     required this.screenWidth,
     this.currentUser,
   });
-
   final double screenWidth;
   final UserInfo? currentUser;
-
   @override
   Widget build(BuildContext context) =>
       buildModules(context, screenWidth, visibleModules(currentUser));
@@ -53,22 +52,14 @@ class ChatPreviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => buildChatPreview();
 }
-///////////////////////////////////////////////////////////////////////////////
-///
-////////////////////////////////////////////////////////////////////////////////
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
-///
+///  RECENT ACTIVITY — notifier's own build() handles the initial fetch
 ////////////////////////////////////////////////////////////////////////////////
 
-class RecentActivitySection extends StatelessWidget {
+class RecentActivitySection extends ConsumerWidget {
   const RecentActivitySection({super.key});
   @override
-  Widget build(BuildContext context) => buildRecentActivity(context);
+  Widget build(BuildContext context, WidgetRef ref) =>
+      buildRecentActivity(context, ref);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-///
-////////////////////////////////////////////////////////////////////////////////

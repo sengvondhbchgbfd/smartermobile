@@ -12,6 +12,7 @@ import 'package:frontendmobile/features/auth/domain/usecases/auth/logout_usecase
 import 'package:frontendmobile/features/auth/domain/usecases/auth/refresh_token_usecase.dart';
 import 'package:frontendmobile/features/auth/domain/usecases/auth/reset_password_usecase.dart';
 import 'package:frontendmobile/features/auth/domain/usecases/auth/setup/register_setup_usecase.dart';
+import 'package:frontendmobile/features/auth/domain/usecases/auth/validate_token_usecase.dart';
 import 'package:frontendmobile/features/auth/domain/usecases/user/activate_user_usecase.dart';
 import 'package:frontendmobile/features/auth/domain/usecases/user/deactivate_user_usecase.dart';
 import 'package:frontendmobile/features/auth/domain/usecases/user/get_user_usecase.dart';
@@ -96,6 +97,13 @@ final refreshTokenUseCaseProvider = FutureProvider<RefreshTokenUseCase>((
   return RefreshTokenUseCase(await ref.watch(authRepositoryProvider.future));
 });
 
+// ── Validate token ────────────────────────────────────────────
+final validateTokenUseCaseProvider = FutureProvider<ValidateTokenUseCase>((
+  ref,
+) async {
+  return ValidateTokenUseCase(await ref.watch(authRepositoryProvider.future));
+});
+
 ///////////////////////////////////////////////////////////////////////
 ///
 /////////////////////////////////////////////////////////////////////
@@ -138,7 +146,6 @@ class UserNotifier extends StateNotifier<AsyncValue<List<UserInfo>>> {
 
   final profileProvider = FutureProvider<UserInfo?>((ref) async {
     final storage = ref.read(secureStorageProvider);
-
     return await storage.getUserInfo();
   });
 
@@ -301,7 +308,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
   final SecureStorageService _storage;
   AuthNotifier(this._ref, this._storage) : super(const AsyncData(null));
-
   // ============================================================
   // AUTH NOTIFIER LOGIN
   // ============================================================
@@ -310,16 +316,12 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncLoading();
     try {
       final loginUseCase = await _ref.read(loginUseCaseProvider.future);
-
       final result = await loginUseCase(username, password);
-
       await _storage.saveTokens(
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
       );
-
       await _storage.saveUserInfo(result.user);
-
       _ref.read(currentUserProvider.notifier).state = result.user;
       _invalidateCompanyScopedProviders();
 
@@ -355,8 +357,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<void>> {
     _ref.invalidate(staffNotifierProvider);
     _ref.invalidate(productNotifierProvider);
     _ref.invalidate(userProvider);
-    _ref.invalidate(staffNotifierProvider);
-    _ref.invalidate(productNotifierProvider);
   }
 
   /////////////////////////////////////////////////////////////////

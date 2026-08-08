@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/core/service/local_notification_service.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/features/communication/notifications/domain/entities/notification_entity.dart';
@@ -293,6 +294,20 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: ElevatedButton(
+              onPressed: () {
+                LocalNotificationService.show(
+                  title: 'Test Notification',
+                  body: 'This is a test alert',
+                  id: 999,
+                  payload: '999',
+                );
+              },
+              child: const Text('Test Local Notification'),
+            ),
+          ),
           const FilterBar(),
           Expanded(
             child: notifAsync.when(

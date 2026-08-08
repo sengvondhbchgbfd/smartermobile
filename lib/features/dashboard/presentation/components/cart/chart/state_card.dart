@@ -8,14 +8,17 @@ class StatCard extends StatelessWidget {
   final Color iconBg;
   final String label;
   final String value;
-  final String? stockIn;   // optional now
-  final String? stockOut;  // optional now
+  final String? stockIn;
+  final String? stockOut;
   final String sub;
   final bool isUp;
   final bool isLive;
   final String badge;
   final List<double> sparkData;
   final Color sparkColor;
+  final double? height;
+  final double? width;
+  final String? allTime;
 
   const StatCard({
     super.key,
@@ -32,6 +35,9 @@ class StatCard extends StatelessWidget {
     required this.badge,
     required this.sparkData,
     required this.sparkColor,
+    this.height,
+    this.width,
+    this.allTime,
   });
 
   @override
@@ -55,11 +61,11 @@ class StatCard extends StatelessWidget {
         ? Pallets.success.withOpacity(0.12)
         : Pallets.error.withOpacity(0.12);
 
-    final cardWidth = (MediaQuery.sizeOf(context).width - 36 - 10) / 2;
     final hasInOut = stockIn != null && stockOut != null;
 
     return Container(
-      width: cardWidth,
+      width: width ?? double.infinity,
+      height: height,
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
         color: cardBg,
@@ -68,7 +74,10 @@ class StatCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: height == null ? MainAxisSize.min : MainAxisSize.max,
+        mainAxisAlignment: height == null
+            ? MainAxisAlignment.start
+            : MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
@@ -114,13 +123,31 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 1),
           Text(sub, style: TextStyle(fontSize: 10, color: labelColor)),
           //////////////////////////////////////////////////////////////////
+          /// All-time value — only rendered when provided
+          //////////////////////////////////////////////////////////////////
+          if (allTime != null) ...[
+            const SizedBox(height: 1),
+            Text(
+              allTime!,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+                color: labelColor.withOpacity(0.7),
+              ),
+            ),
+          ],
+          //////////////////////////////////////////////////////////////////
           /// Stock in/out row — only rendered when both values are present
           //////////////////////////////////////////////////////////////////
           if (hasInOut) ...[
             const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.arrow_upward_rounded, size: 11, color: Pallets.success),
+                Icon(
+                  Icons.arrow_upward_rounded,
+                  size: 11,
+                  color: Pallets.success,
+                ),
                 const SizedBox(width: 2),
                 Text(
                   stockIn!,
@@ -131,7 +158,11 @@ class StatCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(Icons.arrow_downward_rounded, size: 11, color: Pallets.error),
+                Icon(
+                  Icons.arrow_downward_rounded,
+                  size: 11,
+                  color: Pallets.error,
+                ),
                 const SizedBox(width: 2),
                 Text(
                   stockOut!,
@@ -145,13 +176,23 @@ class StatCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 6),
-          SizedBox(
-            height: 28,
-            width: double.infinity,
-            child: CustomPaint(
-              painter: SparklinePainter(data: sparkData, color: sparkColor),
+          if (height != null)
+            Expanded(
+              child: SizedBox(
+                width: double.infinity,
+                child: CustomPaint(
+                  painter: SparklinePainter(data: sparkData, color: sparkColor),
+                ),
+              ),
+            )
+          else
+            SizedBox(
+              height: 28,
+              width: double.infinity,
+              child: CustomPaint(
+                painter: SparklinePainter(data: sparkData, color: sparkColor),
+              ),
             ),
-          ),
         ],
       ),
     );

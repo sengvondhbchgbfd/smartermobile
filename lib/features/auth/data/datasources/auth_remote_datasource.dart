@@ -4,7 +4,7 @@ import 'package:frontendmobile/features/auth/data/models/auth_user_model.dart';
 import 'package:frontendmobile/features/auth/data/models/change_password_model.dart';
 
 abstract class AuthRemoteDatasource {
-  // Future<bool> validateToken(String token);
+  Future<bool> validateToken(String token);
   Future<UserModel> login(String username, String password);
   Future<void> register(RegisterRequestModel model);
   Future<void> registerUser(RegisterUserRequestModel model);

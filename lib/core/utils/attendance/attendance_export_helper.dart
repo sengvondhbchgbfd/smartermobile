@@ -29,9 +29,9 @@ class AttendanceExportHelper {
 
       buffer.writeln(
         '${r.attendanceId},'
-        '${r.staffId ?? ""},'
+        '${r.staffId},'
         '${_csvSafe(r.staffName)},'
-        '${r.date ?? ""},'
+        '${DateFormatter.fmt(r.date)},'
         '${r.checkInTime ?? ""},'
         '${r.checkOutTime ?? ""},'
         '${duration ?? ""},'
@@ -195,14 +195,14 @@ class AttendanceExportHelper {
 
                       final cells = <String>[
                         '${r.attendanceId}',
-                        '${r.staffId ?? ""}',
-                        r.staffName ?? '—',
+                        '${r.staffId}',
+                        r.staffName ?? '-',
+                        DateFormatter.fmt(r.date),
                         _formatTime(r.checkInTime),
                         _formatTime(r.checkOutTime),
-                        duration ?? '—',
+                        duration ?? '-',
                         status,
                       ];
-
                       return pw.TableRow(
                         decoration: pw.BoxDecoration(
                           color: isEven
@@ -219,7 +219,7 @@ class AttendanceExportHelper {
                               vertical: 4,
                             ),
                             child: pw.Text(
-                              cells[index], // <-- guaranteed String
+                              cells[index],
                               style: pw.TextStyle(
                                 fontSize: 8,
                                 color: isStatus ? statusColor : PdfColors.black,
@@ -322,8 +322,10 @@ class AttendanceExportHelper {
   }
 
   /// Format "HH:mm:ss" → "HH:mm" for display.
+  /// Uses '-' rather than '—' (em dash): the default PDF core font
+  /// (Helvetica) has no glyph for U+2014 and renders it as a tofu box.
   static String _formatTime(String? raw) {
-    if (raw == null || raw.isEmpty) return '—';
+    if (raw == null || raw.isEmpty) return '-';
     return fmtKhmerTime(raw);
   }
 

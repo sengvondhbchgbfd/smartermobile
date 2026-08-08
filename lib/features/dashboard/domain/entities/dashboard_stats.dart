@@ -5,6 +5,9 @@ class StatCardData {
   final List<double> spark;
   final double? stockIn;
   final double? stockOut;
+  final double? currentPeriodValue;
+  final double? previousPeriodValue;
+  final double? allTimeValue;
 
   const StatCardData({
     required this.value,
@@ -13,6 +16,9 @@ class StatCardData {
     required this.spark,
     this.stockIn,
     this.stockOut,
+    this.currentPeriodValue,
+    this.previousPeriodValue,
+    this.allTimeValue,
   });
 }
 

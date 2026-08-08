@@ -1,11 +1,10 @@
-// import '../repositories/auth_repository.dart';
+import 'package:frontendmobile/features/auth/domain/repositories/auth_repository.dart';
 
-// class ValidateTokenUseCase {
-//   final AuthRepository repo;
+class ValidateTokenUseCase {
+  final AuthRepository _repository;
+  ValidateTokenUseCase(this._repository);
 
-//   ValidateTokenUseCase(this.repo);
-
-//   Future<bool> call(String token) async {
-//     return await repo.validateToken(token);
-//   }
-// }
+  Future<bool> call(String token) async {
+    return await _repository.validateToken(token);
+  }
+}

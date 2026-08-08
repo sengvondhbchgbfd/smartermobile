@@ -7,10 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:frontendmobile/features/settings/presentation/providers/settings_provider.dart';
 import 'package:frontendmobile/features/settings/domain/entities/system_setting_entity.dart';
 import 'package:frontendmobile/features/settings/domain/models/setting_create_extra.dart';
-
 class SystemSettingsScreen extends ConsumerStatefulWidget {
   const SystemSettingsScreen({super.key});
-
   @override
   ConsumerState<SystemSettingsScreen> createState() =>
       _SystemSettingsScreenState();

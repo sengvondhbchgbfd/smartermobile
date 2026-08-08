@@ -4,6 +4,7 @@ import 'package:frontendmobile/config/routes/router_app_shell_controls/shell_scr
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/users/presentation/provider/user_notifier.dart';
 import 'package:frontendmobile/features/users/presentation/provider/users_state.dart';
+import 'package:frontendmobile/features/users/presentation/widgets/tabs/role_permissions_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class RolesTab extends ConsumerWidget {
@@ -48,9 +49,12 @@ class RolesTab extends ConsumerWidget {
         final userCount = data.users.where((u) => u.roleId == role.id).length;
 
         return GestureDetector(
-          onTap: () => context.push(
-            '/users/filtered',
-            extra: {'type': 'role', 'id': role.id, 'title': role.roleName},
+          // 👇 tapping the card now opens permissions editing
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RolePermissionsScreen(role: role),
+            ),
           ),
           child: Container(
             margin: const EdgeInsets.only(bottom: 10),
@@ -85,24 +89,58 @@ class RolesTab extends ConsumerWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              subtitle: Text(
-                '$userCount ${userCount == 1 ? 'user' : 'users'}',
-                style: TextStyle(color: textSecondary, fontSize: 12),
+              // 👇 subtitle is now a tappable link to the filtered user list
+              subtitle: GestureDetector(
+                onTap: () => context.push(
+                  '/users/filtered',
+                  extra: {
+                    'type': 'role',
+                    'id': role.id,
+                    'title': role.roleName,
+                  },
+                ),
+                child: Text(
+                  '$userCount ${userCount == 1 ? 'user' : 'users'}',
+                  style: TextStyle(
+                    color: Pallets.blurple,
+                    fontSize: 12,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
-              trailing: IconButton(
-                icon: const Icon(
-                  Icons.delete_outline_rounded,
-                  color: Pallets.error,
-                  size: 20,
-                ),
-                onPressed: () => _confirmDelete(
-                  context,
-                  ref,
-                  role,
-                  dialogBg,
-                  textPrimary,
-                  textSecondary,
-                ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.lock_outline_rounded,
+                      color: textSecondary,
+                      size: 20,
+                    ),
+                    tooltip: 'Edit permissions',
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RolePermissionsScreen(role: role),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: Pallets.error,
+                      size: 20,
+                    ),
+                    onPressed: () => _confirmDelete(
+                      context,
+                      ref,
+                      role,
+                      dialogBg,
+                      textPrimary,
+                      textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

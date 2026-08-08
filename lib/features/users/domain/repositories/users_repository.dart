@@ -24,6 +24,10 @@ abstract class UserRepository {
   Future<Either<Failure, List<RoleEntity>>> getRoles();
   Future<Either<Failure, RoleEntity>> createRole(Map<String, dynamic> data);
   Future<Either<Failure, void>> deleteRole(int id);
+   Future<Either<Failure, RoleEntity>> setRolePermissions(  
+    int roleId,
+    List<String> permissionCodes,
+  );
   ////////////////////////////////////////////////
   // DEPARTMENTS
   ////////////////////////////////////////////////

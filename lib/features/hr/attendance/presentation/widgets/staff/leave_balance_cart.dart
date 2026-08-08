@@ -16,12 +16,11 @@ class LeaveBalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = total > 0 ? used / total : 0.0;
 
-    // color changes based on how much is used
     final Color barColor = progress < 0.5
-        ? const Color(0xFF1D9E75) // green — plenty left
+        ? const Color(0xFF1D9E75)
         : progress < 0.8
-        ? const Color(0xFFBA7517) // amber — getting low
-        : const Color(0xFFE24B4A); // red — almost out
+        ? const Color(0xFFBA7517)
+        : const Color(0xFFE24B4A);
 
     return Container(
       padding: const EdgeInsets.all(16),
