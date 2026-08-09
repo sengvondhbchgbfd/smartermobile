@@ -4,7 +4,7 @@ class ApiConstants {
   static final String baseUrl =
       (dotenv.env['BASE_URL']?.trim().isNotEmpty == true
               ? dotenv.env['BASE_URL']!.trim()
-              : 'http://172.31.80.130:8000')
+              : 'http://10.103.17.130:8000')
           .replaceAll(RegExp(r'/+$'), '');
 
   static const String apiVersion = '/api/v1';
@@ -29,6 +29,7 @@ class ApiConstants {
   static const String refreshTokenKey = 'refresh_token';
   static const String userIdKey = 'user_id';
   static const String companyIdKey = 'company_id';
+  static const String permissionsKey = 'permissions';
 
   // ============================================================
   // API CONSTANTS

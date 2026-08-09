@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontendmobile/features/auth/data/models/auth_user_model.dart';
@@ -102,6 +104,14 @@ class SecureStorageService {
       _read(ApiConstants.departmentIdKey),
     ]);
     if (results[0] == null) return null;
+    List<String> permissions = [];
+    if (results[9] != null && results[9]!.isNotEmpty) {
+      try {
+        permissions = List<String>.from(jsonDecode(results[9]!));
+      } catch (_) {
+        permissions = [];
+      }
+    }
     return UserInfo(
       userId: int.parse(results[0]!),
       companyId: int.parse(results[1]!),
@@ -113,7 +123,7 @@ class SecureStorageService {
       role: results[5] ?? '',
       status: results[6] ?? '',
       isManager: results[7] == 'true',
-      permissions: [],
+      permissions: permissions,
       departmentId: (results[8] != null && results[8]!.isNotEmpty)
           ? int.parse(results[8]!)
           : null,
@@ -158,6 +168,7 @@ class SecureStorageService {
       _delete(ApiConstants.statusKey),
       _delete(ApiConstants.isManagerKey),
       _delete(ApiConstants.departmentIdKey),
+      _delete(ApiConstants.permissionsKey),
     ]);
   }
 }

@@ -89,6 +89,11 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
         ////////////////////////////////////////////
 
         case WsNewNotificationEvent(:final notification):
+          final alreadyExists = current.notifications.any(
+            (n) => n.notificationId == notification.notificationId,
+          );
+          if (alreadyExists) return;
+
           final updated = [notification, ...current.notifications];
           final summary = current.summary != null
               ? NotificationSummaryEntity(
@@ -107,6 +112,7 @@ class NotificationNotifier extends AsyncNotifier<NotificationState> {
             id: notification.notificationId != 0
                 ? notification.notificationId
                 : DateTime.now().millisecondsSinceEpoch.remainder(100000),
+            payload: notification.notificationId.toString(),
           );
 
         case WsErrorEvent():

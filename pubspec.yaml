@@ -101,7 +101,15 @@ dev_dependencies:
   build_runner: ^2.4.13
   riverpod_generator: ^2.4.0
   json_serializable: ^6.9.0
-  # analyzer: ^13.0.0                 # ← upgrade from ^2.5.7 to ^3.0.0
+
+  flutter_launcher_icons: ^0.13.1
+
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/duong_chhiv_logo.png"
+
 
 
 

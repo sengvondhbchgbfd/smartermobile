@@ -3,25 +3,54 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 class LocalNotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
 
-  static Future<void> init() async {
+  static const String actionMarkRead = 'mark_read';
+  static const String actionView = 'view';
+  static void Function(String actionId, String? payload)? onAction;
+
+  
+  static Future<void> init({
+    void Function(String actionId, String? payload)? onNotificationAction,
+  }) async {
+    onAction = onNotificationAction;
+
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosInit = DarwinInitializationSettings(
+
+    final iosInit = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
+      notificationCategories: [
+        DarwinNotificationCategory(
+          'notification_actions',
+          actions: [
+            DarwinNotificationAction.plain(actionMarkRead, 'Mark as read'),
+            DarwinNotificationAction.plain(
+              actionView,
+              'View',
+              options: {DarwinNotificationActionOption.foreground},
+            ),
+          ],
+        ),
+      ],
     );
-    const settings = InitializationSettings(android: androidInit, iOS: iosInit);
+
+    final settings = InitializationSettings(android: androidInit, iOS: iosInit);
 
     await _plugin.initialize(
       settings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        print('🔔 Notification tapped: ${response.payload}');
-        // TODO: navigate using response.payload
+        print(
+          '🔔 Notification tapped: ${response.payload}, action: ${response.actionId}',
+        );
+        final actionId = response.actionId ?? actionView;
+        onAction?.call(actionId, response.payload);
       },
     );
 
-    final androidImpl = _plugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final AndroidFlutterLocalNotificationsPlugin? androidImpl = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
 
     await androidImpl?.deleteNotificationChannel('default_channel');
 
@@ -41,14 +70,26 @@ class LocalNotificationService {
     int id = 0,
     String? payload,
   }) async {
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'default_channel',
       'General Notifications',
       importance: Importance.high,
       priority: Priority.high,
+      largeIcon: const DrawableResourceAndroidBitmap('duong_chhiv_logo'),
+      actions: const [
+        AndroidNotificationAction(actionMarkRead, 'Mark as read'),
+        AndroidNotificationAction(actionView, 'View'),
+      ],
     );
-    const iosDetails = DarwinNotificationDetails();
-    const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+
+    const iosDetails = DarwinNotificationDetails(
+      categoryIdentifier: 'notification_actions',
+    );
+
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
 
     await _plugin.show(id, title, body, details, payload: payload);
   }
