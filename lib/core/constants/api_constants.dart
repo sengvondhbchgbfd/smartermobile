@@ -4,7 +4,7 @@ class ApiConstants {
   static final String baseUrl =
       (dotenv.env['BASE_URL']?.trim().isNotEmpty == true
               ? dotenv.env['BASE_URL']!.trim()
-              : 'http://10.103.17.130:8000')
+              : 'http://10.81.68.130:8000')
           .replaceAll(RegExp(r'/+$'), '');
 
   static const String apiVersion = '/api/v1';

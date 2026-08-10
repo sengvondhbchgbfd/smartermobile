@@ -8,19 +8,28 @@ extension UserInfoPermissions on UserInfo {
   bool hasAnyPermission(List<String> perms) =>
       perms.any((p) => hasPermission(p));
 
+  // Attendance
   bool get canViewTeamAttendance =>
       hasPermission(AppPermissions.viewTeamAttendance);
 
   bool get canManageAttendanceSettings =>
       hasPermission(AppPermissions.manageAttendanceSettings);
 
+  // Leave
   bool get canApproveLeave => hasPermission(AppPermissions.approveLeave);
 
   bool get canViewTeamLeave => hasPermission(AppPermissions.viewTeamLeave);
 
+  // Salary
   bool get canViewTeamSalary => hasPermission(AppPermissions.viewTeamSalary);
 
+  bool get canManageSalary => hasPermission(AppPermissions.manageSalary); // ← ADDED, was missing
+
+  // Staff / Users
   bool get canManageStaff => hasPermission(AppPermissions.manageStaff);
+
+  bool get canViewStaff =>
+      hasPermission(AppPermissions.viewUsers) || canManageStaff;
 
   bool get canManageUsers => hasPermission(AppPermissions.manageUsers);
 

@@ -14,14 +14,20 @@ class LeaveScreen extends ConsumerStatefulWidget {
 class _LeaveScreenState extends ConsumerState<LeaveScreen>
     with SingleTickerProviderStateMixin {
   TabController? _tabController;
+  bool? _lastShowBothTabs;
 
-  void _ensureTabController() {
-    _tabController ??= TabController(length: 2, vsync: this);
-  }
+  void _syncTabController(bool showBothTabs) {
+    if (_lastShowBothTabs == showBothTabs) return;
+    _lastShowBothTabs = showBothTabs;
 
-  void _disposeTabController() {
-    _tabController?.dispose();
-    _tabController = null;
+    if (showBothTabs) {
+      _tabController ??= TabController(length: 2, vsync: this);
+    } else {
+      final old = _tabController;
+      _tabController = null;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) => old?.dispose());
+    }
   }
 
   @override
@@ -42,10 +48,12 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen>
     final showBothTabs = hasStaffRecord && canManage;
     final showManagerOnly = canManage && !hasStaffRecord;
 
-    if (showBothTabs) {
-      _ensureTabController();
-    } else {
-      _disposeTabController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncTabController(showBothTabs);
+    });
+    if (showBothTabs && _tabController == null) {
+      _tabController = TabController(length: 2, vsync: this);
+      _lastShowBothTabs = true;
     }
 
     return Scaffold(
@@ -73,8 +81,8 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen>
               ],
             )
           : showManagerOnly
-              ? const ManagerDashboardScreen()
-              : const StaffDashboardScreen(),
+          ? const ManagerDashboardScreen()
+          : const StaffDashboardScreen(),
     );
   }
 }

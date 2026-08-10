@@ -10,6 +10,7 @@ import 'package:frontendmobile/features/auth/presentation/screens/splash_screen.
 import 'package:frontendmobile/features/communication/chat/presentation/screens/chat_groups_screen.dart';
 import 'package:frontendmobile/features/communication/notifications/presentation/screens/notification_screen.dart';
 import 'package:frontendmobile/features/company/domain/entities/company_entity.dart';
+import 'package:frontendmobile/features/company/presentation/screens/company_history_screen.dart';
 import 'package:frontendmobile/features/company/presentation/screens/company_register_screen.dart';
 import 'package:frontendmobile/features/company/presentation/screens/company_screen.dart';
 import 'package:frontendmobile/features/company/presentation/widgets/form/company_edit_screen.dart';
@@ -360,6 +361,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.settings,
         builder: (context, state) => const SystemSettingsScreen(),
       ),
+      GoRoute(
+      path: '/companies/:id/history',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return CompanyHistoryScreen(companyId: id);
+      },
+    ),
+
+
+
+
+
+
+
       GoRoute(
         path: RouteNames.systemSettingCreate,
         builder: (_, state) {

@@ -1,4 +1,5 @@
 import '../../domain/entities/quotation_item_entity.dart';
+import 'quotation_price_tier_model.dart';
 
 class QuotationItemModel extends QuotationItemEntity {
   const QuotationItemModel({
@@ -18,6 +19,7 @@ class QuotationItemModel extends QuotationItemEntity {
     required super.unitPrice,
     required super.totalPrice,
     super.note,
+    super.priceTiers,
   });
 
   factory QuotationItemModel.fromJson(Map<String, dynamic> json) {
@@ -38,10 +40,14 @@ class QuotationItemModel extends QuotationItemEntity {
       unitPrice: double.tryParse('${json['unit_price']}') ?? 0,
       totalPrice: double.tryParse('${json['total_price']}') ?? 0,
       note: json['note'] as String?,
+      priceTiers: (json['price_tiers'] as List<dynamic>?)
+          ?.map(
+            (t) => QuotationPriceTierModel.fromJson(t as Map<String, dynamic>),
+          )
+          .toList(),
     );
   }
 
-  /// Payload for create/update requests.
   Map<String, dynamic> toJson() {
     return {
       'sort_order': sortOrder,
@@ -57,6 +63,8 @@ class QuotationItemModel extends QuotationItemEntity {
       'quantity': quantity,
       'unit_price': unitPrice,
       if (note != null) 'note': note,
+      if (priceTiers != null)
+        'price_tiers': quotationPriceTiersToJson(priceTiers!),
     };
   }
 }

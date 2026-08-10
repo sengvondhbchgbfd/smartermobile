@@ -8,7 +8,10 @@ import '../../domain/repositories/system_setting_repository.dart';
 import '../../domain/usecase/system_setting_usecase.dart';
 
 // ---------------------------------------------------------------------------
-// Data / Repo / UseCase providers
+// Data / Repo providers — the only ones actually used by SettingsNotifier.
+// Usecase classes are cheap wrappers around `repo`, constructed inline in
+// the notifier methods below rather than via separate FutureProviders —
+// keeps this file from accumulating providers nothing reads.
 // ---------------------------------------------------------------------------
 
 final systemSettingDataSourceProvider =
@@ -23,41 +26,6 @@ final systemSettingRepositoryProvider = FutureProvider<SystemSettingRepository>(
     return SystemSettingRepositoryImpl(ds);
   },
 );
-
-final getAllSettingsUseCaseProvider = FutureProvider((ref) async {
-  final repo = await ref.watch(systemSettingRepositoryProvider.future);
-  return GetAllSettingsUseCase(repo);
-});
-
-final getSettingByIdUseCaseProvider = FutureProvider((ref) async {
-  final repo = await ref.watch(systemSettingRepositoryProvider.future);
-  return GetSettingByIdUseCase(repo);
-});
-
-final createSettingUseCaseProvider = FutureProvider((ref) async {
-  final repo = await ref.watch(systemSettingRepositoryProvider.future);
-  return CreateSettingUseCase(repo);
-});
-
-final updateSettingUseCaseProvider = FutureProvider((ref) async {
-  final repo = await ref.watch(systemSettingRepositoryProvider.future);
-  return UpdateSettingUseCase(repo);
-});
-
-final upsertSettingByKeyUseCaseProvider = FutureProvider((ref) async {
-  final repo = await ref.watch(systemSettingRepositoryProvider.future);
-  return UpsertSettingByKeyUseCase(repo);
-});
-
-final bulkUpsertSettingsUseCaseProvider = FutureProvider((ref) async {
-  final repo = await ref.watch(systemSettingRepositoryProvider.future);
-  return BulkUpsertSettingsUseCase(repo);
-});
-
-final deleteSettingUseCaseProvider = FutureProvider((ref) async {
-  final repo = await ref.watch(systemSettingRepositoryProvider.future);
-  return DeleteSettingUseCase(repo);
-});
 
 // ---------------------------------------------------------------------------
 // Notifier
@@ -75,11 +43,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   }
 
   Future<void> loadAll() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final repo = await _repo;
       final result = await GetAllSettingsUseCase(repo)();
-      state = state.copyWith(settings: result, isLoading: false);
+      state = state.copyWith(settings: result, isLoading: false, error: null);
     } on ApiException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
     } catch (e) {
@@ -99,10 +67,16 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         value: value,
         description: description,
       );
-      state = state.copyWith(settings: [...state.settings, created]);
+      state = state.copyWith(
+        settings: [...state.settings, created],
+        error: null,
+      );
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(error: e.message);
+      return false;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
       return false;
     }
   }
@@ -123,10 +97,14 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         settings: state.settings
             .map((s) => s.settingId == settingId ? updated : s)
             .toList(),
+        error: null,
       );
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(error: e.message);
+      return false;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
       return false;
     }
   }
@@ -145,10 +123,14 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
                   .map((s) => s.settingId == result.settingId ? result : s)
                   .toList()
             : [...state.settings, result],
+        error: null,
       );
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(error: e.message);
+      return false;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
       return false;
     }
   }
@@ -162,10 +144,16 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       final newOnes = results.where(
         (r) => !state.settings.any((s) => s.settingId == r.settingId),
       );
-      state = state.copyWith(settings: [...updated, ...newOnes]);
+      state = state.copyWith(
+        settings: [...updated, ...newOnes],
+        error: null,
+      );
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(error: e.message);
+      return false;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
       return false;
     }
   }
@@ -178,10 +166,14 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         settings: state.settings
             .where((s) => s.settingId != settingId)
             .toList(),
+        error: null,
       );
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(error: e.message);
+      return false;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
       return false;
     }
   }
@@ -190,7 +182,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 }
 
 // ---------------------------------------------------------------------------
-// Provider — simple, no Noop classes, no loading constructor
+// Provider
 // ---------------------------------------------------------------------------
 
 final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>(

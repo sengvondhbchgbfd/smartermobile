@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
+import 'package:frontendmobile/features/inventory/quotations/presentation/providers/quotation_provider.dart';
 import 'package:frontendmobile/features/inventory/quotations/presentation/widgets/quotations_form/artwork_delivery_section.dart';
 import 'package:frontendmobile/features/inventory/quotations/presentation/widgets/quotations_form/basic_info_section.dart';
 import 'package:frontendmobile/features/inventory/quotations/presentation/widgets/quotations_form/dates_production_section.dart';
@@ -274,6 +275,7 @@ class _QuotationFormScreenState extends ConsumerState<QuotationFormScreen> {
           ),
           if (!_isEditing) ...[
             const SizedBox(height: 16),
+
             ItemsSection(
               items: formData.items,
               subtotal: formData.subtotal,
@@ -283,17 +285,56 @@ class _QuotationFormScreenState extends ConsumerState<QuotationFormScreen> {
                   context,
                   nextSortOrder: formData.items.length + 1,
                 );
-                if (item != null) notifier.addLocalItem(item);
+                if (item == null) return;
+                if (_isEditing) {
+                  await ref
+                      .read(
+                        quotationDetailNotifierProvider(
+                          widget.existing!.quotationId,
+                        ).notifier,
+                      )
+                      .addItem(item);
+                } else {
+                  notifier.addLocalItem(item);
+                }
               },
+
               onEdit: (index) async {
+                final existingItem = formData.items[index];
                 final updated = await showQuotationItemFormSheet(
                   context,
-                  initial: formData.items[index],
-                  nextSortOrder: formData.items[index].sortOrder,
+                  initial: existingItem,
+                  nextSortOrder: existingItem.sortOrder,
                 );
-                if (updated != null) notifier.updateLocalItem(index, updated);
+                if (updated == null) return;
+
+                if (_isEditing) {
+                  await ref
+                      .read(
+                        quotationDetailNotifierProvider(
+                          widget.existing!.quotationId,
+                        ).notifier,
+                      )
+                      .updateItem(existingItem.itemId, updated);
+                } else {
+                  notifier.updateLocalItem(index, updated);
+                }
               },
-              onDelete: (index) => notifier.removeLocalItem(index),
+              onDelete: (index) async {
+                final existingItem = formData.items[index];
+
+                if (_isEditing) {
+                  await ref
+                      .read(
+                        quotationDetailNotifierProvider(
+                          widget.existing!.quotationId,
+                        ).notifier,
+                      )
+                      .deleteItem(existingItem.itemId);
+                } else {
+                  notifier.removeLocalItem(index);
+                }
+              },
             ),
           ],
         ],

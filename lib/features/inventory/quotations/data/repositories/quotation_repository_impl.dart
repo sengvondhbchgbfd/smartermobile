@@ -1,10 +1,12 @@
 import '../../domain/entities/quotation_entity.dart';
 import '../../domain/entities/quotation_item_entity.dart';
+import '../../domain/entities/quotation_price_tier.dart';
 import '../../domain/entities/quotation_enums.dart';
 import '../../domain/repositories/quotation_repository.dart';
 import '../datasources/quotation_remote_datasource.dart';
 import '../models/quotation_model.dart';
 import '../models/quotation_item_model.dart';
+import '../models/quotation_price_tier_model.dart';
 
 //////////////////////////////////////////////////////////////////////////////
 ///
@@ -90,6 +92,7 @@ class QuotationRepositoryImpl implements QuotationRepository {
             unitPrice: e.unitPrice,
             totalPrice: e.totalPrice,
             note: e.note,
+            priceTiers: e.priceTiers, // ← added: carry tiers through on create
           ),
         )
         .toList();
@@ -180,7 +183,7 @@ class QuotationRepositoryImpl implements QuotationRepository {
   Future<void> delete(int quotationId) => remote.delete(quotationId);
 
   //////////////////////////////////////////////////////////////////////////////
-  ///
+  /// Add item — priceTiers included when non-null.
   //////////////////////////////////////////////////////////////////////////////
 
   @override
@@ -199,6 +202,7 @@ class QuotationRepositoryImpl implements QuotationRepository {
     required int quantity,
     required double unitPrice,
     String? note,
+    List<QuotationPriceTierEntity>? priceTiers, // ← added
   }) {
     return remote.addItem(quotationId, {
       'sort_order': sortOrder,
@@ -214,11 +218,14 @@ class QuotationRepositoryImpl implements QuotationRepository {
       'quantity': quantity,
       'unit_price': unitPrice,
       if (note != null) 'note': note,
+      if (priceTiers != null) // ← added
+        'price_tiers': quotationPriceTiersToJson(priceTiers),
     });
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  ///
+  /// Update item — priceTiers: omitted key = don't touch, [] = clear all,
+  /// non-empty = replace-all.
   //////////////////////////////////////////////////////////////////////////////
 
   @override
@@ -238,6 +245,7 @@ class QuotationRepositoryImpl implements QuotationRepository {
     int? quantity,
     double? unitPrice,
     String? note,
+    List<QuotationPriceTierEntity>? priceTiers, // ← added
   }) {
     final payload = <String, dynamic>{};
     if (sortOrder != null) payload['sort_order'] = sortOrder;
@@ -253,6 +261,10 @@ class QuotationRepositoryImpl implements QuotationRepository {
     if (quantity != null) payload['quantity'] = quantity;
     if (unitPrice != null) payload['unit_price'] = unitPrice;
     if (note != null) payload['note'] = note;
+    if (priceTiers != null) {
+      // ← added
+      payload['price_tiers'] = quotationPriceTiersToJson(priceTiers);
+    }
 
     return remote.updateItem(quotationId, itemId, payload);
   }

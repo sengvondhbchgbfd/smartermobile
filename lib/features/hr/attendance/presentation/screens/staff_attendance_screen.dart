@@ -67,8 +67,6 @@ class _StaffAttendanceScreenState extends ConsumerState<StaffAttendanceScreen> {
         staffState.records.isNotEmpty &&
         staffState.monthlyStats.isNotEmpty;
 
-
-
     if (alreadyLoaded) return;
     await Future.wait([
       if (staffState == null || staffState.records.isEmpty)

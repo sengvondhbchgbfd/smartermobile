@@ -2,7 +2,9 @@ import 'package:dartz/dartz.dart';
 import 'package:frontendmobile/core/errors/exceptions.dart';
 import 'package:frontendmobile/core/errors/failures.dart';
 import 'package:frontendmobile/features/company/data/datasources/company_remote_datasource.dart';
+import 'package:frontendmobile/features/company/data/models/company_history_model.dart';
 import 'package:frontendmobile/features/company/domain/entities/company_entity.dart';
+import 'package:frontendmobile/features/company/domain/entities/compay_status_history_entity.dart';
 import 'package:frontendmobile/features/company/domain/entities/register_response_entity.dart'; // ← add
 import 'package:frontendmobile/features/company/domain/repositories/company_repository.dart';
 import 'package:frontendmobile/features/company/domain/usecases/register_company_usecase.dart'; // ← add
@@ -68,6 +70,38 @@ class CompanyRepositoryImpl implements CompanyRepository {
       return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
+    }
+  }
+
+  @override
+  Future<Either<Failure, CompanyStatusHistoryEntity>> updateStatus({
+    required int companyId,
+    required String status,
+    String? reason,
+  }) async {
+    try {
+      final json = await remoteDatasource.updateStatus(
+        companyId: companyId,
+        status: status,
+        reason: reason,
+      );
+      return Right(CompanyStatusHistoryModel.fromJson(json));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CompanyStatusHistoryEntity>>> getStatusHistory(
+    int companyId,
+  ) async {
+    try {
+      final list = await remoteDatasource.getStatusHistory(companyId);
+      return Right(
+        list.map((e) => CompanyStatusHistoryModel.fromJson(e)).toList(),
+      );
     } catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }

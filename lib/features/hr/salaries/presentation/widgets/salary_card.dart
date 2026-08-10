@@ -10,18 +10,18 @@ import '../../domain/entities/salaries_entity.dart';
 
 class SalaryCard extends ConsumerWidget {
   final SalaryEntity salary;
-  final VoidCallback onEdit;
-  final VoidCallback onMarkPaid;
-  final VoidCallback onDelete;
+  final VoidCallback? onEdit;
+  final VoidCallback? onMarkPaid;
+  final VoidCallback? onDelete;
   final VoidCallback? onAdjustments;
 
   const SalaryCard({
     super.key,
     required this.salary,
-    required this.onEdit,
-    required this.onMarkPaid,
-    required this.onDelete,
-    required this.onAdjustments,
+    this.onEdit,
+    this.onMarkPaid,
+    this.onDelete,
+    this.onAdjustments,
   });
 
   String _fmt(DateTime dt) => DateFormat('dd MMM yyyy').format(dt);
@@ -35,7 +35,6 @@ class SalaryCard extends ConsumerWidget {
         ? Pallets.textSecondaryDark
         : Pallets.textSecondaryLight;
     final border = isDark ? Pallets.borderDark : Pallets.borderLight;
-    // ✅ safe null-aware net salary
     final netSalary = salary.netSalary ?? 0.0;
 
     final staffList = ref.watch(staffNotifierProvider).valueOrNull ?? [];
@@ -64,7 +63,7 @@ class SalaryCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '\$${netSalary.toStringAsFixed(2)}', // ✅ null-safe
+                      '\$${netSalary.toStringAsFixed(2)}',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: Pallets.gradient2,
@@ -119,14 +118,6 @@ class SalaryCard extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           _AmountRow(
-            label: 'Bonus',
-            value: salary.bonus,
-            color: Colors.green,
-            prefix: '+',
-            subText: subText,
-          ),
-          const SizedBox(height: 4),
-          _AmountRow(
             label: 'Deductions',
             value: salary.deductions,
             color: Pallets.error,
@@ -144,7 +135,6 @@ class SalaryCard extends ConsumerWidget {
               Icon(Icons.date_range_outlined, size: 14, color: subText),
               const SizedBox(width: 6),
               Text(
-                // ✅ formatted DateTime
                 '${_fmt(salary.payPeriodStart)}  →  ${_fmt(salary.payPeriodEnd)}',
                 style: theme.textTheme.bodySmall?.copyWith(color: subText),
               ),
@@ -155,7 +145,7 @@ class SalaryCard extends ConsumerWidget {
 
           // ── Actions ──────────────────────────────────────
           AppActionButtons(
-            onPrimary: isPaid ? null : onMarkPaid,
+            onPrimary: (isPaid || onMarkPaid == null) ? null : onMarkPaid,
             primaryIcon: Icons.payments_outlined,
             primaryTooltip: 'Mark Paid',
             onEdit: onEdit,

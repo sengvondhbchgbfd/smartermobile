@@ -89,11 +89,11 @@ final List<DashboardModule> allModules = const [
 
 List<DashboardModule> visibleModules(UserInfo? currentUser) {
   final canManageUsers = currentUser?.canManageUsers ?? false;
-  final canManageStaff = currentUser?.canManageStaff ?? false;
+  final canViewStaff = currentUser?.canViewStaff ?? false;
 
   return allModules.where((m) {
     if (m.route == RouteNames.staffRoles) return canManageUsers;
-    if (m.route == RouteNames.staff) return canManageStaff;
+    if (m.route == RouteNames.staff) return canViewStaff;
     return true;
   }).toList();
 }

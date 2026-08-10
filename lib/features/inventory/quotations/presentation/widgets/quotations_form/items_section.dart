@@ -58,7 +58,10 @@ class ItemsSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Subtotal', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text(
+                'Subtotal',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               Text(currency.format(subtotal)),
             ],
           ),
@@ -66,10 +69,16 @@ class ItemsSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Total (after discount/tax)', style: TextStyle(fontWeight: FontWeight.w700)),
+              const Text(
+                'Total (after discount/tax)',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
               Text(
                 currency.format(totalAmount),
-                style: TextStyle(fontWeight: FontWeight.w800, color: Pallets.blurple),
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: Pallets.blurple,
+                ),
               ),
             ],
           ),

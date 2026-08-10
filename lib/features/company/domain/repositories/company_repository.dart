@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:frontendmobile/core/errors/failures.dart';
 import 'package:frontendmobile/features/company/domain/entities/company_entity.dart';
+import 'package:frontendmobile/features/company/domain/entities/compay_status_history_entity.dart';
 import 'package:frontendmobile/features/company/domain/entities/register_response_entity.dart'; // ← add
 import 'package:frontendmobile/features/company/domain/usecases/register_company_usecase.dart'; // ← add
 
@@ -9,8 +10,6 @@ abstract class CompanyRepository {
   Future<Either<Failure, RegisterResponseEntity>> registerCompany(
     RegisterCompanyParams params,
   );
-
-
 
   // ── Get Company ───────────────────────────────────────────────────────
 
@@ -27,6 +26,16 @@ abstract class CompanyRepository {
     String? timezone,
     String? currency,
   });
+
+  Future<Either<Failure, CompanyStatusHistoryEntity>> updateStatus({
+    required int companyId,
+    required String status,
+    String? reason,
+  });
+
+  Future<Either<Failure, List<CompanyStatusHistoryEntity>>> getStatusHistory(
+    int companyId,
+  );
 
   // ── Upload Logo ───────────────────────────────────────────────────────
   Future<Either<Failure, String>> uploadLogo({

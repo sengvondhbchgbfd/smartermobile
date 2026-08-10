@@ -122,12 +122,17 @@ class CompanyInfoCard extends ConsumerWidget {
               ),
             ),
 
+            ////////////////////////////////////////////////////////////////////
             // Switch account button
-            Positioned(
-              bottom: -18,
-              right: 0,
-              child: const SwitchAccountButton(),
-            ),
+            ////////////////////////////////////////////////////////////////////
+            // Positioned(
+            //   bottom: -18,
+            //   right: 0,
+            //   child: const SwitchAccountButton(),
+            // ),
+            ////////////////////////////////////////////////////////////////////
+            ///
+            ////////////////////////////////////////////////////////////////////
           ],
         ),
 

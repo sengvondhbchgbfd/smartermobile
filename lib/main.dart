@@ -6,6 +6,7 @@ import 'package:frontendmobile/core/service/local_notification_service.dart';
 import 'package:frontendmobile/features/communication/notifications/presentation/providers/notification_provider.dart';
 import 'package:frontendmobile/features/hr/staff/presentation/providers/staff_notifier.dart';
 import 'package:frontendmobile/features/inventory/product/presentation/providers/product_provider.dart';
+import 'package:frontendmobile/features/profile/presentation/providers/profile_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frontendmobile/features/auth/presentation/providers/auth_provider.dart';
 import 'package:frontendmobile/shared/providers/core_providers.dart';
@@ -45,6 +46,7 @@ Future<void> main() async {
 
   if (token != null && user != null) {
     container.read(currentUserProvider.notifier).state = user;
+    unawaited(container.read(profileNotifierProvider.future));
     unawaited(container.read(staffNotifierProvider.future));
     unawaited(container.read(productNotifierProvider.notifier).loadAll());
   }

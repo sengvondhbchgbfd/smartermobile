@@ -111,7 +111,6 @@ class _UserScreenState extends ConsumerState<UserScreen>
     final iconBg = isDark
         ? Colors.white.withOpacity(0.07)
         : Colors.black.withOpacity(0.05);
-
     final asyncState = ref.watch(userNotifierProvider);
     ////////////////////////////////////////////////////////////////////////////
     ///

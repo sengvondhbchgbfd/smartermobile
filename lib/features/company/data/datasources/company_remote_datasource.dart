@@ -3,8 +3,6 @@ import 'package:frontendmobile/features/company/data/models/register_response_mo
 import 'package:frontendmobile/features/company/domain/usecases/register_company_usecase.dart'; // ← add
 
 abstract class CompanyRemoteDatasource {
-  // ← changed: takes params object, returns RegisterResponseModel instead of raw Map
-
   Future<RegisterResponseModel> registerCompany(RegisterCompanyParams params);
   Future<CompanyModel> getCompany(int companyId);
 
@@ -20,4 +18,11 @@ abstract class CompanyRemoteDatasource {
     String? oldLogoPublicId,
     String? oldBannerPublicId,
   });
+
+  Future<Map<String, dynamic>> updateStatus({
+    required int companyId,
+    required String status,
+    String? reason,
+  });
+  Future<List<Map<String, dynamic>>> getStatusHistory(int companyId);
 }

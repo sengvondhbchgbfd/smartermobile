@@ -1,3 +1,4 @@
+import 'package:frontendmobile/features/inventory/quotations/domain/entities/quotation_item_entity.dart';
 import 'package:frontendmobile/shared/providers/core_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -106,6 +107,57 @@ class QuotationDetailNotifier extends _$QuotationDetailNotifier {
   Future<void> refresh() async {
     ref.invalidateSelf();
     await future;
+  }
+
+  Future<void> addItem(QuotationItemEntity item) async {
+    final repo = await ref.read(quotationRepositoryProvider.future);
+    await repo.addItem(
+      quotationId,
+      sortOrder: item.sortOrder,
+      itemName: item.itemName,
+      size: item.size,
+      pages: item.pages,
+      printSide: item.printSide,
+      colorSpec: item.colorSpec,
+      paperCover: item.paperCover,
+      paperInside: item.paperInside,
+      finishing: item.finishing,
+      language: item.language,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      note: item.note,
+      priceTiers: item.priceTiers,
+    );
+    await refresh();
+  }
+
+  Future<void> updateItem(int itemId, QuotationItemEntity item) async {
+    final repo = await ref.read(quotationRepositoryProvider.future);
+    await repo.updateItem(
+      quotationId,
+      itemId,
+      sortOrder: item.sortOrder,
+      itemName: item.itemName,
+      size: item.size,
+      pages: item.pages,
+      printSide: item.printSide,
+      colorSpec: item.colorSpec,
+      paperCover: item.paperCover,
+      paperInside: item.paperInside,
+      finishing: item.finishing,
+      language: item.language,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      note: item.note,
+      priceTiers: item.priceTiers,
+    );
+    await refresh();
+  }
+
+  Future<void> deleteItem(int itemId) async {
+    final repo = await ref.read(quotationRepositoryProvider.future);
+    await repo.deleteItem(quotationId, itemId);
+    await refresh();
   }
 }
 

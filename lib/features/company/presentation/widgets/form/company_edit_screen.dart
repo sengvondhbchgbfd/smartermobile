@@ -129,8 +129,6 @@ class _CompanyEditScreenState extends ConsumerState<CompanyEditScreen> {
       ),
     );
 
-    
-
     if (!mounted) return;
 
     if (success) {

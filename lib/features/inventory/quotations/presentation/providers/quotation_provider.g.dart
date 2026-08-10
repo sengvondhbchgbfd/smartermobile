@@ -126,7 +126,7 @@ final myQuotationsNotifierProvider =
 typedef _$MyQuotationsNotifier =
     AutoDisposeAsyncNotifier<List<QuotationEntity>>;
 String _$quotationDetailNotifierHash() =>
-    r'13ebfebb1625af949306621e139661a4f795a1cd';
+    r'6cf273c7840d4bb4fa0ae94c32ab77c29483a509';
 
 /// Copied from Dart SDK
 class _SystemHash {

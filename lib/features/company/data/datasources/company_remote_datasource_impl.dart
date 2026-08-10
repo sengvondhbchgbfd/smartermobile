@@ -95,4 +95,23 @@ class CompanyRemoteDataSourceImpl extends BaseRemoteDatasource
       },
     );
   }
+
+  @override
+  Future<Map<String, dynamic>> updateStatus({
+    required int companyId,
+    required String status,
+    String? reason,
+  }) async {
+    final response = await dio.patch(
+      '/companies/$companyId/status',
+      data: {'status': status, if (reason != null) 'reason': reason},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getStatusHistory(int companyId) async {
+    final response = await dio.get('/companies/$companyId/history');
+    return List<Map<String, dynamic>>.from(response.data as List);
+  }
 }

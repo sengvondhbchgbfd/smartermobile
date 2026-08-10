@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontendmobile/config/routes/router_app_shell_controls/shell_scroll_controller.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import 'package:frontendmobile/features/hr/staff/domain/entities/staff_entity.dart';
 import 'package:frontendmobile/features/profile/domain/entities/profile_entity.dart';
@@ -51,7 +52,7 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
               context.push('/drafts');
               break;
             case 'history':
-              context.push('/history');
+              context.push('/companies/${widget.profile.companyId}/history');
               break;
             case 'saved':
               context.push('/saved');
@@ -90,10 +91,12 @@ class _ProfileBodyState extends ConsumerState<ProfileBody> {
     ////////////////////////////////////////////////////////////////////////////
     ///
     ////////////////////////////////////////////////////////////////////////////
+    final shellController = ShellScrollController.of(context);
 
     return ColoredBox(
       color: scaffoldBg,
       child: SingleChildScrollView(
+        controller: shellController,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

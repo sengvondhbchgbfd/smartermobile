@@ -1,5 +1,6 @@
 import '../entities/quotation_entity.dart';
 import '../entities/quotation_item_entity.dart';
+import '../entities/quotation_price_tier.dart';
 import '../entities/quotation_enums.dart';
 
 abstract class QuotationRepository {
@@ -75,6 +76,10 @@ abstract class QuotationRepository {
   //////////////////////////////////////////////////////////////////////////////
 
   Future<void> delete(int quotationId);
+
+  //////////////////////////////////////////////////////////////////////////////
+  /// Add item — priceTiers optional; null means no tiers sent.
+  //////////////////////////////////////////////////////////////////////////////
   Future<QuotationItemEntity> addItem(
     int quotationId, {
     required int sortOrder,
@@ -90,10 +95,12 @@ abstract class QuotationRepository {
     required int quantity,
     required double unitPrice,
     String? note,
+    List<QuotationPriceTierEntity>? priceTiers,
   });
 
   //////////////////////////////////////////////////////////////////////////////
-  ///
+  /// Update item — priceTiers: null = don't touch tiers, [] = clear all
+  /// tiers, non-empty = replace-all with this set.
   //////////////////////////////////////////////////////////////////////////////
 
   Future<QuotationItemEntity> updateItem(
@@ -112,6 +119,7 @@ abstract class QuotationRepository {
     int? quantity,
     double? unitPrice,
     String? note,
+    List<QuotationPriceTierEntity>? priceTiers,
   });
 
   //////////////////////////////////////////////////////////////////////////////

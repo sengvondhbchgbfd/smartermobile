@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontendmobile/core/themes/app_pallets.dart';
 import '../../domain/entities/quotation_item_entity.dart';
+import '../../domain/entities/quotation_price_tier.dart';
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -58,6 +59,10 @@ class _QuotationItemFormSheetState extends State<_QuotationItemFormSheet> {
   late final TextEditingController _quantityCtrl;
   late final TextEditingController _unitPriceCtrl;
   late final TextEditingController _noteCtrl;
+
+  // ── price tiers: one qty/price controller pair per row ────────────────
+  final List<_TierControllers> _tierRows = [];
+
   //////////////////////////////////////////////////////////////////////////////
   ///
   //////////////////////////////////////////////////////////////////////////////
@@ -78,6 +83,19 @@ class _QuotationItemFormSheetState extends State<_QuotationItemFormSheet> {
     _quantityCtrl = TextEditingController(text: i?.quantity.toString() ?? '1');
     _unitPriceCtrl = TextEditingController(text: i?.unitPrice.toString() ?? '');
     _noteCtrl = TextEditingController(text: i?.note ?? '');
+
+    // Pre-fill tier rows from an existing item, if editing one that has tiers.
+    final existingTiers = i?.priceTiers;
+    if (existingTiers != null && existingTiers.isNotEmpty) {
+      for (final t in existingTiers) {
+        _tierRows.add(
+          _TierControllers(
+            quantity: TextEditingController(text: t.quantity.toString()),
+            unitPrice: TextEditingController(text: t.unitPrice.toString()),
+          ),
+        );
+      }
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -98,7 +116,28 @@ class _QuotationItemFormSheetState extends State<_QuotationItemFormSheet> {
     _quantityCtrl.dispose();
     _unitPriceCtrl.dispose();
     _noteCtrl.dispose();
+    for (final row in _tierRows) {
+      row.dispose();
+    }
     super.dispose();
+  }
+
+  void _addTierRow() {
+    setState(() {
+      _tierRows.add(
+        _TierControllers(
+          quantity: TextEditingController(),
+          unitPrice: TextEditingController(),
+        ),
+      );
+    });
+  }
+
+  void _removeTierRow(int index) {
+    setState(() {
+      _tierRows[index].dispose();
+      _tierRows.removeAt(index);
+    });
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -109,6 +148,21 @@ class _QuotationItemFormSheetState extends State<_QuotationItemFormSheet> {
     if (!_formKey.currentState!.validate()) return;
     final quantity = int.tryParse(_quantityCtrl.text) ?? 0;
     final unitPrice = double.tryParse(_unitPriceCtrl.text) ?? 0;
+
+    final tiers = <QuotationPriceTierEntity>[];
+    for (final row in _tierRows) {
+      final tQty = int.tryParse(row.quantity.text);
+      final tPrice = double.tryParse(row.unitPrice.text);
+      if (tQty == null || tPrice == null) continue;
+      tiers.add(
+        QuotationPriceTierEntity(
+          quantity: tQty,
+          unitPrice: tPrice,
+          totalPrice: tQty * tPrice,
+        ),
+      );
+    }
+
     final result = QuotationItemEntity(
       itemId: widget.initial?.itemId ?? 0,
       quotationId: widget.initial?.quotationId ?? 0,
@@ -122,10 +176,7 @@ class _QuotationItemFormSheetState extends State<_QuotationItemFormSheet> {
       colorSpec: _colorSpecCtrl.text.trim().isEmpty
           ? null
           : _colorSpecCtrl.text.trim(),
-      paperCover:
-          _paperCoverCtrl.text
-              .trim()
-              .isEmpty // NEW
+      paperCover: _paperCoverCtrl.text.trim().isEmpty
           ? null
           : _paperCoverCtrl.text.trim(),
       paperInside: _paperInsideCtrl.text.trim().isEmpty
@@ -141,10 +192,21 @@ class _QuotationItemFormSheetState extends State<_QuotationItemFormSheet> {
       unitPrice: unitPrice,
       totalPrice: quantity * unitPrice,
       note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+      priceTiers: _resolvePriceTiers(tiers),
     );
     Navigator.of(context).pop(result);
   }
 
+  List<QuotationPriceTierEntity>? _resolvePriceTiers(
+    List<QuotationPriceTierEntity> tiers,
+  ) {
+    final isEditingExisting = widget.initial != null;
+    final hadTiersInitially = widget.initial?.priceTiers?.isNotEmpty ?? false;
+    if (tiers.isEmpty && !isEditingExisting && !hadTiersInitially) {
+      return null;
+    }
+    return tiers;
+  }
   //////////////////////////////////////////////////////////////////////////////
   ///
   //////////////////////////////////////////////////////////////////////////////
@@ -158,6 +220,7 @@ class _QuotationItemFormSheetState extends State<_QuotationItemFormSheet> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? Pallets.surfaceOverlay : Pallets.surfaceLight;
     final isEditing = widget.initial != null;
+    final muted = Pallets.textMuted;
 
     ////////////////////////////////////////////////////////////////////////////
     ///
@@ -352,6 +415,128 @@ class _QuotationItemFormSheetState extends State<_QuotationItemFormSheet> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+
+                // ── Price tiers section ─────────────────────────────────
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Quantity Tiers (optional)',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? Pallets.textPrimaryDark
+                            : Pallets.textPrimaryLight,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _addTierRow,
+                      icon: const Icon(Icons.add_rounded, size: 16),
+                      label: const Text('Add tier'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Pallets.blurple,
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 0),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  'Offer this item at different prices per quantity, e.g. '
+                  '200 pcs at \$3.00, 1000 pcs at \$1.80. Leave a row blank '
+                  'to skip it.',
+                  style: TextStyle(fontSize: 11.5, color: muted),
+                ),
+                const SizedBox(height: 8),
+
+                if (_tierRows.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'No tiers added.',
+                      style: TextStyle(fontSize: 12, color: muted),
+                    ),
+                  )
+                else
+                  ...List.generate(_tierRows.length, (index) {
+                    final row = _tierRows[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: row.quantity,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Qty',
+                                isDense: true,
+                              ),
+                              // A row is "in use" once either field has
+                              // input. Only then do we require both to be
+                              // valid — an untouched row stays optional.
+                              validator: (v) {
+                                final qtyEmpty = row.quantity.text
+                                    .trim()
+                                    .isEmpty;
+                                final priceEmpty = row.unitPrice.text
+                                    .trim()
+                                    .isEmpty;
+                                if (qtyEmpty && priceEmpty) return null;
+                                final n = int.tryParse(v ?? '');
+                                if (n == null || n <= 0) return 'Invalid';
+                                return null;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextFormField(
+                              controller: row.unitPrice,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              decoration: const InputDecoration(
+                                labelText: 'Unit price',
+                                isDense: true,
+                              ),
+                              validator: (v) {
+                                final qtyEmpty = row.quantity.text
+                                    .trim()
+                                    .isEmpty;
+                                final priceEmpty = row.unitPrice.text
+                                    .trim()
+                                    .isEmpty;
+                                if (qtyEmpty && priceEmpty) return null;
+                                final n = double.tryParse(v ?? '');
+                                if (n == null || n < 0) return 'Invalid';
+                                return null;
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: IconButton(
+                              onPressed: () => _removeTierRow(index),
+                              icon: Icon(
+                                Icons.close_rounded,
+                                size: 18,
+                                color: Pallets.error,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              splashRadius: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+
                 const SizedBox(height: 12),
                 ////////////////////////////////////////////////////////////////
                 ///
@@ -386,5 +571,18 @@ class _QuotationItemFormSheetState extends State<_QuotationItemFormSheet> {
         ),
       ),
     );
+  }
+}
+
+// ── helper: pairs a quantity + unit-price controller for one tier row ────
+class _TierControllers {
+  final TextEditingController quantity;
+  final TextEditingController unitPrice;
+
+  _TierControllers({required this.quantity, required this.unitPrice});
+
+  void dispose() {
+    quantity.dispose();
+    unitPrice.dispose();
   }
 }

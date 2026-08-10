@@ -1,5 +1,6 @@
 import '../entities/quotation_entity.dart';
 import '../entities/quotation_item_entity.dart';
+import '../entities/quotation_price_tier.dart';
 import '../entities/quotation_enums.dart';
 import '../repositories/quotation_repository.dart';
 
@@ -140,7 +141,7 @@ class QuotationUsecase {
   Future<void> delete(int quotationId) => repository.delete(quotationId);
 
   //////////////////////////////////////////////////////////////////////////////
-  ///
+  /// Add item — now accepts optional priceTiers
   //////////////////////////////////////////////////////////////////////////////
   Future<QuotationItemEntity> addItem(
     int quotationId, {
@@ -157,6 +158,7 @@ class QuotationUsecase {
     required int quantity,
     required double unitPrice,
     String? note,
+    List<QuotationPriceTierEntity>? priceTiers,   // ← added
   }) {
     return repository.addItem(
       quotationId,
@@ -173,11 +175,13 @@ class QuotationUsecase {
       quantity: quantity,
       unitPrice: unitPrice,
       note: note,
+      priceTiers: priceTiers,                     // ← added
     );
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  ///
+  /// Update item — now accepts optional priceTiers.
+  /// null = don't touch tiers. [] = clear all tiers. Non-empty = replace-all.
   //////////////////////////////////////////////////////////////////////////////
 
   Future<QuotationItemEntity> updateItem(
@@ -196,6 +200,7 @@ class QuotationUsecase {
     int? quantity,
     double? unitPrice,
     String? note,
+    List<QuotationPriceTierEntity>? priceTiers,   // ← added
   }) {
     return repository.updateItem(
       quotationId,
@@ -213,6 +218,7 @@ class QuotationUsecase {
       quantity: quantity,
       unitPrice: unitPrice,
       note: note,
+      priceTiers: priceTiers,                     
     );
   }
 

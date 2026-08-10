@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontendmobile/features/company/data/datasources/company_remote_datasource.dart';
 import 'package:frontendmobile/features/company/data/datasources/company_remote_datasource_impl.dart';
 import 'package:frontendmobile/features/company/data/repositories/company_repository_impl.dart';
+import 'package:frontendmobile/features/company/domain/usecases/get_company_hist_usecase.dart';
 import 'package:frontendmobile/features/company/domain/usecases/get_company_usecase.dart';
 import 'package:frontendmobile/features/company/domain/usecases/register_company_usecase.dart';
+import 'package:frontendmobile/features/company/domain/usecases/update_company_status_usecase.dart';
 import 'package:frontendmobile/features/company/domain/usecases/update_company_usecase.dart';
 import 'package:frontendmobile/features/company/domain/usecases/upload_company_logo.usecase.dart';
 import 'package:frontendmobile/features/company/presentation/providers/company_state.dart';
@@ -17,6 +19,8 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
   late final UpdateCompanyUseCase _updateCompany;
   late final UploadCompanyLogoUseCase _uploadLogo;
   late final RegisterCompanyUseCase _createCompany;
+  late final UpdateCompanyStatusUseCase _updateStatus;
+  late final GetCompanyStatusHistoryUseCase _getStatusHistory;
   @override
   Future<CompanyState> build() async {
     final repo = await ref.watch(companyRepositoryProvider.future);
@@ -24,6 +28,8 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
     _updateCompany = UpdateCompanyUseCase(repo);
     _uploadLogo = UploadCompanyLogoUseCase(repo);
     _createCompany = RegisterCompanyUseCase(repo);
+    _updateStatus = UpdateCompanyStatusUseCase(repo);
+    _getStatusHistory = GetCompanyStatusHistoryUseCase(repo);
     return const CompanyState();
   }
 
@@ -109,6 +115,59 @@ class CompanyNotifier extends AsyncNotifier<CompanyState> {
         state = AsyncData(CompanyState(company: company));
         return true;
       },
+    );
+  }
+
+  Future<bool> updateCompanyStatus({
+    required int companyId,
+    required String status,
+    String? reason,
+  }) async {
+    final current = state.valueOrNull ?? const CompanyState();
+    state = AsyncData(current.copyWith(isUpdating: true, error: null));
+
+    final result = await _updateStatus(
+      UpdateCompanyStatusParams(
+        companyId: companyId,
+        status: status,
+        reason: reason,
+      ),
+    );
+
+    return result.fold(
+      (failure) {
+        state = AsyncData(
+          current.copyWith(isUpdating: false, error: failure.message),
+        );
+        return false;
+      },
+      (historyEntry) {
+        state = AsyncData(
+          current.copyWith(
+            isUpdating: false,
+            error: null,
+            history: [historyEntry, ...current.history],
+          ),
+        );
+        fetchCompany(companyId);
+        return true;
+      },
+    );
+  }
+
+  Future<void> fetchStatusHistory(int companyId) async {
+    final current = state.valueOrNull ?? const CompanyState();
+    state = AsyncData(current.copyWith(isLoadingHistory: true, error: null));
+
+    final result = await _getStatusHistory(companyId);
+
+    state = result.fold(
+      (failure) => AsyncData(
+        current.copyWith(isLoadingHistory: false, error: failure.message),
+      ),
+      (history) => AsyncData(
+        current.copyWith(isLoadingHistory: false, history: history),
+      ),
     );
   }
 

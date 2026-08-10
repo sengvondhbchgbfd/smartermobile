@@ -106,7 +106,7 @@ class SystemSettingRemoteDataSourceImpl
   }) async {
     try {
       final res = await _dio.post(
-        _path,
+        '$_path/',
         data: {
           'key': key,
           'value': value,

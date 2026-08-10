@@ -11,9 +11,19 @@ import '../providers/quotation_provider.dart';
 import '../widgets/quotation_item_form_sheet.dart';
 import 'quotation_form_screen.dart';
 
-class QuotationDetailScreen extends ConsumerWidget {
+class QuotationDetailScreen extends ConsumerStatefulWidget {
   final int quotationId;
   const QuotationDetailScreen({super.key, required this.quotationId});
+
+  @override
+  ConsumerState<QuotationDetailScreen> createState() =>
+      _QuotationDetailScreenState();
+}
+
+class _QuotationDetailScreenState extends ConsumerState<QuotationDetailScreen> {
+  // Guards against double-tap firing the same add/edit/delete request twice
+  // while the previous one is still in flight.
+  bool _itemSubmitting = false;
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -36,7 +46,7 @@ class QuotationDetailScreen extends ConsumerWidget {
     if (confirmed == true) {
       await ref
           .read(quotationListNotifierProvider.notifier)
-          .deleteQuotation(quotationId);
+          .deleteQuotation(widget.quotationId);
       if (context.mounted) Navigator.pop(context);
     }
   }
@@ -66,8 +76,8 @@ class QuotationDetailScreen extends ConsumerWidget {
     if (selected != null && selected != current && context.mounted) {
       try {
         final usecase = await ref.read(quotationUsecaseProvider.future);
-        await usecase.updateStatus(quotationId, selected);
-        ref.invalidate(quotationDetailNotifierProvider(quotationId));
+        await usecase.updateStatus(widget.quotationId, selected);
+        ref.invalidate(quotationDetailNotifierProvider(widget.quotationId));
         ref.invalidate(quotationListNotifierProvider);
       } catch (e) {
         if (context.mounted) {
@@ -79,11 +89,123 @@ class QuotationDetailScreen extends ConsumerWidget {
     }
   }
 
+  // ── Add item: creates a brand-new item via addItem — correct as-is ──────
+  Future<void> _addItem(BuildContext context, int nextOrder) async {
+    if (_itemSubmitting) return;
+    final item = await showQuotationItemFormSheet(
+      context,
+      nextSortOrder: nextOrder,
+    );
+    if (item == null) return;
+
+    setState(() => _itemSubmitting = true);
+    try {
+      final usecase = await ref.read(quotationUsecaseProvider.future);
+      await usecase.addItem(
+        widget.quotationId,
+        sortOrder: item.sortOrder,
+        itemName: item.itemName,
+        size: item.size,
+        pages: item.pages,
+        printSide: item.printSide,
+        colorSpec: item.colorSpec,
+        paperCover: item.paperCover,
+        paperInside: item.paperInside,
+        finishing: item.finishing,
+        language: item.language,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        note: item.note,
+        priceTiers: item.priceTiers,
+      );
+      ref.invalidate(quotationDetailNotifierProvider(widget.quotationId));
+      ref.invalidate(quotationListNotifierProvider);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } finally {
+      if (mounted) setState(() => _itemSubmitting = false);
+    }
+  }
+
+  // ── Edit item: MUST call updateItem (PATCH), using `updated` values ─────
+  // This was previously calling `usecase.addItem(...)` with the stale
+  // `item` values, which is why every "edit" created a brand-new duplicate
+  // row instead of modifying the existing one, and tier/field edits never
+  // actually saved.
+  Future<void> _editItem(
+    BuildContext context,
+    dynamic item, // QuotationItemEntity — kept dynamic-free below
+  ) async {
+    if (_itemSubmitting) return;
+    final updated = await showQuotationItemFormSheet(
+      context,
+      initial: item,
+      nextSortOrder: item.sortOrder,
+    );
+    if (updated == null) return;
+
+    setState(() => _itemSubmitting = true);
+    try {
+      final usecase = await ref.read(quotationUsecaseProvider.future);
+      await usecase.updateItem(
+        widget.quotationId,
+        item.itemId,
+        sortOrder: updated.sortOrder,
+        itemName: updated.itemName,
+        size: updated.size,
+        pages: updated.pages,
+        printSide: updated.printSide,
+        colorSpec: updated.colorSpec,
+        paperCover: updated.paperCover,
+        paperInside: updated.paperInside,
+        finishing: updated.finishing,
+        language: updated.language,
+        quantity: updated.quantity,
+        unitPrice: updated.unitPrice,
+        note: updated.note,
+        priceTiers: updated.priceTiers,
+      );
+      ref.invalidate(quotationDetailNotifierProvider(widget.quotationId));
+      ref.invalidate(quotationListNotifierProvider);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } finally {
+      if (mounted) setState(() => _itemSubmitting = false);
+    }
+  }
+
+  Future<void> _deleteItem(BuildContext context, int itemId) async {
+    if (_itemSubmitting) return;
+    setState(() => _itemSubmitting = true);
+    try {
+      final usecase = await ref.read(quotationUsecaseProvider.future);
+      await usecase.deleteItem(widget.quotationId, itemId);
+      ref.invalidate(quotationDetailNotifierProvider(widget.quotationId));
+      ref.invalidate(quotationListNotifierProvider);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } finally {
+      if (mounted) setState(() => _itemSubmitting = false);
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final quotationAsync = ref.watch(
-      quotationDetailNotifierProvider(quotationId),
+      quotationDetailNotifierProvider(widget.quotationId),
     );
 
     return Scaffold(
@@ -152,38 +274,9 @@ class QuotationDetailScreen extends ConsumerWidget {
           foregroundColor: Pallets.onAccent,
           icon: const Icon(Icons.add),
           label: const Text('Add Item'),
-          onPressed: () async {
-            final nextOrder = q.items.length + 1;
-            final item = await showQuotationItemFormSheet(
-              context,
-              nextSortOrder: nextOrder,
-            );
-            if (item == null) return;
-            try {
-              final usecase = await ref.read(quotationUsecaseProvider.future);
-              await usecase.addItem(
-                quotationId,
-                sortOrder: item.sortOrder,
-                itemName: item.itemName,
-                size: item.size,
-                pages: item.pages,
-                printSide: item.printSide,
-                colorSpec: item.colorSpec,
-                finishing: item.finishing,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                note: item.note,
-              );
-              ref.invalidate(quotationDetailNotifierProvider(quotationId));
-              ref.invalidate(quotationListNotifierProvider);
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('$e')));
-              }
-            }
-          },
+          onPressed: _itemSubmitting
+              ? null
+              : () => _addItem(context, q.items.length + 1),
         ),
         orElse: () => null,
       ),
@@ -194,7 +287,9 @@ class QuotationDetailScreen extends ConsumerWidget {
         ),
         data: (q) => RefreshIndicator(
           onRefresh: () => ref
-              .read(quotationDetailNotifierProvider(quotationId).notifier)
+              .read(
+                quotationDetailNotifierProvider(widget.quotationId).notifier,
+              )
               .refresh(),
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
@@ -203,60 +298,8 @@ class QuotationDetailScreen extends ConsumerWidget {
               const SizedBox(height: 20),
               QuotationItemsSection(
                 items: q.items,
-                onEdit: (item) async {
-                  final updated = await showQuotationItemFormSheet(
-                    context,
-                    initial: item,
-                    nextSortOrder: item.sortOrder,
-                  );
-                  if (updated == null) return;
-                  try {
-                    final usecase = await ref.read(
-                      quotationUsecaseProvider.future,
-                    );
-                    await usecase.updateItem(
-                      quotationId,
-                      item.itemId,
-                      itemName: updated.itemName,
-                      size: updated.size,
-                      pages: updated.pages,
-                      printSide: updated.printSide,
-                      colorSpec: updated.colorSpec,
-                      finishing: updated.finishing,
-                      quantity: updated.quantity,
-                      unitPrice: updated.unitPrice,
-                      note: updated.note,
-                    );
-                    ref.invalidate(
-                      quotationDetailNotifierProvider(quotationId),
-                    );
-                    ref.invalidate(quotationListNotifierProvider);
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('$e')));
-                    }
-                  }
-                },
-                onDelete: (item) async {
-                  try {
-                    final usecase = await ref.read(
-                      quotationUsecaseProvider.future,
-                    );
-                    await usecase.deleteItem(quotationId, item.itemId);
-                    ref.invalidate(
-                      quotationDetailNotifierProvider(quotationId),
-                    );
-                    ref.invalidate(quotationListNotifierProvider);
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('$e')));
-                    }
-                  }
-                },
+                onEdit: (item) => _editItem(context, item),
+                onDelete: (item) => _deleteItem(context, item.itemId),
               ),
               const SizedBox(height: 20),
               QuotationTotalsCard(quotation: q),

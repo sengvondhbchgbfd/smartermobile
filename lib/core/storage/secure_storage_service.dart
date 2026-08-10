@@ -84,6 +84,7 @@ class SecureStorageService {
       _write(ApiConstants.statusKey, user.status),
       _write(ApiConstants.isManagerKey, user.isManager.toString()),
       _write(ApiConstants.departmentIdKey, user.departmentId?.toString() ?? ''),
+      _write(ApiConstants.permissionsKey, jsonEncode(user.permissions)),
     ]);
   }
 
@@ -102,6 +103,7 @@ class SecureStorageService {
       _read(ApiConstants.statusKey),
       _read(ApiConstants.isManagerKey),
       _read(ApiConstants.departmentIdKey),
+      _read(ApiConstants.permissionsKey),
     ]);
     if (results[0] == null) return null;
     List<String> permissions = [];
